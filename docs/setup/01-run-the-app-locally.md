@@ -107,11 +107,12 @@ Login and confirmation emails don't go out to real inboxes during local developm
 
 ## If something goes wrong
 
-| What you see                                              | What to do                                                                                   |
-| --------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| `docker ... cannot find the file specified`               | Docker isn't running. Repeat Step 1 and wait for "Engine running".                           |
-| `Local Supabase is not running`                           | Run Step 5 again, then Step 6.                                                               |
-| `Missing or invalid environment variables` in the browser | Run Step 6 again, then restart Step 7.                                                       |
-| `Port 5173 is in use`                                     | The app is already running in another terminal. Use that one, or close it with **Ctrl + C**. |
+| What you see                                                                          | What to do                                                                                   |
+| ------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| `docker ... cannot find the file specified`                                           | Docker isn't running. Repeat Step 1 and wait for "Engine running".                           |
+| `Local Supabase is not running`                                                       | Run Step 5 again, then Step 6.                                                               |
+| `Missing or invalid environment variables` in the browser                             | Run Step 6 again, then restart Step 7.                                                       |
+| `Failed to resolve import "virtual:pwa-register/react"` (or another `virtual:` error) | The app was started before its settings changed. Press **Ctrl + C**, then run Step 7 again.  |
+| `Port 5173 is in use`                                                                 | The app is already running in another terminal. Use that one, or close it with **Ctrl + C**. |
 
 Still stuck? Copy the red text from the terminal and paste it to Claude.
