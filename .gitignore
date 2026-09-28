@@ -141,3 +141,13 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+# Crusty Krustees
+.env.local
+.env.*.local
+dev-dist
+playwright-report
+test-results
+supabase/.temp
+supabase/.branches
+!.env.example
