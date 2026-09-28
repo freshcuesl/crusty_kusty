@@ -24,6 +24,8 @@ language sql as $$
     true
   );
 $$;
+-- The deny-by-default baseline blocks new functions, including this test helper.
+grant execute on function pg_temp.sign_in(uuid, text, text) to authenticated, anon;
 
 -- ---------------------------------------------------------------------------
 -- Profiles
