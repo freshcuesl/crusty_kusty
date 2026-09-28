@@ -42,7 +42,9 @@ docs/         This file, setup guides, workflow
 
 1. **Deny by default.** New tables, sequences and functions are unreachable from the API
    until a migration grants access on purpose (`20260927000000_security_baseline.sql`).
-   A pgTAP test fails if any public table lacks row-level security.
+   A pgTAP test fails if any public table lacks row-level security, or if new tables or
+   functions are reachable without an explicit grant. Every migration that adds a function the
+   app calls must include its own `grant execute ... to authenticated`.
 2. **MFA for everyone.** TOTP authenticator apps first, passkeys next. Sensitive tables
    require an `aal2` session in their RLS policies, so skipping the UI does not skip MFA.
 3. **Blind matching.** Customer identifiers (phone, email, address, name) are normalized

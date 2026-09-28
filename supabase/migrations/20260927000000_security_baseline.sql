@@ -9,4 +9,12 @@ alter default privileges for role postgres in schema public
   revoke all on sequences from anon, authenticated;
 
 alter default privileges for role postgres in schema public
-  revoke execute on functions from public, anon, authenticated;
+  revoke execute on functions from anon, authenticated;
+
+-- Postgres grants EXECUTE on every new function to PUBLIC (every role, including
+-- anon) as a database-wide default. A per-schema rule can't remove a
+-- database-wide one, so this revoke must be global. Migrations that add a
+-- function, or an extension whose functions the API needs, must GRANT EXECUTE
+-- explicitly.
+alter default privileges for role postgres
+  revoke execute on functions from public;
