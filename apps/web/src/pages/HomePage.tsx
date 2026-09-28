@@ -1,18 +1,29 @@
 import ChevronRight from '@mui/icons-material/ChevronRight';
-import { Box, Card, CardActionArea, Stack, Typography } from '@mui/material';
+import { Alert, Box, Card, CardActionArea, Stack, Typography } from '@mui/material';
 import { Link as RouterLink } from 'react-router';
+import { useAuth } from '../auth/AuthProvider';
 import { InstallBanner } from '../pwa/InstallBanner';
 import { homeActions } from '../routes';
 
 export function HomePage() {
+  const { membership } = useAuth();
+
   return (
     <Stack spacing={3}>
       <Box>
         <Typography variant="h4" component="h1">
           What do you need?
         </Typography>
-        <Typography color="text.secondary">Verified facts, not labels.</Typography>
+        <Typography color="text.secondary">
+          {membership?.businessName ?? 'Verified facts, not labels.'}
+        </Typography>
       </Box>
+
+      {membership && membership.verificationStatus !== 'verified' && (
+        <Alert severity="warning" role="status">
+          Your business isn't verified yet. Customer checks and incident reports unlock once it is.
+        </Alert>
+      )}
 
       <Stack component="nav" aria-label="Main actions" spacing={1.5}>
         {homeActions.map(({ label, description, path, icon: Icon, primary }) => (

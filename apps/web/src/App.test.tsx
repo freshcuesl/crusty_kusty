@@ -1,27 +1,23 @@
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
-import { App, AppRoutes } from './App';
-import { renderWithProviders } from './test/renderWithProviders';
+import { App } from './App';
+import { createFakeSupabase } from '@ck/core/testing';
+import { as, renderApp } from './test/renderApp';
 
-vi.mock('virtual:pwa-register/react', () => ({
-  useRegisterSW: () => ({
-    needRefresh: [false, vi.fn()],
-    offlineReady: [false, vi.fn()],
-    updateServiceWorker: vi.fn(),
-  }),
-}));
+const getSupabase = vi.hoisted(() => vi.fn());
+vi.mock('./lib/supabase', () => ({ getSupabase }));
 
 describe('app shell', () => {
-  it('shows the Crusty Krustees logo in the header', () => {
-    renderWithProviders(<AppRoutes />);
-    const header = screen.getByRole('banner');
+  it('shows the Crusty Krustees logo in the header', async () => {
+    renderApp('/', as.owner);
+    const header = await screen.findByRole('banner');
     expect(within(header).getByRole('img', { name: 'Crusty Krustees' })).toBeInTheDocument();
   });
 
-  it('lets keyboard users skip straight to the main content', () => {
-    renderWithProviders(<AppRoutes />);
-    expect(screen.getByRole('link', { name: 'Skip to main content' })).toHaveAttribute(
+  it('lets keyboard users skip straight to the main content', async () => {
+    renderApp('/', as.owner);
+    expect(await screen.findByRole('link', { name: 'Skip to main content' })).toHaveAttribute(
       'href',
       '#main',
     );
@@ -36,37 +32,55 @@ describe('home screen', () => {
     ['Customer check', '/check'],
     ['My incidents', '/incidents'],
     ['Alerts', '/alerts'],
-  ])('offers "%s"', (label, href) => {
-    renderWithProviders(<AppRoutes />);
-    expect(screen.getByRole('link', { name: new RegExp(label) })).toHaveAttribute('href', href);
+  ])('offers "%s"', async (label, href) => {
+    renderApp('/', as.owner);
+    expect(await screen.findByRole('link', { name: new RegExp(label) })).toHaveAttribute(
+      'href',
+      href,
+    );
+  });
+
+  it('explains that an unverified business is limited until verified', async () => {
+    renderApp('/', as.owner);
+    expect(await screen.findByText(/isn't verified yet/)).toBeInTheDocument();
   });
 
   it('opens a placeholder for features still being built', async () => {
-    renderWithProviders(<AppRoutes />);
-    await userEvent.click(screen.getByRole('link', { name: /Report incident/ }));
+    renderApp('/', as.owner);
+    await userEvent.click(await screen.findByRole('link', { name: /Report incident/ }));
     expect(screen.getByRole('heading', { name: 'Report incident' })).toBeInTheDocument();
     expect(screen.getByText(/coming soon/i)).toBeInTheDocument();
   });
 
   it('can go back home from a placeholder', async () => {
-    renderWithProviders(<AppRoutes />, { route: '/alerts' });
-    await userEvent.click(screen.getByRole('link', { name: 'Back to home' }));
+    renderApp('/alerts', as.owner);
+    await userEvent.click(await screen.findByRole('link', { name: 'Back to home' }));
     expect(screen.getByRole('link', { name: /Customer check/ })).toBeInTheDocument();
   });
 });
 
 describe('unknown pages', () => {
-  it('shows a friendly not-found page', () => {
-    renderWithProviders(<AppRoutes />, { route: '/does-not-exist' });
-    expect(screen.getByRole('heading', { name: /page not found/i })).toBeInTheDocument();
+  it('shows a friendly not-found page', async () => {
+    renderApp('/does-not-exist', as.owner);
+    expect(await screen.findByRole('heading', { name: /page not found/i })).toBeInTheDocument();
   });
 });
 
 describe('<App />', () => {
-  it('boots with the real router and theme', () => {
+  it('boots into sign-in with the real router', async () => {
+    getSupabase.mockReturnValue(createFakeSupabase().client);
+    render(<App />);
+    expect(await screen.findByRole('heading', { name: 'Sign in' })).toBeInTheDocument();
+  });
+
+  it('explains how to connect when configuration is missing', () => {
+    getSupabase.mockImplementation(() => {
+      throw new Error('Missing or invalid environment variables: VITE_SUPABASE_URL.');
+    });
     render(<App />);
     expect(
-      screen.getByRole('heading', { level: 1, name: 'What do you need?' }),
+      screen.getByRole('heading', { name: "The app isn't connected yet" }),
     ).toBeInTheDocument();
+    expect(screen.getByText(/VITE_SUPABASE_URL/)).toBeInTheDocument();
   });
 });

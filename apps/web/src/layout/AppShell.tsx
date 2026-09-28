@@ -1,7 +1,7 @@
 import { AppBar, Box, Container, Link, Toolbar } from '@mui/material';
 import { Outlet, Link as RouterLink } from 'react-router';
 import { Logo } from '@ck/brand';
-import { UpdatePrompt } from '../pwa/UpdatePrompt';
+import { AccountMenu } from './AccountMenu';
 
 /** Mobile-first frame: navy header, centered content column, safe-area padding for notches. */
 export function AppShell() {
@@ -32,8 +32,10 @@ export function AppShell() {
             to="/"
             style={{ color: 'inherit', textDecoration: 'none', display: 'inline-flex' }}
           >
-            <Logo size={36} withWordmark />
+            <Logo size={36} withWordmark onDark />
           </RouterLink>
+          <Box sx={{ flex: 1 }} />
+          <AccountMenu />
         </Toolbar>
       </AppBar>
       <Container
@@ -45,7 +47,6 @@ export function AppShell() {
       >
         <Outlet />
       </Container>
-      <UpdatePrompt />
     </Box>
   );
 }

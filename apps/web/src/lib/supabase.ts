@@ -1,5 +1,5 @@
-import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import { parseEnv } from '../config/env';
+import type { SupabaseClient } from '@supabase/supabase-js';
+import { createSupabaseClient } from '@ck/core';
 
 let client: SupabaseClient | undefined;
 
@@ -8,17 +8,6 @@ let client: SupabaseClient | undefined;
  * shows a clear error instead of crashing at import time.
  */
 export function getSupabase(): SupabaseClient {
-  if (!client) {
-    const { supabaseUrl, supabaseAnonKey } = parseEnv(import.meta.env);
-    client = createClient(supabaseUrl, supabaseAnonKey, {
-      auth: {
-        persistSession: true,
-        autoRefreshToken: true,
-        detectSessionInUrl: true,
-        // PKCE keeps auth codes useless to anyone who intercepts a redirect.
-        flowType: 'pkce',
-      },
-    });
-  }
+  client ??= createSupabaseClient(import.meta.env);
   return client;
 }

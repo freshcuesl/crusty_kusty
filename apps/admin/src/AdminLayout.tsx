@@ -7,7 +7,7 @@ function BrandAppBar() {
   return (
     <AppBar color="secondary">
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mr: 2 }}>
-        <Logo size={32} />
+        <Logo size={32} onDark />
         <Typography variant="h6" component="span" sx={{ fontWeight: 600 }}>
           Admin
         </Typography>

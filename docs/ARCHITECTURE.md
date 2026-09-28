@@ -31,6 +31,7 @@ apps/
   admin/      Moderator and admin panel (react-admin)
 packages/
   brand/      Colors, fonts, MUI theme, logo; contrast-tested
+  core/       Env validation, Supabase client, friendly errors, test fakes
 supabase/
   migrations/ Database changes, applied in order
   tests/      pgTAP database tests (RLS, grants, policies)
@@ -45,7 +46,9 @@ docs/         This file, setup guides, workflow
    A pgTAP test fails if any public table lacks row-level security, or if new tables or
    functions are reachable without an explicit grant. Every migration that adds a function the
    app calls must include its own `grant execute ... to authenticated`.
-2. **MFA for everyone.** TOTP authenticator apps first, passkeys next. Sensitive tables
+2. **MFA for everyone.** Authenticator app (TOTP) is required, with an optional backup device.
+   Passkeys and recovery codes follow once Supabase marks them stable (both are experimental
+   in supabase-js as of 2026-09). Sensitive tables
    require an `aal2` session in their RLS policies, so skipping the UI does not skip MFA.
 3. **Blind matching.** Customer identifiers (phone, email, address, name) are normalized
    and stored as keyed HMAC hashes. Matching runs server-side; raw PII is encrypted and only
@@ -57,6 +60,23 @@ docs/         This file, setup guides, workflow
    self-hosted fonts, hidden source maps, and the app refuses admin keys in its config.
 6. **Supply chain.** CI fails on high or critical `npm audit` findings, and Dependabot opens
    weekly update PRs.
+
+## Accounts (implemented)
+
+| Table              | Purpose                                                                                    |
+| ------------------ | ------------------------------------------------------------------------------------------ |
+| `profiles`         | Name per user, created automatically at sign-up                                            |
+| `businesses`       | Name and `verification_status` (starts `unverified`)                                       |
+| `business_members` | Who belongs to which business, as `owner` or `staff`. One business per user.               |
+| `business_invites` | Staff invites. Only a SHA-256 hash of the link token is stored; links expire after 7 days. |
+| `platform_roles`   | `moderator` or `admin`. Granted only by server tools (`npm run make-admin` locally).       |
+
+Every table has a **restrictive** policy that requires an `aal2` (two-step) session, so a
+password alone reads nothing. Writes go through checked functions: `create_business`,
+`create_invite`, `accept_invite`, `team_members`, `remove_member` and `my_platform_role`.
+
+Sign-in funnel (`apps/web/src/auth/authStep.ts`): sign in → set up or enter authenticator code →
+create or join a business → app. The admin panel additionally requires a platform role.
 
 ## Data model direction
 
@@ -88,7 +108,7 @@ Every change starts with a failing test. CI runs all layers on every push.
 ## Roadmap (one branch each)
 
 1. `setup/project-foundation`: this branch
-2. `feature/auth-mfa`: sign-up, sign-in, required MFA, roles
+2. `feature/auth-mfa`: sign-up, sign-in, required MFA, roles, staff invites, admin login
 3. `feature/business-verification`: onboarding, Stripe Identity, documents, admin queue
 4. `feature/incidents-evidence`: incident records, uploads, integrity and audit
 5. `feature/moderation`: react-admin review workflow
@@ -97,3 +117,4 @@ Every change starts with a failing test. CI runs all layers on every push.
 8. `feature/subscriptions`: Stripe billing tiers
 9. `feature/analytics`
 10. `feature/crm-integrations` and later invoicing
+11. `feature/passkeys-recovery-codes`: when Supabase marks them stable

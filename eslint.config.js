@@ -40,6 +40,11 @@ export default tseslint.config(
     },
   },
   {
+    // Test helpers render throwaway components; fast refresh doesn't apply.
+    files: ['**/test/**', '**/*.test.{ts,tsx}'],
+    rules: { 'react-refresh/only-export-components': 'off' },
+  },
+  {
     files: ['**/*.config.{ts,js}', '**/e2e/**', 'supabase/**', 'scripts/**'],
     languageOptions: { globals: { ...globals.node } },
   },

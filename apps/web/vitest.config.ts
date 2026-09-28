@@ -16,5 +16,7 @@ export default defineProject({
     globals: true,
     setupFiles: ['../../test/setup.ts'],
     include: ['src/**/*.test.{ts,tsx}'],
+    // Full-page form tests type into several fields; CI machines are slower than laptops.
+    testTimeout: 15_000,
   },
 });
