@@ -1,0 +1,9 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["node", "vite/client", "vitest/globals"],
+    // react-admin's typings aren't written for this flag (RaThemeOptions rejects MUI ThemeOptions).
+    "exactOptionalPropertyTypes": false
+  },
+  "include": ["../../test/setup.ts", "src", "vite.config.ts", "vitest.config.ts"]
+}
