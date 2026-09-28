@@ -41,27 +41,7 @@ begin
 end;
 $$;
 
-create function private.my_business_role(p_business_id uuid) returns public.business_role
-language sql stable security definer
-set search_path = ''
-as $$
-  select role from public.business_members
-  where business_id = p_business_id and user_id = auth.uid();
-$$;
-
-create function private.is_platform_staff() returns boolean
-language sql stable security definer
-set search_path = ''
-as $$
-  select exists (select 1 from public.platform_roles where user_id = auth.uid());
-$$;
-
-grant execute on function
-  private.is_aal2(),
-  private.require_aal2(),
-  private.my_business_role(uuid),
-  private.is_platform_staff()
-to authenticated;
+grant execute on function private.is_aal2(), private.require_aal2() to authenticated;
 
 -- ---------------------------------------------------------------------------
 -- Tables
@@ -108,6 +88,26 @@ create table public.platform_roles (
   role public.platform_role not null,
   granted_at timestamptz not null default now()
 );
+
+-- Membership helpers. Defined after the tables because SQL function bodies are
+-- checked at creation time.
+create function private.my_business_role(p_business_id uuid) returns public.business_role
+language sql stable security definer
+set search_path = ''
+as $$
+  select role from public.business_members
+  where business_id = p_business_id and user_id = auth.uid();
+$$;
+
+create function private.is_platform_staff() returns boolean
+language sql stable security definer
+set search_path = ''
+as $$
+  select exists (select 1 from public.platform_roles where user_id = auth.uid());
+$$;
+
+grant execute on function private.my_business_role(uuid), private.is_platform_staff()
+  to authenticated;
 
 alter table public.profiles enable row level security;
 alter table public.businesses enable row level security;
