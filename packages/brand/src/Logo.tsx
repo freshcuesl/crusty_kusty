@@ -7,12 +7,19 @@ export interface LogoProps {
   withWordmark?: boolean;
   /** Hide from screen readers when a visible label already names the app. */
   decorative?: boolean;
+  /** Set when the logo sits on a dark surface (the navy header), for wordmark contrast. */
+  onDark?: boolean;
 }
 
 const NAME = 'Crusty Krustees';
 
 /** The Crusty Krustees crab mascot: a crust-colored shell holding a verified check. */
-export function Logo({ size = 40, withWordmark = false, decorative = false }: LogoProps) {
+export function Logo({
+  size = 40,
+  withWordmark = false,
+  decorative = false,
+  onDark = false,
+}: LogoProps) {
   const a11y = decorative ? { 'aria-hidden': true } : { role: 'img', 'aria-label': NAME };
 
   return (
@@ -71,7 +78,8 @@ export function Logo({ size = 40, withWordmark = false, decorative = false }: Lo
             lineHeight: 1,
           }}
         >
-          <span>Crusty</span> <span style={{ color: brand.crust }}>Krustees</span>
+          <span>Crusty</span>{' '}
+          <span style={{ color: onDark ? brand.crust : brand.crustDark }}>Krustees</span>
         </span>
       )}
     </span>

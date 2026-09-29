@@ -1,45 +1,23 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const createClient = vi.fn(() => ({ auth: {} }));
-vi.mock('@supabase/supabase-js', () => ({ createClient }));
+const createSupabaseClient = vi.hoisted(() => vi.fn(() => ({ auth: {} })));
+vi.mock('@ck/core', () => ({ createSupabaseClient }));
 
 beforeEach(() => {
   vi.resetModules();
-  createClient.mockClear();
-  vi.unstubAllEnvs();
+  createSupabaseClient.mockClear();
 });
 
 describe('getSupabase', () => {
-  it('connects with the validated URL and public key', async () => {
-    vi.stubEnv('VITE_SUPABASE_URL', 'http://127.0.0.1:54321');
-    vi.stubEnv('VITE_SUPABASE_ANON_KEY', 'sb_publishable_test');
-    const { getSupabase } = await import('./supabase');
-
-    getSupabase();
-
-    expect(createClient).toHaveBeenCalledWith(
-      'http://127.0.0.1:54321',
-      'sb_publishable_test',
-      expect.objectContaining({
-        auth: expect.objectContaining({ persistSession: true, flowType: 'pkce' }),
-      }),
-    );
-  });
-
   it('reuses one client for the whole app', async () => {
-    vi.stubEnv('VITE_SUPABASE_URL', 'http://127.0.0.1:54321');
-    vi.stubEnv('VITE_SUPABASE_ANON_KEY', 'sb_publishable_test');
     const { getSupabase } = await import('./supabase');
-
     expect(getSupabase()).toBe(getSupabase());
-    expect(createClient).toHaveBeenCalledOnce();
+    expect(createSupabaseClient).toHaveBeenCalledOnce();
   });
 
-  it('fails with setup directions when configuration is missing', async () => {
-    vi.stubEnv('VITE_SUPABASE_URL', '');
-    vi.stubEnv('VITE_SUPABASE_ANON_KEY', '');
+  it('passes the Vite environment through for validation', async () => {
     const { getSupabase } = await import('./supabase');
-
-    expect(() => getSupabase()).toThrow(/docs\/setup/);
+    getSupabase();
+    expect(createSupabaseClient).toHaveBeenCalledWith(import.meta.env);
   });
 });

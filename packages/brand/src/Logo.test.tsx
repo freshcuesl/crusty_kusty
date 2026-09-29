@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { Logo } from './Logo';
+import { brand } from './tokens';
 
 describe('<Logo />', () => {
   it('is announced to screen readers as "Crusty Krustees"', () => {
@@ -28,5 +29,15 @@ describe('<Logo />', () => {
   it('scales to the requested size', () => {
     const { container } = render(<Logo size={96} />);
     expect(container.querySelector('svg')).toHaveAttribute('width', '96');
+  });
+
+  it('uses the darker orange for "Krustees" on light backgrounds, for contrast', () => {
+    render(<Logo withWordmark />);
+    expect(screen.getByText('Krustees')).toHaveStyle({ color: brand.crustDark });
+  });
+
+  it('uses the bright orange on dark backgrounds such as the navy header', () => {
+    render(<Logo withWordmark onDark />);
+    expect(screen.getByText('Krustees')).toHaveStyle({ color: brand.crust });
   });
 });

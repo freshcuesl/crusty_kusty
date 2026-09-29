@@ -41,4 +41,18 @@ export const contrastPairs: ContrastPair[] = [
   { name: 'verified label on cream', foreground: brand.verifiedText, background: brand.cream },
   { name: 'error text on cream', foreground: brand.danger, background: brand.cream },
   { name: 'crust accent on dark mode', foreground: brand.crust, background: brand.navyDeep },
+  { name: 'links on white cards', foreground: brand.crustDark, background: brand.white },
+  { name: 'links on cream', foreground: brand.crustDark, background: brand.cream },
+  {
+    name: 'logo accent on cream',
+    foreground: brand.crustDark,
+    background: brand.cream,
+    largeText: true,
+  },
+  {
+    name: 'logo accent on navy header',
+    foreground: brand.crust,
+    background: brand.navy,
+    largeText: true,
+  },
 ];

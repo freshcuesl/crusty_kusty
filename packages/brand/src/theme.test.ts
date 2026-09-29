@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { meetsWcagAA } from './contrast';
-import { createAppTheme } from './theme';
+import { accentTextColor, createAppTheme } from './theme';
 import { brand } from './tokens';
 
 describe('createAppTheme', () => {
@@ -38,6 +38,36 @@ describe('createAppTheme', () => {
     expect(meetsWcagAA(theme.palette.text.primary, theme.palette.background.default)).toBe(true);
     expect(meetsWcagAA(theme.palette.text.primary, theme.palette.background.paper)).toBe(true);
   });
+
+  it.each([
+    ['light', light],
+    ['dark', dark],
+  ] as const)('%s theme: orange text is readable on the page and on cards', (mode, theme) => {
+    const accent = accentTextColor(mode);
+    expect(meetsWcagAA(accent, theme.palette.background.default)).toBe(true);
+    expect(meetsWcagAA(accent, theme.palette.background.paper)).toBe(true);
+  });
+
+  it.each([
+    ['light', light],
+    ['dark', dark],
+  ] as const)(
+    '%s theme: links and text/outlined buttons use the readable orange',
+    (mode, theme) => {
+      const accent = accentTextColor(mode);
+      expect(theme.components?.MuiLink?.defaultProps?.color).toBe(accent);
+      const variants = (theme.components?.MuiButton?.variants ?? []) as {
+        props: { variant?: string; color?: string };
+        style: { color?: string };
+      }[];
+      for (const variant of ['text', 'outlined']) {
+        const rule = variants.find(
+          (v) => v.props.variant === variant && v.props.color === 'primary',
+        );
+        expect(rule?.style.color).toBe(accent);
+      }
+    },
+  );
 
   it('switches to a dark background in dark mode', () => {
     expect(dark.palette.mode).toBe('dark');

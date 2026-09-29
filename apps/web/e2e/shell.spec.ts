@@ -1,41 +1,44 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 
-test.describe('app shell', () => {
-  test('home screen shows the main actions', async ({ page }) => {
+test.describe('signed-out visitors', () => {
+  test('are sent to sign in', async ({ page }) => {
     await page.goto('/');
     await expect(page).toHaveTitle('Crusty Krustees');
-    await expect(page.getByRole('heading', { level: 1 })).toHaveText('What do you need?');
-    for (const label of [
-      'New customer',
-      'Report incident',
-      'Customer check',
-      'My incidents',
-      'Alerts',
-    ]) {
-      await expect(page.getByRole('link', { name: new RegExp(label) })).toBeVisible();
-    }
+    await expect(page).toHaveURL(/\/sign-in$/);
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Sign in');
   });
 
-  test('has no automatically detectable accessibility problems', async ({ page }) => {
-    await page.goto('/');
-    const results = await new AxeBuilder({ page })
-      .withTags(['wcag2a', 'wcag2aa', 'wcag21aa'])
-      .analyze();
-    expect(results.violations).toEqual([]);
-  });
-
-  test('never scrolls sideways on a phone', async ({ page }) => {
-    await page.goto('/');
-    const overflow = await page.evaluate(
-      () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
-    );
-    expect(overflow).toBeLessThanOrEqual(0);
-  });
-
-  test('deep links work after a refresh', async ({ page }) => {
+  test('cannot open app pages directly', async ({ page }) => {
     await page.goto('/incidents');
-    await expect(page.getByRole('heading', { name: 'My incidents' })).toBeVisible();
+    await expect(page).toHaveURL(/\/sign-in$/);
+  });
+
+  for (const path of ['/sign-in', '/sign-up', '/forgot-password']) {
+    test(`${path} has no automatically detectable accessibility problems`, async ({ page }) => {
+      await page.goto(path);
+      await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+      const results = await new AxeBuilder({ page })
+        .withTags(['wcag2a', 'wcag2aa', 'wcag21aa'])
+        .analyze();
+      expect(results.violations).toEqual([]);
+    });
+
+    test(`${path} never scrolls sideways on a phone`, async ({ page }) => {
+      await page.goto(path);
+      await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+      const overflow = await page.evaluate(
+        () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      );
+      expect(overflow).toBeLessThanOrEqual(0);
+    });
+  }
+
+  test('sign-up shows the password rules as the user types', async ({ page }) => {
+    await page.goto('/sign-up');
+    await page.getByLabel('Password', { exact: true }).fill('Crusty-Krab-2026');
+    const rules = page.getByRole('list', { name: 'Password rules' });
+    await expect(rules.locator('li[data-met="false"]')).toHaveCount(0);
   });
 });
 
@@ -83,6 +86,6 @@ test.describe('installable PWA', () => {
     await page.reload();
     await context.setOffline(true);
     await page.reload();
-    await expect(page.getByRole('heading', { level: 1 })).toHaveText('What do you need?');
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Sign in');
   });
 });
