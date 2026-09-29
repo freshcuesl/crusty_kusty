@@ -3,6 +3,9 @@
 **Time:** about 15 minutes.
 **You need:** Guide 1 finished (Docker running, `npm run dev` working), and your phone.
 
+> **Using the cloud test database (Guide 1b)?** Skip Part B. In Step 7 the email arrives in
+> your real inbox instead. For Step 13, use the SQL from Guide 1b.
+
 Do one step at a time. After each step, check the ✅ line before moving on.
 
 ---

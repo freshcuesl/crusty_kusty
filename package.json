@@ -30,7 +30,12 @@
     "setup:env": "node scripts/setup-env.mjs",
     "db:status": "supabase status",
     "audit": "npm audit --audit-level=high",
-    "make-admin": "node scripts/make-admin.mjs"
+    "make-admin": "node scripts/make-admin.mjs",
+    "setup:env:cloud": "node scripts/setup-env.mjs --cloud",
+    "db:login": "supabase login",
+    "db:link": "supabase link --project-ref mnmlvmctxponwzltixub",
+    "db:push": "supabase db push",
+    "db:config:push": "supabase config push"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",
