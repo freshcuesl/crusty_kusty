@@ -20,6 +20,8 @@ describe('setting up the authenticator app', () => {
     expect(fake.mocks.auth.mfa.enroll).toHaveBeenCalledWith({
       factorType: 'totp',
       friendlyName: expect.stringMatching(/^Authenticator app/),
+      // The name shown next to the code in the user's authenticator app.
+      issuer: 'ClientShield',
     });
   });
 

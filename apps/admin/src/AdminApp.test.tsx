@@ -1,12 +1,12 @@
-import { createFakeSupabase, type FakeState } from '@ck/core/testing';
+import { createFakeSupabase, type FakeState } from '@cs/core/testing';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
-import { brand } from '@ck/brand';
+import { brand } from '@cs/brand';
 import { AdminApp } from './AdminApp';
 import { adminTheme } from './adminTheme';
 
-const user = { id: 'm1', email: 'mod@krustees.test' };
+const user = { id: 'm1', email: 'mod@clientshield.test' };
 const verifiedFactor = [
   { id: 'f1', factor_type: 'totp' as const, status: 'verified' as const, friendly_name: 'Phone' },
 ];
@@ -32,10 +32,10 @@ describe('<AdminApp /> signed in', () => {
     ).toBeInTheDocument();
   });
 
-  it('brands the header as the Crusty Krustees admin', async () => {
+  it('brands the header as the ClientShield admin', async () => {
     renderAdmin(moderator);
     const header = await screen.findByRole('banner');
-    expect(within(header).getByRole('img', { name: 'Crusty Krustees' })).toBeInTheDocument();
+    expect(within(header).getByRole('img', { name: 'ClientShield' })).toBeInTheDocument();
     expect(within(header).getByText('Admin')).toBeInTheDocument();
   });
 
@@ -71,8 +71,8 @@ describe('<AdminApp /> login', () => {
       return { data: {}, error: null } as never;
     });
 
-    await userEvent.type(await screen.findByLabelText('Email'), 'mod@krustees.test');
-    await userEvent.type(screen.getByLabelText('Password'), 'Crusty-Krab-2026');
+    await userEvent.type(await screen.findByLabelText('Email'), 'mod@clientshield.test');
+    await userEvent.type(screen.getByLabelText('Password'), 'Shield-Strong-2026');
     await userEvent.click(screen.getByRole('button', { name: 'Continue' }));
 
     await userEvent.type(await screen.findByLabelText('6-digit code'), '123456');
@@ -94,12 +94,12 @@ describe('<AdminApp /> login', () => {
       return { data: { user: null, session: null }, error: null } as never;
     });
 
-    await userEvent.type(await screen.findByLabelText('Email'), 'mod@krustees.test');
-    await userEvent.type(screen.getByLabelText('Password'), 'Crusty-Krab-2026');
+    await userEvent.type(await screen.findByLabelText('Email'), 'mod@clientshield.test');
+    await userEvent.type(screen.getByLabelText('Password'), 'Shield-Strong-2026');
     await userEvent.click(screen.getByRole('button', { name: 'Continue' }));
 
     expect(await screen.findByRole('alert')).toHaveTextContent(
-      'Set up two-step login in the Crusty Krustees app first',
+      'Set up two-step login in the ClientShield app first',
     );
     expect(fake.mocks.auth.signOut).toHaveBeenCalled();
   });
@@ -121,7 +121,7 @@ describe('<AdminApp /> login', () => {
     });
 
     await userEvent.type(await screen.findByLabelText('Email'), 'owner@alpha.test');
-    await userEvent.type(screen.getByLabelText('Password'), 'Crusty-Krab-2026');
+    await userEvent.type(screen.getByLabelText('Password'), 'Shield-Strong-2026');
     await userEvent.click(screen.getByRole('button', { name: 'Continue' }));
     await userEvent.type(await screen.findByLabelText('6-digit code'), '123456');
     await userEvent.click(screen.getByRole('button', { name: 'Verify' }));
@@ -134,8 +134,8 @@ describe('<AdminApp /> login', () => {
 
 describe('adminTheme', () => {
   it('shares the brand palette with the main app', () => {
-    expect(adminTheme.palette?.primary).toMatchObject({ main: brand.crust });
-    expect(adminTheme.palette?.secondary).toMatchObject({ main: brand.navy });
+    expect(adminTheme.palette?.primary).toMatchObject({ main: brand.teal });
+    expect(adminTheme.palette?.secondary).toMatchObject({ main: brand.midnight });
   });
 });
 
@@ -146,7 +146,7 @@ describe('<AdminApp /> login problems', () => {
       data: { user: null, session: null },
       error: { code: 'invalid_credentials', message: 'Invalid login credentials' },
     } as never);
-    await userEvent.type(await screen.findByLabelText('Email'), 'mod@krustees.test');
+    await userEvent.type(await screen.findByLabelText('Email'), 'mod@clientshield.test');
     await userEvent.type(screen.getByLabelText('Password'), 'wrong');
     await userEvent.click(screen.getByRole('button', { name: 'Continue' }));
     expect(await screen.findByRole('alert')).toHaveTextContent('Email or password is incorrect.');
@@ -163,8 +163,8 @@ describe('<AdminApp /> login problems', () => {
       });
       return { data: { user: null, session: null }, error: null } as never;
     });
-    await userEvent.type(await screen.findByLabelText('Email'), 'mod@krustees.test');
-    await userEvent.type(screen.getByLabelText('Password'), 'Crusty-Krab-2026');
+    await userEvent.type(await screen.findByLabelText('Email'), 'mod@clientshield.test');
+    await userEvent.type(screen.getByLabelText('Password'), 'Shield-Strong-2026');
     await userEvent.click(screen.getByRole('button', { name: 'Continue' }));
     await userEvent.type(await screen.findByLabelText('6-digit code'), '12');
     await userEvent.click(screen.getByRole('button', { name: 'Verify' }));

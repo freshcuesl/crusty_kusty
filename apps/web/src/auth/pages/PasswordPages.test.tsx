@@ -33,10 +33,10 @@ describe('reset password', () => {
 
   it('saves a strong new password', async () => {
     const { fake } = renderApp('/reset-password', as.owner);
-    await userEvent.type(await screen.findByLabelText('New password'), 'Brand-New-Krab-9');
+    await userEvent.type(await screen.findByLabelText('New password'), 'Brand-New-Shield-9');
     await userEvent.click(screen.getByRole('button', { name: 'Save password' }));
 
-    expect(fake.mocks.auth.updateUser).toHaveBeenCalledWith({ password: 'Brand-New-Krab-9' });
+    expect(fake.mocks.auth.updateUser).toHaveBeenCalledWith({ password: 'Brand-New-Shield-9' });
     expect(await screen.findByRole('status')).toHaveTextContent('Password updated');
   });
 

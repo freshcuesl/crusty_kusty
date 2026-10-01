@@ -14,7 +14,7 @@ export function AdminApp({ supabase }: { supabase: SupabaseClient }) {
 
   return (
     <Admin
-      title="Crusty Krustees Admin"
+      title="ClientShield Admin"
       authProvider={authProvider}
       loginPage={LoginPage}
       requireAuth

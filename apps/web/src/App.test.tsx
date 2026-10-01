@@ -2,17 +2,17 @@ import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import { App } from './App';
-import { createFakeSupabase } from '@ck/core/testing';
+import { createFakeSupabase } from '@cs/core/testing';
 import { as, renderApp } from './test/renderApp';
 
 const getSupabase = vi.hoisted(() => vi.fn());
 vi.mock('./lib/supabase', () => ({ getSupabase }));
 
 describe('app shell', () => {
-  it('shows the Crusty Krustees logo in the header', async () => {
+  it('shows the ClientShield logo in the header', async () => {
     renderApp('/', as.owner);
     const header = await screen.findByRole('banner');
-    expect(within(header).getByRole('img', { name: 'Crusty Krustees' })).toBeInTheDocument();
+    expect(within(header).getByRole('img', { name: 'ClientShield' })).toBeInTheDocument();
   });
 
   it('lets keyboard users skip straight to the main content', async () => {

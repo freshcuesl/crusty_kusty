@@ -1,7 +1,7 @@
 import { Box, Typography } from '@mui/material';
 import type { ReactNode } from 'react';
 import { AppBar, Layout, TitlePortal } from 'react-admin';
-import { Logo } from '@ck/brand';
+import { Logo } from '@cs/brand';
 
 function BrandAppBar() {
   return (

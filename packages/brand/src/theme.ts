@@ -9,11 +9,11 @@ export function createAppTheme(mode: ColorMode): Theme {
 }
 
 /**
- * Orange used for text (links, text and outlined buttons). Bright crust is too
- * faint on cream and white, so light mode uses the darker crust.
+ * Teal used for text (links, text and outlined buttons). Bright teal is too
+ * faint on mist and white, so light mode uses the darker teal.
  */
 export function accentTextColor(mode: ColorMode): string {
-  return mode === 'dark' ? brand.crust : brand.crustDark;
+  return mode === 'dark' ? brand.teal : brand.tealDark;
 }
 
 /** Raw theme options, for libraries such as react-admin that build the theme themselves. */
@@ -24,28 +24,28 @@ export function appThemeOptions(mode: ColorMode): ThemeOptions {
   return {
     palette: {
       mode,
-      primary: { main: brand.crust, dark: brand.crustDark, contrastText: brand.navy },
-      secondary: { main: brand.navy, contrastText: brand.cream },
-      // Incident alerts use calm orange. Red is reserved for real errors.
-      warning: { main: brand.crust, contrastText: brand.navy },
+      primary: { main: brand.teal, dark: brand.tealDark, contrastText: brand.midnight },
+      secondary: { main: brand.midnight, contrastText: brand.mist },
+      // Incident alerts use calm amber. Red is reserved for real errors.
+      warning: { main: brand.amber, contrastText: brand.midnight },
       error: { main: brand.danger },
-      success: { main: brand.verified, dark: brand.verifiedText },
+      success: { main: brand.teal, dark: brand.tealDark, contrastText: brand.midnight },
       background: isDark
-        ? { default: brand.navyDeep, paper: brand.navy }
-        : { default: brand.cream, paper: brand.white },
+        ? { default: brand.midnightDeep, paper: brand.midnightSoft }
+        : { default: brand.mist, paper: brand.white },
       text: isDark
-        ? { primary: brand.cream, secondary: brand.mist }
-        : { primary: brand.navy, secondary: brand.slate },
+        ? { primary: brand.mist, secondary: brand.haze }
+        : { primary: brand.midnight, secondary: brand.slate },
     },
     shape: { borderRadius: 12 },
     typography: {
       fontFamily: fonts.body,
-      h1: { fontFamily: fonts.display, fontWeight: 600 },
-      h2: { fontFamily: fonts.display, fontWeight: 600 },
-      h3: { fontFamily: fonts.display, fontWeight: 600 },
-      h4: { fontFamily: fonts.display, fontWeight: 600 },
-      h5: { fontFamily: fonts.display, fontWeight: 600 },
-      h6: { fontFamily: fonts.display, fontWeight: 600 },
+      h1: { fontFamily: fonts.display, fontWeight: 700 },
+      h2: { fontFamily: fonts.display, fontWeight: 700 },
+      h3: { fontFamily: fonts.display, fontWeight: 700 },
+      h4: { fontFamily: fonts.display, fontWeight: 700 },
+      h5: { fontFamily: fonts.display, fontWeight: 700 },
+      h6: { fontFamily: fonts.display, fontWeight: 700 },
       button: { textTransform: 'none', fontWeight: 600 },
     },
     components: {

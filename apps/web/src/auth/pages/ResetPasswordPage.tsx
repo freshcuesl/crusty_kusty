@@ -1,7 +1,7 @@
 import { Alert, Button, Stack } from '@mui/material';
 import { useState, type FormEvent } from 'react';
 import { Link as RouterLink } from 'react-router';
-import { friendlyError } from '@ck/core';
+import { friendlyError } from '@cs/core';
 import { unmetPasswordRules } from '../passwordPolicy';
 import { useSupabase } from '../SupabaseProvider';
 import { FormError, PageTitle, PasswordField } from '../ui';

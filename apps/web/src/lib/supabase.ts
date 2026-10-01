@@ -1,5 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { createSupabaseClient } from '@ck/core';
+import { createSupabaseClient } from '@cs/core';
 
 let client: SupabaseClient | undefined;
 

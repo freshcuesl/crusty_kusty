@@ -1,10 +1,10 @@
 import IosShareIcon from '@mui/icons-material/IosShare';
 import { Button, Paper, Stack, Typography } from '@mui/material';
 import { useState } from 'react';
-import { Logo } from '@ck/brand';
+import { Logo } from '@cs/brand';
 import { useInstallPrompt } from './useInstallPrompt';
 
-const DISMISS_KEY = 'ck.installBanner.dismissed';
+const DISMISS_KEY = 'cs.installBanner.dismissed';
 
 function readDismissed(): boolean {
   try {
@@ -22,7 +22,7 @@ function saveDismissed() {
   }
 }
 
-/** Invites the user to add Crusty Krustees to their home screen. */
+/** Invites the user to add ClientShield to their home screen. */
 export function InstallBanner() {
   const { canInstall, isInstalled, platform, promptInstall } = useInstallPrompt();
   const [dismissed, setDismissed] = useState(readDismissed);
@@ -56,7 +56,7 @@ export function InstallBanner() {
             </Typography>
           ) : (
             <Typography variant="body2" color="text.secondary">
-              Add Crusty Krustees to your home screen for quick checks on the job.
+              Add ClientShield to your home screen for quick checks on the job.
             </Typography>
           )}
         </Stack>

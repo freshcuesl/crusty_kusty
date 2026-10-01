@@ -2,7 +2,7 @@ import GroupAddOutlined from '@mui/icons-material/GroupAddOutlined';
 import { Alert, Button, Divider, Stack, TextField, Typography } from '@mui/material';
 import { useState, type FormEvent } from 'react';
 import { useAuth } from '../AuthProvider';
-import { friendlyError } from '@ck/core';
+import { friendlyError } from '@cs/core';
 import { clearPendingInvite, readPendingInvite } from '../pendingInvite';
 import { useSupabase } from '../SupabaseProvider';
 import { FormError, PageTitle } from '../ui';

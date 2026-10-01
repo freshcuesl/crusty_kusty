@@ -19,7 +19,7 @@ describe('when things go wrong', () => {
     fake.mocks.auth.signUp.mockResolvedValueOnce(refused('over_email_send_rate_limit'));
     await userEvent.type(await screen.findByLabelText('Your name'), 'Olive');
     await userEvent.type(screen.getByLabelText('Email'), 'o@alpha.test');
-    await userEvent.type(screen.getByLabelText('Password'), 'Crusty-Krab-2026');
+    await userEvent.type(screen.getByLabelText('Password'), 'Shield-Strong-2026');
     await userEvent.click(screen.getByRole('button', { name: 'Create account' }));
     expect(await screen.findByRole('alert')).toHaveTextContent('Too many emails sent');
   });
@@ -55,7 +55,7 @@ describe('when things go wrong', () => {
   it('reset-password shows a server refusal', async () => {
     const { fake } = renderApp('/reset-password', as.owner);
     fake.mocks.auth.updateUser.mockResolvedValueOnce(refused('same_password'));
-    await userEvent.type(await screen.findByLabelText('New password'), 'Brand-New-Krab-9');
+    await userEvent.type(await screen.findByLabelText('New password'), 'Brand-New-Shield-9');
     await userEvent.click(screen.getByRole('button', { name: 'Save password' }));
     expect(await screen.findByRole('alert')).toHaveTextContent('not used before');
   });

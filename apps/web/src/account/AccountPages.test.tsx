@@ -150,6 +150,7 @@ describe('security page', () => {
     expect(fake.mocks.auth.mfa.enroll).toHaveBeenCalledWith({
       factorType: 'totp',
       friendlyName: 'Backup authenticator 2',
+      issuer: 'ClientShield',
     });
   });
 

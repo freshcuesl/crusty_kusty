@@ -25,7 +25,7 @@ export function UpdatePrompt() {
           </>
         }
       >
-        A new version of Crusty Krustees is ready.
+        A new version of ClientShield is ready.
       </Alert>
     </Snackbar>
   );

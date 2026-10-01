@@ -1,6 +1,6 @@
 import { Box, Button, CircularProgress, Stack, Typography } from '@mui/material';
 import { useEffect, useRef, useState, type FormEvent } from 'react';
-import { friendlyError } from '@ck/core';
+import { friendlyError } from '@cs/core';
 import { useSupabase } from './SupabaseProvider';
 import { CodeField, FormError } from './ui';
 import { isSixDigits } from './a11y';
@@ -47,6 +47,8 @@ export function TotpEnroll({ friendlyName, submitLabel, onVerified }: TotpEnroll
         const { data, error: enrollError } = await supabase.auth.mfa.enroll({
           factorType: 'totp',
           friendlyName,
+          // Shown next to the code in the user's authenticator app.
+          issuer: 'ClientShield',
         });
         if (enrollError || !data) {
           setError(friendlyError(enrollError));

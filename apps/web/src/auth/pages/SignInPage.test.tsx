@@ -8,12 +8,12 @@ describe('sign in', () => {
     const { fake } = renderApp('/sign-in', as.signedOut);
 
     await userEvent.type(await screen.findByLabelText('Email'), '  Owner@Alpha.test ');
-    await userEvent.type(screen.getByLabelText('Password'), 'Crusty-Krab-2026');
+    await userEvent.type(screen.getByLabelText('Password'), 'Shield-Strong-2026');
     await userEvent.click(screen.getByRole('button', { name: 'Sign in' }));
 
     expect(fake.mocks.auth.signInWithPassword).toHaveBeenCalledWith({
       email: 'owner@alpha.test',
-      password: 'Crusty-Krab-2026',
+      password: 'Shield-Strong-2026',
     });
   });
 
@@ -48,7 +48,7 @@ describe('sign in', () => {
     });
 
     await userEvent.type(await screen.findByLabelText('Email'), 'owner@alpha.test');
-    await userEvent.type(screen.getByLabelText('Password'), 'Crusty-Krab-2026');
+    await userEvent.type(screen.getByLabelText('Password'), 'Shield-Strong-2026');
     await userEvent.click(screen.getByRole('button', { name: 'Sign in' }));
 
     await waitFor(() => expect(path()).toBe('/mfa/verify'));

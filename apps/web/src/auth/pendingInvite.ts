@@ -1,5 +1,5 @@
 // An invite link opened before sign-up is remembered for this browser tab only.
-const KEY = 'ck.pendingInvite';
+const KEY = 'cs.pendingInvite';
 
 export function savePendingInvite(token: string) {
   try {

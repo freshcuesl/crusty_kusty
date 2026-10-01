@@ -1,19 +1,19 @@
 import { brand, fonts } from './tokens';
 
 export interface LogoProps {
-  /** Height of the crab mark in pixels. */
+  /** Height of the shield in pixels. */
   size?: number;
-  /** Show the "Crusty Krustees" wordmark beside the crab. */
+  /** Show the "ClientShield" wordmark beside the shield. */
   withWordmark?: boolean;
   /** Hide from screen readers when a visible label already names the app. */
   decorative?: boolean;
-  /** Set when the logo sits on a dark surface (the navy header), for wordmark contrast. */
+  /** Set when the logo sits on a dark surface (the midnight header), for contrast. */
   onDark?: boolean;
 }
 
-const NAME = 'Crusty Krustees';
+const NAME = 'ClientShield';
 
-/** The Crusty Krustees crab mascot: a crust-colored shell holding a verified check. */
+/** The ClientShield mark: a shield holding a "C", with a teal "verified" dot. */
 export function Logo({
   size = 40,
   withWordmark = false,
@@ -21,51 +21,31 @@ export function Logo({
   onDark = false,
 }: LogoProps) {
   const a11y = decorative ? { 'aria-hidden': true } : { role: 'img', 'aria-label': NAME };
+  const shield = onDark ? brand.mist : brand.midnight;
+  const letter = onDark ? brand.midnight : brand.mist;
 
   return (
     <span style={{ display: 'inline-flex', alignItems: 'center', gap: size * 0.25 }}>
-      <svg width={size} height={size} viewBox="0 0 120 100" focusable="false" {...a11y}>
-        <line
-          x1="48"
-          y1="44"
-          x2="44"
-          y2="24"
-          stroke={brand.navy}
-          strokeWidth="4"
-          strokeLinecap="round"
-        />
-        <line
-          x1="72"
-          y1="44"
-          x2="76"
-          y2="24"
-          stroke={brand.navy}
-          strokeWidth="4"
-          strokeLinecap="round"
-        />
-        <circle cx="44" cy="22" r="7" fill={brand.cream} stroke={brand.navy} strokeWidth="4" />
-        <circle cx="76" cy="22" r="7" fill={brand.cream} stroke={brand.navy} strokeWidth="4" />
-        <circle cx="45" cy="23" r="3" fill={brand.navy} />
-        <circle cx="77" cy="23" r="3" fill={brand.navy} />
-        <ellipse cx="60" cy="66" rx="34" ry="22" fill={brand.crust} />
+      <svg
+        width={Math.round(size * (100 / 114))}
+        height={size}
+        viewBox="0 0 100 114"
+        focusable="false"
+        {...a11y}
+      >
         <path
-          d="M30 60 Q45 50 60 58 Q75 50 90 60"
-          fill="none"
-          stroke={brand.crustDark}
-          strokeWidth="4"
-          strokeLinecap="round"
+          data-part="shield"
+          d="M50 4 L92 18 V54 C92 82 74 100 50 110 C26 100 8 82 8 54 V18 Z"
+          fill={shield}
         />
-        <circle cx="16" cy="54" r="11" fill={brand.crust} />
-        <circle cx="104" cy="54" r="11" fill={brand.crust} />
-        <circle cx="60" cy="72" r="10" fill={brand.navy} />
         <path
-          d="M55 72 L59 76 L66 68"
+          d="M66 40 A20 20 0 1 0 66 70"
           fill="none"
-          stroke={brand.cream}
-          strokeWidth="3"
+          stroke={letter}
+          strokeWidth="10"
           strokeLinecap="round"
-          strokeLinejoin="round"
         />
+        <circle cx="70" cy="55" r="6" fill={brand.teal} />
       </svg>
       {withWordmark && (
         // The svg already carries the accessible name, so the visible text is hidden from screen readers.
@@ -73,13 +53,14 @@ export function Logo({
           aria-hidden="true"
           style={{
             fontFamily: fonts.display,
-            fontWeight: 600,
-            fontSize: size * 0.5,
+            fontWeight: 700,
+            fontSize: size * 0.52,
             lineHeight: 1,
+            letterSpacing: '-0.01em',
           }}
         >
-          <span>Crusty</span>{' '}
-          <span style={{ color: onDark ? brand.crust : brand.crustDark }}>Krustees</span>
+          <span>Client</span>
+          <span style={{ color: onDark ? brand.teal : brand.tealDark }}>Shield</span>
         </span>
       )}
     </span>

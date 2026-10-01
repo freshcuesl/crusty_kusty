@@ -2,11 +2,11 @@ import { ThemeProvider } from '@mui/material';
 import { render } from '@testing-library/react';
 import { useEffect } from 'react';
 import { MemoryRouter, useLocation } from 'react-router';
-import { createAppTheme } from '@ck/brand';
+import { createAppTheme } from '@cs/brand';
 import { AppRoutes } from '../App';
 import { AuthProvider } from '../auth/AuthProvider';
 import { SupabaseProvider } from '../auth/SupabaseProvider';
-import { createFakeSupabase, type FakeState } from '@ck/core/testing';
+import { createFakeSupabase, type FakeState } from '@cs/core/testing';
 
 export const testUser = { id: 'u1', email: 'owner@alpha.test' };
 

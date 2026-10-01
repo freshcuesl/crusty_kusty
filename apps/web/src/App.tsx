@@ -2,7 +2,7 @@ import { CssBaseline, ThemeProvider } from '@mui/material';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { useMemo } from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router';
-import { createAppTheme } from '@ck/brand';
+import { createAppTheme } from '@cs/brand';
 import { SecurityPage } from './account/SecurityPage';
 import { TeamPage } from './account/TeamPage';
 import { AuthProvider } from './auth/AuthProvider';
