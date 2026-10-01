@@ -17,7 +17,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { useCallback, useEffect, useState } from 'react';
 import { Link as RouterLink } from 'react-router';
 import { useAuth } from '../auth/AuthProvider';
-import { friendlyError } from '@ck/core';
+import { friendlyError } from '@cs/core';
 import { useSupabase } from '../auth/SupabaseProvider';
 import { TotpEnroll } from '../auth/TotpEnroll';
 import { FormError } from '../auth/ui';

@@ -13,7 +13,7 @@ describe('password policy', () => {
   });
 
   it('accepts a strong password', () => {
-    expect(unmetPasswordRules('Crusty-Krab-2026')).toEqual([]);
+    expect(unmetPasswordRules('Shield-Strong-2026')).toEqual([]);
   });
 
   it('lists every rule an empty password misses', () => {

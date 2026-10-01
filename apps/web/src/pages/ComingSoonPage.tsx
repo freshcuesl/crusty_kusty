@@ -1,7 +1,7 @@
 import ArrowBack from '@mui/icons-material/ArrowBack';
 import { Button, Stack, Typography } from '@mui/material';
 import { Link as RouterLink } from 'react-router';
-import { Logo } from '@ck/brand';
+import { Logo } from '@cs/brand';
 
 /** Placeholder for features that later branches will build. */
 export function ComingSoonPage({ title }: { title: string }) {

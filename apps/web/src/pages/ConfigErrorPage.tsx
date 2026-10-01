@@ -1,5 +1,5 @@
 import { Alert, Container, Stack, Typography } from '@mui/material';
-import { Logo } from '@ck/brand';
+import { Logo } from '@cs/brand';
 
 /** Shown instead of the app when it isn't connected to Supabase, with the fix. */
 export function ConfigErrorPage({ message }: { message: string }) {

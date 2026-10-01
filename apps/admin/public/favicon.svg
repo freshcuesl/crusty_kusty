@@ -1,18 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
-  <title>Crusty Krustees</title>
-  <rect width="120" height="120" rx="26" fill="#FBF5EA"/>
-  <g transform="translate(0 10)">
-    <line x1="48" y1="44" x2="44" y2="24" stroke="#16233B" stroke-width="4" stroke-linecap="round"/>
-    <line x1="72" y1="44" x2="76" y2="24" stroke="#16233B" stroke-width="4" stroke-linecap="round"/>
-    <circle cx="44" cy="22" r="7" fill="#FBF5EA" stroke="#16233B" stroke-width="4"/>
-    <circle cx="76" cy="22" r="7" fill="#FBF5EA" stroke="#16233B" stroke-width="4"/>
-    <circle cx="45" cy="23" r="3" fill="#16233B"/>
-    <circle cx="77" cy="23" r="3" fill="#16233B"/>
-    <ellipse cx="60" cy="66" rx="34" ry="22" fill="#E07A2F"/>
-    <path d="M30 60 Q45 50 60 58 Q75 50 90 60" fill="none" stroke="#B3561A" stroke-width="4" stroke-linecap="round"/>
-    <circle cx="16" cy="54" r="11" fill="#E07A2F"/>
-    <circle cx="104" cy="54" r="11" fill="#E07A2F"/>
-    <circle cx="60" cy="72" r="10" fill="#16233B"/>
-    <path d="M55 72 L59 76 L66 68" fill="none" stroke="#FBF5EA" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <title>ClientShield</title>
+  <rect width="120" height="120" rx="26" fill="#F4F7FB"/>
+  <g transform="translate(14 7) scale(0.92)">
+    <path d="M50 4 L92 18 V54 C92 82 74 100 50 110 C26 100 8 82 8 54 V18 Z" fill="#0B2545"/>
+    <path d="M66 40 A20 20 0 1 0 66 70" fill="none" stroke="#F4F7FB" stroke-width="10" stroke-linecap="round"/>
+    <circle cx="70" cy="55" r="6" fill="#2EC4B6"/>
   </g>
 </svg>

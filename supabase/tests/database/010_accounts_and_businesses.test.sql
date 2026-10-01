@@ -10,7 +10,7 @@ insert into auth.users (id, email, raw_user_meta_data) values
   ('00000000-0000-0000-0000-00000000000a', 'owner@alpha.test', '{"full_name":"Olive Owner"}'),
   ('00000000-0000-0000-0000-00000000000b', 'staff@alpha.test', '{}'),
   ('00000000-0000-0000-0000-00000000000c', 'owner@bravo.test', '{}'),
-  ('00000000-0000-0000-0000-00000000000d', 'mod@krustees.test', '{}'),
+  ('00000000-0000-0000-0000-00000000000d', 'mod@clientshield.test', '{}'),
   ('00000000-0000-0000-0000-00000000000e', 'stranger@else.test', '{}');
 
 insert into public.platform_roles (user_id, role)
@@ -255,7 +255,7 @@ select throws_ok(
 );
 select is(public.my_platform_role(), null::public.platform_role, 'a regular user has no platform role');
 
-select pg_temp.sign_in('00000000-0000-0000-0000-00000000000d', 'mod@krustees.test', 'aal2');
+select pg_temp.sign_in('00000000-0000-0000-0000-00000000000d', 'mod@clientshield.test', 'aal2');
 select is(public.my_platform_role(), 'moderator'::public.platform_role, 'a moderator can see their own role');
 select results_eq(
   'select name from public.businesses order by name',
@@ -263,7 +263,7 @@ select results_eq(
   'moderators see every business, for verification'
 );
 
-select pg_temp.sign_in('00000000-0000-0000-0000-00000000000d', 'mod@krustees.test', 'aal1');
+select pg_temp.sign_in('00000000-0000-0000-0000-00000000000d', 'mod@clientshield.test', 'aal1');
 select is_empty(
   'select * from public.businesses',
   'moderators also need two-step login'

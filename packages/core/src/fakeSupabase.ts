@@ -98,7 +98,7 @@ export function createFakeSupabase(initial: Partial<FakeState> = {}) {
           totp: {
             qr_code: 'data:image/svg+xml;utf-8,<svg xmlns="http://www.w3.org/2000/svg"/>',
             secret: 'JBSWY3DPEHPK3PXP',
-            uri: 'otpauth://totp/Crusty%20Krustees:owner@alpha.test?secret=JBSWY3DPEHPK3PXP',
+            uri: 'otpauth://totp/ClientShield:owner@alpha.test?secret=JBSWY3DPEHPK3PXP',
           },
         }),
       ),

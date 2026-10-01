@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 import { as, renderApp } from '../../test/renderApp';
 
-async function fillForm(password = 'Crusty-Krab-2026') {
+async function fillForm(password = 'Shield-Strong-2026') {
   await userEvent.type(await screen.findByLabelText('Your name'), 'Olive Owner');
   await userEvent.type(screen.getByLabelText('Email'), 'Owner@Alpha.test');
   await userEvent.type(screen.getByLabelText('Password'), password);
@@ -18,7 +18,7 @@ describe('sign up', () => {
 
     expect(fake.mocks.auth.signUp).toHaveBeenCalledWith({
       email: 'owner@alpha.test',
-      password: 'Crusty-Krab-2026',
+      password: 'Shield-Strong-2026',
       options: {
         data: { full_name: 'Olive Owner' },
         emailRedirectTo: `${window.location.origin}/sign-in`,

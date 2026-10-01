@@ -47,11 +47,11 @@ describe('joining with an invite link', () => {
   it('remembers the invite while a new person signs up', async () => {
     const { path } = renderApp('/invite/tok_123', as.signedOut);
     await waitFor(() => expect(path()).toBe('/sign-up'));
-    expect(sessionStorage.getItem('ck.pendingInvite')).toBe('tok_123');
+    expect(sessionStorage.getItem('cs.pendingInvite')).toBe('tok_123');
   });
 
   it('joins the team once the person is signed in with two-step login', async () => {
-    sessionStorage.setItem('ck.pendingInvite', 'tok_123');
+    sessionStorage.setItem('cs.pendingInvite', 'tok_123');
     const { fake, path } = renderApp('/onboarding', as.needsBusiness);
     fake.mocks.rpc.mockImplementationOnce(async () => {
       fake.state.membership = { ...ownerMembership, role: 'staff' };
@@ -62,11 +62,11 @@ describe('joining with an invite link', () => {
 
     expect(fake.mocks.rpc).toHaveBeenCalledWith('accept_invite', { p_token: 'tok_123' });
     await waitFor(() => expect(path()).toBe('/'));
-    expect(sessionStorage.getItem('ck.pendingInvite')).toBeNull();
+    expect(sessionStorage.getItem('cs.pendingInvite')).toBeNull();
   });
 
   it('explains an invite that no longer works and lets them discard it', async () => {
-    sessionStorage.setItem('ck.pendingInvite', 'tok_old');
+    sessionStorage.setItem('cs.pendingInvite', 'tok_old');
     const { fake } = renderApp('/onboarding', as.needsBusiness);
     fake.mocks.rpc.mockResolvedValueOnce({
       data: null,
@@ -77,7 +77,7 @@ describe('joining with an invite link', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent('Invite not found');
 
     await userEvent.click(screen.getByRole('button', { name: 'Forget this invite' }));
-    expect(sessionStorage.getItem('ck.pendingInvite')).toBeNull();
+    expect(sessionStorage.getItem('cs.pendingInvite')).toBeNull();
     expect(screen.queryByRole('button', { name: 'Join the team' })).not.toBeInTheDocument();
   });
 

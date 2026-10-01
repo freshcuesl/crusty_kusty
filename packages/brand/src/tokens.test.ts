@@ -3,11 +3,11 @@ import { meetsWcagAA } from './contrast';
 import { brand, contrastPairs } from './tokens';
 
 describe('brand tokens', () => {
-  it('uses the approved "Toasted trust" palette', () => {
-    expect(brand.navy).toBe('#16233B');
-    expect(brand.crust).toBe('#E07A2F');
-    expect(brand.cream).toBe('#FBF5EA');
-    expect(brand.verified).toBe('#2E9E6A');
+  it('uses the approved "Midnight and teal" palette', () => {
+    expect(brand.midnight).toBe('#0B2545');
+    expect(brand.teal).toBe('#2EC4B6');
+    expect(brand.mist).toBe('#F4F7FB');
+    expect(brand.amber).toBe('#F2A541');
   });
 
   it('declares the text/background pairs the UI relies on', () => {

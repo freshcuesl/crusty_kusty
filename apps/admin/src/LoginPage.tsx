@@ -2,8 +2,8 @@ import { Alert, Box, Button, Container, Paper, Stack, TextField, Typography } fr
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { useState, type FormEvent } from 'react';
 import { useLogin } from 'react-admin';
-import { Logo } from '@ck/brand';
-import { friendlyError } from '@ck/core';
+import { Logo } from '@cs/brand';
+import { friendlyError } from '@cs/core';
 import { ADMIN_MESSAGES } from './authProvider';
 
 type Step = 'password' | 'code';

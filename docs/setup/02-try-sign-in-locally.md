@@ -72,7 +72,7 @@ test inbox. Nothing is sent to real email addresses.
 **Step 9 of 14.** In the authenticator app on your phone, tap **+** or **Add**, choose
 **Scan a QR code**, and point the camera at the screen.
 
-✅ **You should see:** "Crusty Krustees" in the app with a 6-digit code that changes every 30
+✅ **You should see:** "ClientShield" in the app with a 6-digit code that changes every 30
 seconds.
 
 **Step 10 of 14.** Type the 6-digit code from your phone into the page and click

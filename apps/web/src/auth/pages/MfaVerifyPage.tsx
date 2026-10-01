@@ -10,7 +10,7 @@ import {
 } from '@mui/material';
 import { useEffect, useState, type FormEvent } from 'react';
 import { useAuth } from '../AuthProvider';
-import { friendlyError } from '@ck/core';
+import { friendlyError } from '@cs/core';
 import { useSupabase } from '../SupabaseProvider';
 import { CodeField, FormError, FullPageSpinner, PageTitle } from '../ui';
 import { isSixDigits } from '../a11y';
@@ -73,7 +73,7 @@ export function MfaVerifyPage() {
 
   return (
     <form onSubmit={submit} noValidate>
-      <PageTitle subtitle="Open your authenticator app and enter the code for Crusty Krustees.">
+      <PageTitle subtitle="Open your authenticator app and enter the code for ClientShield.">
         Enter your code
       </PageTitle>
       <Stack spacing={2}>

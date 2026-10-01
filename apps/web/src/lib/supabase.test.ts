@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const createSupabaseClient = vi.hoisted(() => vi.fn(() => ({ auth: {} })));
-vi.mock('@ck/core', () => ({ createSupabaseClient }));
+vi.mock('@cs/core', () => ({ createSupabaseClient }));
 
 beforeEach(() => {
   vi.resetModules();

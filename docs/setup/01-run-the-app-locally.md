@@ -72,7 +72,7 @@ npm run dev
 
 **Step 8 of 9.** Open your web browser and go to **http://localhost:5173**
 
-✅ **You should see:** the navy header with the crab logo and **"What do you need?"**
+✅ **You should see:** the dark blue header with the ClientShield logo and **"What do you need?"**
 
 **Step 9 of 9.** When you're done, go back to the terminal and press **Ctrl + C** to stop
 the app. To stop the database too, type this and press **Enter**:

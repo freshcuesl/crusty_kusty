@@ -2,7 +2,7 @@ import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
-const brand = { navy: '#16233B', cream: '#FBF5EA' };
+const brand = { midnight: '#0B2545', mist: '#F4F7FB' };
 
 export default defineConfig({
   envDir: '../..',
@@ -14,15 +14,15 @@ export default defineConfig({
       includeAssets: ['favicon.ico', 'favicon.svg', 'apple-touch-icon-180x180.png'],
       manifest: {
         id: '/',
-        name: 'Crusty Krustees',
-        short_name: 'Krustees',
+        name: 'ClientShield',
+        short_name: 'ClientShield',
         description: 'Verified service dispute alerts for contractors.',
         start_url: '/',
         scope: '/',
         display: 'standalone',
         orientation: 'portrait',
-        background_color: brand.cream,
-        theme_color: brand.navy,
+        background_color: brand.mist,
+        theme_color: brand.midnight,
         categories: ['business', 'productivity'],
         icons: [
           { src: 'pwa-64x64.png', sizes: '64x64', type: 'image/png' },

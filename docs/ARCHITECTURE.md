@@ -1,4 +1,4 @@
-# Crusty Krustees architecture
+# ClientShield architecture
 
 A verified incident network for service businesses: evidence-backed dispute records,
 human moderation, and private alerts when a new booking matches a verified incident.
@@ -8,19 +8,19 @@ It is not a blacklist and never offers public people search.
 
 | Area            | Decision                                                                                                                                               |
 | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Product name    | Crusty Krustees (repo name `crusty_kusty` only)                                                                                                        |
+| Product name    | ClientShield (renamed from Crusty Krustees on 2026-10-01; repo name `crusty_kusty` only). Name to be cleared by the lawyer (trademark search).         |
 | Audience        | Business owners and their staff. Customers see nothing in the app (option A).                                                                          |
 | Customer portal | Option A now. The data model keeps a separate customer identity so option B (customers log in to respond and dispute) can be added without rebuilding. |
 | Market          | United States only                                                                                                                                     |
 | Frontend        | React + TypeScript + Vite, installable PWA (`vite-plugin-pwa`)                                                                                         |
-| UI              | MUI, one shared theme (`@ck/brand`) for the app and the admin panel                                                                                    |
+| UI              | MUI, one shared theme (`@cs/brand`) for the app and the admin panel                                                                                    |
 | Admin           | react-admin (`apps/admin`), same theme                                                                                                                 |
 | Backend         | Supabase (Postgres, Auth, Storage, Edge Functions); Pro plan in production                                                                             |
 | Hosting         | Cloudflare (static assets, `_headers` for security headers)                                                                                            |
 | Identity checks | Stripe Identity for owners, plus business documents reviewed by a moderator                                                                            |
 | Email / errors  | Resend and Sentry, added at deploy time                                                                                                                |
 | Retention       | Minor disputes 24 months; fraud and chargebacks 60 months (admin-configurable)                                                                         |
-| Brand           | Crab mascot (B) with the "Toasted trust" palette                                                                                                       |
+| Brand           | "C" monogram shield (B) with the "Midnight and teal" palette; amber for alerts, never red                                                              |
 | Future          | Invoicing and servicing (one-stop shop)                                                                                                                |
 
 ## Repository layout

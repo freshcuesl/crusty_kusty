@@ -1,4 +1,4 @@
-# Crusty Krustees
+# ClientShield
 
 A verified incident network for service businesses. Contractors document real disputes with
 real evidence, moderators verify them, and businesses get a private alert when a new booking

@@ -16,7 +16,7 @@ import {
 } from '@mui/material';
 import { useId, useState, type ReactNode } from 'react';
 import { Outlet } from 'react-router';
-import { Logo } from '@ck/brand';
+import { Logo } from '@cs/brand';
 import { visuallyHidden } from './a11y';
 import { passwordRules } from './passwordPolicy';
 

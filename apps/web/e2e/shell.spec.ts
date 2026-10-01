@@ -4,7 +4,7 @@ import { expect, test } from '@playwright/test';
 test.describe('signed-out visitors', () => {
   test('are sent to sign in', async ({ page }) => {
     await page.goto('/');
-    await expect(page).toHaveTitle('Crusty Krustees');
+    await expect(page).toHaveTitle('ClientShield');
     await expect(page).toHaveURL(/\/sign-in$/);
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Sign in');
   });
@@ -36,7 +36,7 @@ test.describe('signed-out visitors', () => {
 
   test('sign-up shows the password rules as the user types', async ({ page }) => {
     await page.goto('/sign-up');
-    await page.getByLabel('Password', { exact: true }).fill('Crusty-Krab-2026');
+    await page.getByLabel('Password', { exact: true }).fill('Shield-Strong-2026');
     const rules = page.getByRole('list', { name: 'Password rules' });
     await expect(rules.locator('li[data-met="false"]')).toHaveCount(0);
   });
@@ -50,8 +50,8 @@ test.describe('installable PWA', () => {
 
     const manifest = await (await request.get(`/${href!.replace(/^\//, '')}`)).json();
     expect(manifest).toMatchObject({
-      name: 'Crusty Krustees',
-      short_name: 'Krustees',
+      name: 'ClientShield',
+      short_name: 'ClientShield',
       display: 'standalone',
       start_url: '/',
     });

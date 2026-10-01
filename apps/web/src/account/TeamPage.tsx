@@ -17,7 +17,7 @@ import {
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { useAuth } from '../auth/AuthProvider';
-import { friendlyError } from '@ck/core';
+import { friendlyError } from '@cs/core';
 import { useSupabase } from '../auth/SupabaseProvider';
 import { FormError } from '../auth/ui';
 import { ConfirmDialog } from './ConfirmDialog';

@@ -1,9 +1,9 @@
 import { AppBar, Box, Container, Link, Toolbar } from '@mui/material';
 import { Outlet, Link as RouterLink } from 'react-router';
-import { Logo } from '@ck/brand';
+import { Logo } from '@cs/brand';
 import { AccountMenu } from './AccountMenu';
 
-/** Mobile-first frame: navy header, centered content column, safe-area padding for notches. */
+/** Mobile-first frame: midnight header, centered content column, safe-area padding for notches. */
 export function AppShell() {
   return (
     <Box sx={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column' }}>

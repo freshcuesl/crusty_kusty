@@ -1,7 +1,7 @@
 {
-  "name": "crusty-krustees",
+  "name": "clientshield",
   "private": true,
-  "description": "Crusty Krustees: a verified incident network for service businesses.",
+  "description": "ClientShield: a verified incident network for service businesses.",
   "type": "module",
   "workspaces": [
     "packages/*",
@@ -11,13 +11,13 @@
     "node": ">=22"
   },
   "scripts": {
-    "dev": "npm run dev -w @ck/web",
-    "dev:admin": "npm run dev -w @ck/admin",
+    "dev": "npm run dev -w @cs/web",
+    "dev:admin": "npm run dev -w @cs/admin",
     "build": "npm run build --workspaces --if-present",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "test:e2e": "npm run test:e2e -w @ck/web",
+    "test:e2e": "npm run test:e2e -w @cs/web",
     "lint": "eslint .",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "format": "prettier --write .",

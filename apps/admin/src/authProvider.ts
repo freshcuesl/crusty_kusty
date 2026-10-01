@@ -10,7 +10,7 @@ type AdminCheck =
 export const ADMIN_MESSAGES = {
   'signed-out': 'Sign in to continue.',
   'needs-code': 'Enter the code from your authenticator app.',
-  'needs-mfa-setup': 'Set up two-step login in the Crusty Krustees app first, then sign in here.',
+  'needs-mfa-setup': 'Set up two-step login in the ClientShield app first, then sign in here.',
   'not-staff': "This account doesn't have admin access.",
 } as const;
 

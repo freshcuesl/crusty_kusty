@@ -1,8 +1,8 @@
-import { createFakeSupabase, type FakeState } from '@ck/core/testing';
+import { createFakeSupabase, type FakeState } from '@cs/core/testing';
 import { describe, expect, it } from 'vitest';
 import { createAuthProvider } from './authProvider';
 
-const user = { id: 'm1', email: 'mod@krustees.test' };
+const user = { id: 'm1', email: 'mod@clientshield.test' };
 const moderator: Partial<FakeState> = {
   session: { user },
   currentLevel: 'aal2',
@@ -20,7 +20,10 @@ describe('admin authProvider', () => {
     const { auth } = setup(moderator);
     await expect(auth.checkAuth({})).resolves.toBeUndefined();
     await expect(auth.getPermissions!({})).resolves.toBe('moderator');
-    await expect(auth.getIdentity!()).resolves.toEqual({ id: 'm1', fullName: 'mod@krustees.test' });
+    await expect(auth.getIdentity!()).resolves.toEqual({
+      id: 'm1',
+      fullName: 'mod@clientshield.test',
+    });
   });
 
   it('keeps out anyone without a session', async () => {

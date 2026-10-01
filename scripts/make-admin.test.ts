@@ -3,15 +3,15 @@ import { assertLocalUrl, parseMakeAdminArgs } from './make-admin.mjs';
 
 describe('parseMakeAdminArgs', () => {
   it('defaults to the moderator role', () => {
-    expect(parseMakeAdminArgs(['Mod@Krustees.test'])).toEqual({
-      email: 'mod@krustees.test',
+    expect(parseMakeAdminArgs(['Mod@ClientShield.test'])).toEqual({
+      email: 'mod@clientshield.test',
       role: 'moderator',
     });
   });
 
   it('accepts --admin for full admins', () => {
-    expect(parseMakeAdminArgs(['boss@krustees.test', '--admin'])).toEqual({
-      email: 'boss@krustees.test',
+    expect(parseMakeAdminArgs(['boss@clientshield.test', '--admin'])).toEqual({
+      email: 'boss@clientshield.test',
       role: 'admin',
     });
   });

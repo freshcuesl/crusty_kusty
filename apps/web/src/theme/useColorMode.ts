@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import type { ColorMode } from '@ck/brand';
+import type { ColorMode } from '@cs/brand';
 
 const QUERY = '(prefers-color-scheme: dark)';
 
