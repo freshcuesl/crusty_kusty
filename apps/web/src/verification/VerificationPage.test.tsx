@@ -1,8 +1,15 @@
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { FakeState } from '@cs/core/testing';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { as, ownerMembership, renderApp } from '../test/renderApp';
+
+const redirectTo = vi.hoisted(() => vi.fn());
+vi.mock('./redirect', () => ({ redirectTo }));
+
+afterEach(() => {
+  redirectTo.mockClear();
+});
 
 type Status = 'unverified' | 'pending' | 'needs_info' | 'rejected' | 'verified';
 
@@ -55,11 +62,12 @@ function ownerWith(
 }
 
 describe('verification page: owner, not yet submitted', () => {
-  it('shows the three steps', async () => {
+  it('shows the four steps', async () => {
     renderApp('/verification', ownerWith(emptyBusiness));
     expect(await screen.findByRole('heading', { name: '1. Business details' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: '2. Proof documents' })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: '3. Submit for review' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: '3. Verify your identity' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: '4. Submit for review' })).toBeInTheDocument();
   });
 
   it('saves the business phone and address', async () => {
@@ -274,5 +282,164 @@ describe('locked features', () => {
     await userEvent.click(await screen.findByRole('button', { name: 'Account menu' }));
     await userEvent.click(screen.getByRole('menuitem', { name: 'Verification' }));
     await waitFor(() => expect(path()).toBe('/verification'));
+  });
+});
+
+describe('verification page: owner identity (Stripe)', () => {
+  const withIdentity = (checks: unknown[], role: 'owner' | 'staff' = 'owner') => {
+    const state = ownerWith(filledBusiness, [licenseDoc]);
+    state.tables = { ...state.tables, owner_identity_checks: checks };
+    if (role === 'staff') state.membership = { ...state.membership!, role: 'staff' };
+    return state;
+  };
+
+  it('explains the check and promises we never keep the ID', async () => {
+    renderApp('/verification', withIdentity([]));
+    const button = await screen.findByRole('button', { name: 'Verify my identity' });
+    expect(button).toBeInTheDocument();
+    expect(screen.getByText(/ClientShield never sees or stores your ID/)).toBeInTheDocument();
+  });
+
+  it('starts a Stripe check and sends the owner to Stripe', async () => {
+    const { fake } = renderApp('/verification', withIdentity([]));
+    await userEvent.click(await screen.findByRole('button', { name: 'Verify my identity' }));
+
+    expect(fake.mocks.functions.invoke).toHaveBeenCalledWith('create-identity-session', {
+      method: 'POST',
+    });
+    await waitFor(() =>
+      expect(redirectTo).toHaveBeenCalledWith('https://verify.stripe.com/start/test'),
+    );
+  });
+
+  it('shows the reason from the server when a check cannot start', async () => {
+    const { fake } = renderApp('/verification', withIdentity([]));
+    fake.mocks.functions.invoke.mockResolvedValueOnce({
+      data: null,
+      error: {
+        name: 'FunctionsHttpError',
+        context: new Response(
+          JSON.stringify({ error: 'Too many attempts today. Try again tomorrow.' }),
+          {
+            status: 429,
+          },
+        ),
+      },
+    } as never);
+
+    await userEvent.click(await screen.findByRole('button', { name: 'Verify my identity' }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Too many attempts today');
+    expect(redirectTo).not.toHaveBeenCalled();
+  });
+
+  it('shows a verified identity', async () => {
+    renderApp(
+      '/verification',
+      withIdentity([
+        { status: 'verified', last_error_code: null, updated_at: '2026-10-17T12:00:00Z' },
+      ]),
+    );
+    expect(await screen.findByText(/Identity verified by Stripe/)).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Verify my identity' })).not.toBeInTheDocument();
+  });
+
+  it('explains why Stripe could not verify, and offers to try again', async () => {
+    renderApp(
+      '/verification',
+      withIdentity([
+        {
+          status: 'requires_input',
+          last_error_code: 'selfie_face_mismatch',
+          updated_at: '2026-10-17T12:00:00Z',
+        },
+      ]),
+    );
+    expect(
+      await screen.findByText(/The selfie didn't match the photo on your ID/),
+    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Try again' })).toBeInTheDocument();
+  });
+
+  it('tells the owner to wait while Stripe is still checking', async () => {
+    const { fake } = renderApp(
+      '/verification?identity=returned',
+      withIdentity([
+        { status: 'processing', last_error_code: null, updated_at: '2026-10-17T12:00:00Z' },
+      ]),
+    );
+    expect(await screen.findByText(/Stripe is checking your ID/)).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'Check again' }));
+    await waitFor(() =>
+      expect(
+        fake.mocks.from.mock.calls.filter(([t]) => t === 'owner_identity_checks').length,
+      ).toBeGreaterThan(1),
+    );
+  });
+
+  it('a verified identity counts even if a later attempt was abandoned', async () => {
+    renderApp(
+      '/verification',
+      withIdentity([
+        { status: 'canceled', last_error_code: null, updated_at: '2026-10-17T13:00:00Z' },
+        { status: 'verified', last_error_code: null, updated_at: '2026-10-17T12:00:00Z' },
+      ]),
+    );
+    expect(await screen.findByText(/Identity verified by Stripe/)).toBeInTheDocument();
+  });
+
+  it('staff see the owner identity status without the button', async () => {
+    renderApp(
+      '/verification',
+      withIdentity(
+        [{ status: 'verified', last_error_code: null, updated_at: '2026-10-17T12:00:00Z' }],
+        'staff',
+      ),
+    );
+    expect(await screen.findByText(/Owner identity: verified/)).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Verify my identity' })).not.toBeInTheDocument();
+  });
+
+  it('falls back to a plain message when the server reply is not readable', async () => {
+    const { fake } = renderApp('/verification', withIdentity([]));
+    fake.mocks.functions.invoke.mockResolvedValueOnce({
+      data: null,
+      error: {
+        name: 'FunctionsHttpError',
+        context: new Response('<html>Bad gateway</html>', { status: 502 }),
+      },
+    } as never);
+    await userEvent.click(await screen.findByRole('button', { name: 'Verify my identity' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent('Something went wrong');
+  });
+
+  it('explains a lost connection', async () => {
+    const { fake } = renderApp('/verification', withIdentity([]));
+    fake.mocks.functions.invoke.mockRejectedValueOnce(new TypeError('Failed to fetch'));
+    await userEvent.click(await screen.findByRole('button', { name: 'Verify my identity' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent("Can't reach the server");
+  });
+
+  it('treats a reply without a Stripe link as a failure', async () => {
+    const { fake } = renderApp('/verification', withIdentity([]));
+    fake.mocks.functions.invoke.mockResolvedValueOnce({ data: {}, error: null } as never);
+    await userEvent.click(await screen.findByRole('button', { name: 'Verify my identity' }));
+    expect(await screen.findByRole('alert')).toBeInTheDocument();
+    expect(redirectTo).not.toHaveBeenCalled();
+  });
+
+  it('shows a not-yet-verified owner to staff', async () => {
+    renderApp('/verification', withIdentity([], 'staff'));
+    expect(await screen.findByText(/Owner identity: not verified yet/)).toBeInTheDocument();
+  });
+
+  it('waits for the result right after returning from Stripe', async () => {
+    renderApp(
+      '/verification?identity=returned',
+      withIdentity([
+        { status: 'requires_input', last_error_code: null, updated_at: '2026-10-17T12:00:00Z' },
+      ]),
+    );
+    expect(await screen.findByText(/Stripe is checking your ID/)).toBeInTheDocument();
   });
 });

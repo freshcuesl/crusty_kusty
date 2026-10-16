@@ -9,6 +9,13 @@ the GitHub profile of `freshcuesl`, with steps to reproduce.
 
 See the security model in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md#security-model).
 
+## Secrets
+
+- Stripe keys (`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`) live only in Edge Function secrets:
+  `supabase/functions/.env` locally (git-ignored) and `supabase secrets set` when hosted.
+  Never in `VITE_*` variables, the repo or chat.
+- Identity results store no ID images or numbers; Stripe holds those under its own controls.
+
 ## Known and accepted risks
 
 | Date       | Package                                                            | Severity                       | Why accepted                                                                                                                                                                                        | Revisit                                                          |

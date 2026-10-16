@@ -17,11 +17,14 @@ import {
 } from '@mui/material';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { useCallback, useEffect, useState, type FormEvent, type ReactNode } from 'react';
+import { useSearchParams } from 'react-router';
 import { formatUsPhone, friendlyError, normalizeUsPhone, sha256Hex } from '@cs/core';
 import { useAuth } from '../auth/AuthProvider';
 import type { Membership } from '../auth/authStep';
 import { useSupabase } from '../auth/SupabaseProvider';
 import { FormError } from '../auth/ui';
+import { currentIdentity, identityReason, type IdentityCheck } from './identity';
+import { redirectTo } from './redirect';
 import { ACCEPTED_DOCUMENT_TYPES, checkDocumentFile, storagePathFor } from './verificationUtils';
 
 type Status = Membership['verificationStatus'] | 'needs_info';
@@ -125,14 +128,24 @@ async function fetchVerification(supabase: SupabaseClient, businessId: string) {
     .eq('business_id', businessId)
     .order('uploaded_at');
   if (docsError) throw docsError;
-  return { business, documents: (documents as DocumentRow[] | null) ?? [] };
+  const { data: checks, error: checksError } = await supabase
+    .from('owner_identity_checks')
+    .select('status, last_error_code, updated_at')
+    .eq('business_id', businessId)
+    .order('updated_at', { ascending: false });
+  if (checksError) throw checksError;
+  return {
+    business,
+    documents: (documents as DocumentRow[] | null) ?? [],
+    identity: currentIdentity((checks as IdentityCheck[] | null) ?? []),
+  };
 }
 
 function StatusBanner({ business }: { business: BusinessRow }) {
   const messages: Record<Status, { severity: 'info' | 'warning' | 'success'; text: ReactNode }> = {
     unverified: {
       severity: 'info',
-      text: 'Complete the three steps below. A moderator usually reviews within 1–2 business days.',
+      text: 'Complete the four steps below. A moderator usually reviews within 1–2 business days.',
     },
     pending: {
       severity: 'info',
@@ -186,11 +199,13 @@ export function VerificationPage() {
 
   const [business, setBusiness] = useState<BusinessRow | null>(null);
   const [documents, setDocuments] = useState<DocumentRow[]>([]);
+  const [identity, setIdentity] = useState<IdentityCheck | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
 
   const apply = useCallback((data: Awaited<ReturnType<typeof fetchVerification>>) => {
     setBusiness(data.business);
     setDocuments(data.documents);
+    setIdentity(data.identity);
   }, []);
 
   const reload = useCallback(
@@ -238,6 +253,7 @@ export function VerificationPage() {
         <>
           <DetailsForm business={business} onSaved={reload} />
           <DocumentsSection businessId={businessId} documents={documents} onChanged={reload} />
+          <IdentitySection identity={identity} onRefresh={reload} />
           <SubmitSection
             onSubmitted={async () => {
               await reload();
@@ -247,6 +263,11 @@ export function VerificationPage() {
         </>
       )}
 
+      {!editable && (
+        <Typography>
+          Owner identity: {identity?.status === 'verified' ? 'verified' : 'not verified yet'}
+        </Typography>
+      )}
       {!editable && documents.length > 0 && <DocumentList documents={documents} />}
     </Stack>
   );
@@ -556,7 +577,7 @@ function SubmitSection({ onSubmitted }: { onSubmitted: () => Promise<void> }) {
   };
 
   return (
-    <Section title="3. Submit for review">
+    <Section title="4. Submit for review">
       <Stack spacing={2}>
         <Typography color="text.secondary">
           A moderator checks that your business is real and the documents match. Your details and
@@ -566,6 +587,97 @@ function SubmitSection({ onSubmitted }: { onSubmitted: () => Promise<void> }) {
         <Button variant="contained" size="large" onClick={() => void submit()} loading={busy}>
           Submit for review
         </Button>
+      </Stack>
+    </Section>
+  );
+}
+
+/** Reads the {error} message our Edge Functions return, or a friendly fallback. */
+async function functionErrorMessage(error: unknown): Promise<string> {
+  const context = (error as { context?: unknown } | null)?.context;
+  if (context instanceof Response) {
+    try {
+      const body = (await context.clone().json()) as { error?: unknown };
+      if (typeof body.error === 'string') return body.error;
+    } catch {
+      // Not JSON; fall through.
+    }
+  }
+  return friendlyError(error);
+}
+
+function IdentitySection({
+  identity,
+  onRefresh,
+}: {
+  identity: IdentityCheck | null;
+  onRefresh: () => unknown;
+}) {
+  const supabase = useSupabase();
+  const [params] = useSearchParams();
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const returned = params.get('identity') === 'returned';
+
+  const start = async () => {
+    setError(null);
+    setBusy(true);
+    try {
+      const { data, error: invokeError } = await supabase.functions.invoke<{ url: string }>(
+        'create-identity-session',
+        { method: 'POST' },
+      );
+      if (invokeError || !data?.url) {
+        setError(await functionErrorMessage(invokeError));
+        return;
+      }
+      redirectTo(data.url);
+    } catch (thrown) {
+      setError(friendlyError(thrown));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const status = identity?.status;
+  // Just back from Stripe, before its result arrives: show the waiting message.
+  const waiting =
+    status === 'processing' ||
+    (returned && status === 'requires_input' && !identity?.last_error_code);
+
+  return (
+    <Section title="3. Verify your identity">
+      <Stack spacing={2}>
+        {status === 'verified' ? (
+          <Alert severity="success" role="status">
+            Identity verified by Stripe.
+          </Alert>
+        ) : waiting ? (
+          <>
+            <Alert severity="info" role="status">
+              Stripe is checking your ID. This usually takes a minute.
+            </Alert>
+            <Button variant="outlined" onClick={() => void onRefresh()}>
+              Check again
+            </Button>
+          </>
+        ) : (
+          <>
+            <Typography color="text.secondary">
+              Stripe checks a photo of your driver's license, passport or state ID and a live
+              selfie. ClientShield never sees or stores your ID, only whether it passed.
+            </Typography>
+            {status === 'requires_input' && (
+              <Alert severity="warning" role="status">
+                {identityReason(identity?.last_error_code ?? null)} Try again.
+              </Alert>
+            )}
+            <FormError message={error} />
+            <Button variant="contained" onClick={() => void start()} loading={busy}>
+              {status ? 'Try again' : 'Verify my identity'}
+            </Button>
+          </>
+        )}
       </Stack>
     </Section>
   );

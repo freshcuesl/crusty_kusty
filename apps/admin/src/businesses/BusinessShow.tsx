@@ -70,6 +70,31 @@ function Details({ record }: { record: RaRecord }) {
   );
 }
 
+function OwnerIdentity({ businessId }: { businessId: string }) {
+  const { data = [], isPending } = useGetManyReference('owner_identity_checks', {
+    target: 'business_id',
+    id: businessId,
+    pagination: { page: 1, perPage: 20 },
+    sort: { field: 'updated_at', order: 'DESC' },
+  });
+  const verified = data.some((check) => check.status === 'verified');
+  return (
+    <Section title="Owner identity">
+      {isPending ? null : verified ? (
+        <Typography sx={{ color: 'success.dark', display: 'flex', gap: 0.5, alignItems: 'center' }}>
+          <CheckCircleOutlined fontSize="small" aria-hidden="true" />
+          Verified by Stripe
+        </Typography>
+      ) : (
+        <Typography sx={{ color: 'error.main', display: 'flex', gap: 0.5, alignItems: 'center' }}>
+          <ErrorOutlined fontSize="small" aria-hidden="true" />
+          Not verified. Approval will be refused until it is.
+        </Typography>
+      )}
+    </Section>
+  );
+}
+
 type Check = 'checking' | 'match' | 'mismatch' | 'error';
 
 function DocumentRow({ doc }: { doc: DocumentRecord }) {
@@ -294,6 +319,7 @@ function ReviewLayout() {
         <StatusChip status={String(record.verification_status)} />
       </Box>
       <Details record={record} />
+      <OwnerIdentity businessId={id} />
       <Documents businessId={id} />
       {record.verification_status === 'pending' && <DecisionPanel businessId={id} />}
       <History businessId={id} />

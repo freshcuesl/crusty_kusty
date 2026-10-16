@@ -147,6 +147,11 @@ export function createFakeSupabase(initial: Partial<FakeState> = {}) {
     storage,
     from: vi.fn((table: string) => builderFor(table)),
     rpc: vi.fn((name: string) => ok(state.rpc[name] ?? null)),
+    functions: {
+      invoke: vi.fn((_name: string, _options?: unknown) =>
+        ok({ url: 'https://verify.stripe.com/start/test' }),
+      ),
+    },
   };
 
   return {

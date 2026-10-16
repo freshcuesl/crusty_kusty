@@ -56,7 +56,12 @@ describe('business verification queue', () => {
 describe('reviewing a business', () => {
   const pdf = new Blob(['%PDF-1.7 license'], { type: 'application/pdf' });
 
-  async function openReview(overrides: Partial<typeof alpha> = {}) {
+  async function openReview(
+    overrides: Partial<typeof alpha> = {},
+    identity: unknown[] = [
+      { id: 'i1', business_id: 'b1', status: 'verified', updated_at: '2026-10-16T10:00:00Z' },
+    ],
+  ) {
     const doc = {
       id: 'd1',
       business_id: 'b1',
@@ -69,6 +74,7 @@ describe('reviewing a business', () => {
     const fake = await renderAt('#/businesses/b1/show', {
       businesses: [{ ...alpha, ...overrides }],
       business_documents: [doc],
+      owner_identity_checks: identity,
       verification_events: [
         {
           id: 1,
@@ -176,5 +182,44 @@ describe('reviewing a business', () => {
     await openReview();
     const history = await screen.findByRole('list', { name: 'History' });
     expect(within(history).getByText('Submitted for review')).toBeInTheDocument();
+  });
+});
+
+describe('owner identity on the review page', () => {
+  it('shows that Stripe verified the owner', async () => {
+    window.location.hash = '#/businesses/b1/show';
+    const fake = createFakeSupabase({
+      ...moderator,
+      tables: {
+        businesses: [alpha],
+        owner_identity_checks: [
+          { id: 'i1', business_id: 'b1', status: 'verified', updated_at: '2026-10-16T10:00:00Z' },
+        ],
+      },
+    });
+    render(<AdminApp supabase={fake.client} />);
+    expect(await screen.findByText('Verified by Stripe')).toBeInTheDocument();
+  });
+
+  it('warns when the owner has not passed the identity check', async () => {
+    window.location.hash = '#/businesses/b1/show';
+    const fake = createFakeSupabase({
+      ...moderator,
+      tables: {
+        businesses: [alpha],
+        owner_identity_checks: [
+          {
+            id: 'i1',
+            business_id: 'b1',
+            status: 'requires_input',
+            updated_at: '2026-10-16T10:00:00Z',
+          },
+        ],
+      },
+    });
+    render(<AdminApp supabase={fake.client} />);
+    expect(
+      await screen.findByText('Not verified. Approval will be refused until it is.'),
+    ).toBeInTheDocument();
   });
 });

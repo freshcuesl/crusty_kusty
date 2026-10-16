@@ -31,7 +31,7 @@ This adds the new verification tables without erasing your account.
 
 **Step 4 of 12.** Click **Verify now**.
 
-✅ **You should see:** **Verification** with three steps.
+✅ **You should see:** **Verification** with four steps.
 
 **Step 5 of 12.** In **1. Business details**, type a phone number like `(206) 555-0100`, a street,
 city, state and ZIP. Click **Save details**.
@@ -43,7 +43,14 @@ pick any PDF or photo on your computer, then click **Upload document**.
 
 ✅ **You should see:** the file listed under the form.
 
-**Step 7 of 12.** In **3. Submit for review**, click **Submit for review**.
+**Step 7 of 12.** Verify your identity. With Stripe set up ([Guide 4](04-connect-stripe-identity.md)),
+use **3. Verify your identity**. Without Stripe yet, run this instead (your email):
+
+```bash
+npm run dev:verify-identity -- me@test.com
+```
+
+Then refresh the page. In **4. Submit for review**, click **Submit for review**.
 
 ✅ **You should see:** **"We're reviewing your business."** The forms are now locked.
 

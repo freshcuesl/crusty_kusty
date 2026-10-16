@@ -98,6 +98,22 @@ and resubmit after `needs_info` or `rejected`.
 - **react-admin note:** don't use `<Admin requireAuth>`. In react-admin 5.15 it re-renders
   forever for signed-out visitors (blank page). `apps/admin/e2e` guards this in a real browser.
 
+## Owner identity (implemented)
+
+Stripe Identity checks a government ID plus a live selfie on Stripe's own page.
+
+- `create-identity-session` (Edge Function) is for signed-in owners with two-step login only.
+  It allows 5 attempts a day. It builds the return address on the server from `APP_URL`, so it
+  can't be used to redirect people elsewhere.
+- `stripe-webhook` (Edge Function, no JWT) accepts only messages with a valid Stripe signature
+  (`STRIPE_WEBHOOK_SECRET`), and records the outcome via `record_identity_result()`, which only
+  the service role can run. A verified result is final.
+- Stored: Stripe session id, status and error code. **Never** ID images, numbers or birth dates.
+- Submission requires a verified owner, and approval re-checks it.
+- Logic lives in `supabase/functions/_shared/identity.ts` (Vitest). Entry files are
+  type-checked with `npm run functions:check` (Deno) in CI.
+- Local without Stripe: `npm run dev:verify-identity -- email` (local database only).
+
 ## Data model direction
 
 Two separate layers, joined only through the blind matching check:
