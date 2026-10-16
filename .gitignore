@@ -151,3 +151,6 @@ test-results
 supabase/.temp
 supabase/.branches
 !.env.example
+
+# Local Edge Function secrets (Stripe test keys etc.)
+supabase/functions/.env
