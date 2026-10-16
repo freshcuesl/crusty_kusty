@@ -11,6 +11,7 @@ matches a verified incident.
 - **Run it on your computer:** [docs/setup/01-run-the-app-locally.md](docs/setup/01-run-the-app-locally.md)
 - **No Docker? Use the free cloud test database:** [docs/setup/01b-cloud-test-database.md](docs/setup/01b-cloud-test-database.md)
 - **Try sign-up and two-step login:** [docs/setup/02-try-sign-in-locally.md](docs/setup/02-try-sign-in-locally.md)
+- **Try business verification:** [docs/setup/03-try-business-verification.md](docs/setup/03-try-business-verification.md)
 - **How the system is built:** [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 - **How changes get merged:** [docs/WORKFLOW.md](docs/WORKFLOW.md)
 - **Security:** [SECURITY.md](SECURITY.md)

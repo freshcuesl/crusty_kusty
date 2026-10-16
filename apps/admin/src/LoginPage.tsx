@@ -1,4 +1,14 @@
-import { Alert, Box, Button, Container, Paper, Stack, TextField, Typography } from '@mui/material';
+import {
+  Alert,
+  Box,
+  Button,
+  Container,
+  Paper,
+  Stack,
+  TextField,
+  Typography,
+  useTheme,
+} from '@mui/material';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { useState, type FormEvent } from 'react';
 import { useLogin } from 'react-admin';
@@ -12,6 +22,7 @@ type Step = 'password' | 'code';
 export function createLoginPage(supabase: SupabaseClient) {
   return function LoginPage() {
     const login = useLogin();
+    const onDark = useTheme().palette.mode === 'dark';
     const [step, setStep] = useState<Step>('password');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -80,7 +91,7 @@ export function createLoginPage(supabase: SupabaseClient) {
       >
         <Container maxWidth="xs">
           <Stack spacing={3} sx={{ alignItems: 'center' }}>
-            <Logo size={56} withWordmark />
+            <Logo size={56} withWordmark onDark={onDark} />
             <Paper variant="outlined" sx={{ p: 4, width: '100%', borderRadius: 4 }}>
               <Typography variant="h5" component="h1" sx={{ mb: 3 }}>
                 Admin sign in

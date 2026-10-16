@@ -42,6 +42,16 @@ export const as = {
     factors: [{ id: 'f1', factor_type: 'totp', status: 'verified', friendly_name: 'Phone' }],
     membership: ownerMembership,
   } as Partial<FakeState>,
+  verifiedOwner: {
+    session: { user: testUser },
+    currentLevel: 'aal2',
+    nextLevel: 'aal2',
+    factors: [{ id: 'f1', factor_type: 'totp', status: 'verified', friendly_name: 'Phone' }],
+    membership: {
+      ...ownerMembership,
+      business: { ...ownerMembership.business, verification_status: 'verified' },
+    },
+  } as Partial<FakeState>,
 };
 
 const spy = { path: '/' };

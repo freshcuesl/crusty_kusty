@@ -47,17 +47,42 @@ export function createFakeSupabase(initial: Partial<FakeState> = {}) {
     listeners.forEach((listener) => listener(event, state.session));
   };
 
-  let lastTable = '';
+  /**
+   * Shared spies record every call so tests can assert on them. Each from(table)
+   * gets its own builder, so queries running at the same time never mix tables.
+   */
   const query = {
-    select: vi.fn(() => query),
-    eq: vi.fn(() => query),
-    is: vi.fn(() => query),
-    order: vi.fn(() => query),
-    delete: vi.fn(() => query),
-    maybeSingle: vi.fn(() => ok(state.membership)),
+    select: vi.fn(),
+    eq: vi.fn(),
+    is: vi.fn(),
+    order: vi.fn(),
+    delete: vi.fn(),
+    range: vi.fn(),
+    in: vi.fn(),
+    maybeSingle: vi.fn((_table?: string) => ok(state.membership)),
+    single: vi.fn((table?: string) => ok(state.tables[table ?? '']?.[0] ?? null)),
+  };
+
+  type Builder = Record<string, unknown>;
+  const chainable = ['select', 'eq', 'is', 'order', 'delete', 'range', 'in'] as const;
+  const builderFor = (table: string): Builder => {
+    const builder: Builder = {};
+    for (const name of chainable) {
+      builder[name] = (...args: unknown[]) => {
+        (query[name] as (...a: unknown[]) => unknown)(...args);
+        return builder;
+      };
+    }
+    builder.maybeSingle = () => query.maybeSingle(table);
+    builder.single = () => query.single(table);
     // List queries are awaited directly, like the real query builder.
-    then: (resolve: (value: { data: unknown[]; error: null }) => unknown) =>
-      resolve({ data: state.tables[lastTable] ?? [], error: null }),
+    builder.then = (
+      resolve: (value: { data: unknown[]; error: null; count: number }) => unknown,
+    ) => {
+      const rows = state.tables[table] ?? [];
+      return resolve({ data: rows, error: null, count: rows.length });
+    };
+    return builder;
   };
 
   const auth = {
@@ -107,12 +132,20 @@ export function createFakeSupabase(initial: Partial<FakeState> = {}) {
     },
   };
 
+  const bucket = {
+    upload: vi.fn((path: string) => ok({ path })),
+    remove: vi.fn((paths: string[]) => ok(paths.map((name) => ({ name })))),
+    createSignedUrl: vi.fn((path: string) =>
+      ok({ signedUrl: `https://storage.test/signed/${path}?token=t` }),
+    ),
+    download: vi.fn(() => ok(new Blob(['file contents']))),
+  };
+  const storage = { from: vi.fn(() => bucket) };
+
   const client = {
     auth,
-    from: vi.fn((table: string) => {
-      lastTable = table;
-      return query;
-    }),
+    storage,
+    from: vi.fn((table: string) => builderFor(table)),
     rpc: vi.fn((name: string) => ok(state.rpc[name] ?? null)),
   };
 
@@ -120,6 +153,7 @@ export function createFakeSupabase(initial: Partial<FakeState> = {}) {
     client: client as unknown as SupabaseClient,
     mocks: client,
     query,
+    bucket,
     state,
     /** Simulates Supabase notifying the app, e.g. after sign-in or MFA. */
     emit,

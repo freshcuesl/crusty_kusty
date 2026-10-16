@@ -1,6 +1,7 @@
 import AccountCircle from '@mui/icons-material/AccountCircle';
 import GroupsOutlined from '@mui/icons-material/GroupsOutlined';
 import LockOutlined from '@mui/icons-material/LockOutlined';
+import VerifiedOutlined from '@mui/icons-material/VerifiedOutlined';
 import Logout from '@mui/icons-material/Logout';
 import { Divider, IconButton, ListItemIcon, Menu, MenuItem, Typography } from '@mui/material';
 import { useState } from 'react';
@@ -35,6 +36,12 @@ export function AccountMenu() {
           </Typography>
         )}
         <Divider />
+        <MenuItem onClick={() => go('/verification')}>
+          <ListItemIcon>
+            <VerifiedOutlined fontSize="small" />
+          </ListItemIcon>
+          Verification
+        </MenuItem>
         <MenuItem onClick={() => go('/team')}>
           <ListItemIcon>
             <GroupsOutlined fontSize="small" />

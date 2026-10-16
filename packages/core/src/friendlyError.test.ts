@@ -28,6 +28,12 @@ describe('friendlyError', () => {
         message: 'Invite not found, expired, or for a different email',
       }),
     ).toBe('Invite not found, expired, or for a different email');
+    expect(
+      friendlyError({
+        code: '55000',
+        message: 'Your business is being reviewed. Changes are locked until then.',
+      }),
+    ).toBe('Your business is being reviewed. Changes are locked until then.');
   });
 
   it('never shows raw technical errors', () => {

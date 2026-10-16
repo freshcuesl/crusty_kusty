@@ -12,7 +12,7 @@ const AUTH_MESSAGES: Record<string, string> = {
 };
 
 // Postgres error codes our own database functions raise with human-readable messages.
-const OUR_DATABASE_CODES = new Set(['22023', '23505', '42501', '54000', 'P0002']);
+const OUR_DATABASE_CODES = new Set(['22023', '23505', '42501', '54000', '55000', 'P0002']);
 
 /** Turns any auth, database or network error into one plain sentence for the user. */
 export function friendlyError(error: unknown): string {

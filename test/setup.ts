@@ -26,4 +26,10 @@ if (typeof window !== 'undefined' && !window.matchMedia) {
 
 afterEach(() => {
   cleanup();
+  // Every test starts like a fresh browser tab: no saved settings, no leftover address.
+  if (typeof window !== 'undefined') {
+    localStorage.clear();
+    sessionStorage.clear();
+    window.history.replaceState(null, '', '/');
+  }
 });

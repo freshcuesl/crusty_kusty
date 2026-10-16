@@ -78,6 +78,26 @@ password alone reads nothing. Writes go through checked functions: `create_busin
 Sign-in funnel (`apps/web/src/auth/authStep.ts`): sign in → set up or enter authenticator code →
 create or join a business → app. The admin panel additionally requires a platform role.
 
+## Business verification (implemented)
+
+Flow: `unverified` → owner adds phone, address and at least one proof document → submits →
+`pending` (details and documents locked) → a moderator approves (`verified`), asks for more
+information (`needs_info`, note required) or rejects (`rejected`, note required). Owners can fix
+and resubmit after `needs_info` or `rejected`.
+
+- **Documents** live in the private `business-documents` bucket at `<business id>/<random name>`
+  (PDF or photo, 10 MB max). There's no update policy, so a file can't be replaced after upload.
+  Each document row stores the file's SHA-256 fingerprint, computed in the browser. The admin
+  "Check" button downloads the file and compares the fingerprints to detect tampering.
+- **Audit trail:** `verification_events` records every step and can't be edited or deleted
+  by clients.
+- **Gating:** `private.is_my_business_verified()` is the check future features (customer checks,
+  incident reports) build their RLS on. The app also locks those screens until verified.
+- **Admin:** react-admin reads through a read-only data provider; decisions go through
+  `review_business()`. Documents open through signed links that expire after 5 minutes.
+- **react-admin note:** don't use `<Admin requireAuth>`. In react-admin 5.15 it re-renders
+  forever for signed-out visitors (blank page). `apps/admin/e2e` guards this in a real browser.
+
 ## Data model direction
 
 Two separate layers, joined only through the blind matching check:

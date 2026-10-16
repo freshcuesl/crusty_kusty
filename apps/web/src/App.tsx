@@ -27,6 +27,8 @@ import { NotFoundPage } from './pages/NotFoundPage';
 import { UpdatePrompt } from './pwa/UpdatePrompt';
 import { homeActions } from './routes';
 import { useColorMode } from './theme/useColorMode';
+import { RequireVerified } from './verification/RequireVerified';
+import { VerificationPage } from './verification/VerificationPage';
 
 export function AppRoutes() {
   return (
@@ -107,9 +109,22 @@ export function AppRoutes() {
         }
       >
         <Route index element={<HomePage />} />
-        {homeActions.map(({ path, label }) => (
-          <Route key={path} path={path} element={<ComingSoonPage title={label} />} />
+        {homeActions.map(({ path, label, needsVerification }) => (
+          <Route
+            key={path}
+            path={path}
+            element={
+              needsVerification ? (
+                <RequireVerified>
+                  <ComingSoonPage title={label} />
+                </RequireVerified>
+              ) : (
+                <ComingSoonPage title={label} />
+              )
+            }
+          />
         ))}
+        <Route path="/verification" element={<VerificationPage />} />
         <Route path="/team" element={<TeamPage />} />
         <Route path="/account/security" element={<SecurityPage />} />
         <Route path="*" element={<NotFoundPage />} />

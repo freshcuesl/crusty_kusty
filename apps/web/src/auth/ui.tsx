@@ -13,6 +13,7 @@ import {
   Stack,
   TextField,
   Typography,
+  useTheme,
 } from '@mui/material';
 import { useId, useState, type ReactNode } from 'react';
 import { Outlet } from 'react-router';
@@ -22,6 +23,7 @@ import { passwordRules } from './passwordPolicy';
 
 /** Centered card layout for sign-in, sign-up and setup screens. */
 export function AuthLayout() {
+  const onDark = useTheme().palette.mode === 'dark';
   return (
     <Box
       component="main"
@@ -36,7 +38,7 @@ export function AuthLayout() {
     >
       <Container maxWidth="xs">
         <Stack spacing={3} sx={{ alignItems: 'center' }}>
-          <Logo size={56} withWordmark />
+          <Logo size={56} withWordmark onDark={onDark} />
           <Paper variant="outlined" sx={{ p: { xs: 2.5, sm: 4 }, width: '100%', borderRadius: 4 }}>
             <Outlet />
           </Paper>

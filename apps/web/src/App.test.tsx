@@ -33,7 +33,7 @@ describe('home screen', () => {
     ['My incidents', '/incidents'],
     ['Alerts', '/alerts'],
   ])('offers "%s"', async (label, href) => {
-    renderApp('/', as.owner);
+    renderApp('/', as.verifiedOwner);
     expect(await screen.findByRole('link', { name: new RegExp(label) })).toHaveAttribute(
       'href',
       href,
@@ -46,7 +46,7 @@ describe('home screen', () => {
   });
 
   it('opens a placeholder for features still being built', async () => {
-    renderApp('/', as.owner);
+    renderApp('/', as.verifiedOwner);
     await userEvent.click(await screen.findByRole('link', { name: /Report incident/ }));
     expect(screen.getByRole('heading', { name: 'Report incident' })).toBeInTheDocument();
     expect(screen.getByText(/coming soon/i)).toBeInTheDocument();
