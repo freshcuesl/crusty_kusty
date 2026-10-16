@@ -12,7 +12,6 @@ vi.mock('virtual:pwa-register/react', () => ({
 
 describe('who can see what', () => {
   it.each([
-    ['a visitor', as.signedOut, '/sign-in'],
     ['a new account without an authenticator', as.needsMfaSetup, '/mfa/setup'],
     ['an account that has not entered its code', as.needsMfaCode, '/mfa/verify'],
     ['a verified user without a business', as.needsBusiness, '/onboarding'],

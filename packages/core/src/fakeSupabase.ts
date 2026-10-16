@@ -132,6 +132,9 @@ export function createFakeSupabase(initial: Partial<FakeState> = {}) {
     },
   };
 
+  type RpcResult = { data: unknown; error: unknown };
+  const rpcOverrides = new Map<string, (args: unknown) => RpcResult | Promise<RpcResult>>();
+
   const bucket = {
     upload: vi.fn((path: string) => ok({ path })),
     remove: vi.fn((paths: string[]) => ok(paths.map((name) => ({ name })))),
@@ -146,7 +149,10 @@ export function createFakeSupabase(initial: Partial<FakeState> = {}) {
     auth,
     storage,
     from: vi.fn((table: string) => builderFor(table)),
-    rpc: vi.fn((name: string) => ok(state.rpc[name] ?? null)),
+    rpc: vi.fn((name: string, args?: unknown) => {
+      const override = rpcOverrides.get(name);
+      return override ? Promise.resolve(override(args)) : ok(state.rpc[name] ?? null);
+    }),
     functions: {
       invoke: vi.fn((_name: string, _options?: unknown) =>
         ok({ url: 'https://verify.stripe.com/start/test' }),
@@ -160,6 +166,10 @@ export function createFakeSupabase(initial: Partial<FakeState> = {}) {
     query,
     bucket,
     state,
+    /** Answers supabase.rpc(name) with this result, whatever else the app calls first. */
+    whenRpc(name: string, result: RpcResult | ((args: unknown) => RpcResult | Promise<RpcResult>)) {
+      rpcOverrides.set(name, typeof result === 'function' ? result : () => result);
+    },
     /** Simulates Supabase notifying the app, e.g. after sign-in or MFA. */
     emit,
   };

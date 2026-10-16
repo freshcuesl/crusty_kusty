@@ -205,10 +205,10 @@ describe('verification page: owner, not yet submitted', () => {
 
   it('shows what is missing when submitting too early', async () => {
     const { fake } = renderApp('/verification', ownerWith(emptyBusiness));
-    fake.mocks.rpc.mockResolvedValueOnce({
+    fake.whenRpc('submit_for_verification', {
       data: null,
       error: { code: '22023', message: 'Add your business phone and address first' },
-    } as never);
+    });
     await userEvent.click(await screen.findByRole('button', { name: 'Submit for review' }));
     expect(await screen.findByRole('alert')).toHaveTextContent(
       'Add your business phone and address first',

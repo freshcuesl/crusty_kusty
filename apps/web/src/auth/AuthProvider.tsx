@@ -16,6 +16,8 @@ export interface AuthContextValue {
   step: AuthStep;
   user: User | null;
   membership: Membership | null;
+  /** 'moderator' or 'admin' for ClientShield staff; null for everyone else. */
+  platformRole: PlatformRole | null;
   /** Re-reads session, two-step status and business, e.g. after joining a business. */
   refresh: () => Promise<void>;
   signOut: () => Promise<void>;
@@ -23,8 +25,11 @@ export interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
+export type PlatformRole = 'moderator' | 'admin';
+
 interface State extends AuthSnapshot {
   user: User | null;
+  platformRole: PlatformRole | null;
 }
 
 const INITIAL: State = {
@@ -34,6 +39,7 @@ const INITIAL: State = {
   nextLevel: null,
   membership: null,
   user: null,
+  platformRole: null,
 };
 
 const SIGNED_OUT: State = { ...INITIAL, loading: false };
@@ -66,7 +72,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       // Business data is protected by two-step login, so only ask once it's done.
       let membership: Membership | null = null;
+      let platformRole: PlatformRole | null = null;
       if (currentLevel === 'aal2') {
+        const { data: role } = await supabase.rpc('my_platform_role');
+        platformRole = role === 'moderator' || role === 'admin' ? role : null;
         const { data } = await supabase
           .from('business_members')
           .select('role, business:businesses(id, name, verification_status)')
@@ -89,6 +98,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         nextLevel,
         membership,
         user: session.user,
+        platformRole,
       });
     } catch {
       apply(SIGNED_OUT);
@@ -116,6 +126,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       step: resolveAuthStep(state),
       user: state.user,
       membership: state.membership,
+      platformRole: state.platformRole,
       refresh: load,
       signOut,
     }),

@@ -1,11 +1,11 @@
 import { CssBaseline, ThemeProvider } from '@mui/material';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { useMemo } from 'react';
-import { BrowserRouter, Route, Routes } from 'react-router';
+import { BrowserRouter, Route, Routes, useLocation } from 'react-router';
 import { createAppTheme } from '@cs/brand';
 import { SecurityPage } from './account/SecurityPage';
 import { TeamPage } from './account/TeamPage';
-import { AuthProvider } from './auth/AuthProvider';
+import { AuthProvider, useAuth } from './auth/AuthProvider';
 import { Gate } from './auth/Gate';
 import { CheckEmailPage } from './auth/pages/CheckEmailPage';
 import { ForgotPasswordPage } from './auth/pages/ForgotPasswordPage';
@@ -18,6 +18,7 @@ import { SignInPage } from './auth/pages/SignInPage';
 import { SignUpPage } from './auth/pages/SignUpPage';
 import { SupabaseProvider } from './auth/SupabaseProvider';
 import { AuthLayout } from './auth/ui';
+import { LandingPage } from './landing/LandingPage';
 import { AppShell } from './layout/AppShell';
 import { getSupabase } from './lib/supabase';
 import { ComingSoonPage } from './pages/ComingSoonPage';
@@ -29,6 +30,21 @@ import { homeActions } from './routes';
 import { useColorMode } from './theme/useColorMode';
 import { RequireVerified } from './verification/RequireVerified';
 import { VerificationPage } from './verification/VerificationPage';
+
+/**
+ * Signed-out visitors at "/" see the public landing page. Every other app page,
+ * and "/" for members, goes through the usual sign-in gate.
+ */
+function HomeOrLanding() {
+  const { step } = useAuth();
+  const { pathname } = useLocation();
+  if (step === 'signed-out' && pathname === '/') return <LandingPage />;
+  return (
+    <Gate allow={['ready']} rememberAsDestination>
+      <AppShell />
+    </Gate>
+  );
+}
 
 export function AppRoutes() {
   return (
@@ -101,13 +117,7 @@ export function AppRoutes() {
         <Route path="/invite/:token" element={<InvitePage />} />
       </Route>
 
-      <Route
-        element={
-          <Gate allow={['ready']} rememberAsDestination>
-            <AppShell />
-          </Gate>
-        }
-      >
+      <Route element={<HomeOrLanding />}>
         <Route index element={<HomePage />} />
         {homeActions.map(({ path, label, needsVerification }) => (
           <Route

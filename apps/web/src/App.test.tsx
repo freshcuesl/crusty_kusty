@@ -67,10 +67,12 @@ describe('unknown pages', () => {
 });
 
 describe('<App />', () => {
-  it('boots into sign-in with the real router', async () => {
+  it('boots into the landing page with the real router', async () => {
     getSupabase.mockReturnValue(createFakeSupabase().client);
     render(<App />);
-    expect(await screen.findByRole('heading', { name: 'Sign in' })).toBeInTheDocument();
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Know before you go.' }),
+    ).toBeInTheDocument();
   });
 
   it('explains how to connect when configuration is missing', () => {
