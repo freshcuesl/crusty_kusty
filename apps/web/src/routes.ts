@@ -11,6 +11,8 @@ export interface HomeAction {
   path: string;
   icon: SvgIconComponent;
   primary?: boolean;
+  /** Only verified businesses may use it (it reads or writes the shared incident network). */
+  needsVerification?: boolean;
 }
 
 /** The main screen actions from the product spec, in order. */
@@ -21,18 +23,21 @@ export const homeActions: HomeAction[] = [
     path: '/customers/new',
     icon: PersonAddAlt1Outlined,
     primary: true,
+    needsVerification: true,
   },
   {
     label: 'Report incident',
     description: 'Document a dispute with evidence',
     path: '/incidents/new',
     icon: AddAlertOutlined,
+    needsVerification: true,
   },
   {
     label: 'Customer check',
     description: 'Check a customer you already have',
     path: '/check',
     icon: VerifiedUserOutlined,
+    needsVerification: true,
   },
   {
     label: 'My incidents',

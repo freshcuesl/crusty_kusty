@@ -51,7 +51,9 @@ export function appThemeOptions(mode: ColorMode): ThemeOptions {
     components: {
       MuiButton: {
         defaultProps: { disableElevation: true },
-        styleOverrides: { root: { minHeight: 44, borderRadius: 12 } },
+        styleOverrides: {
+          root: { minHeight: 44, borderRadius: 12 },
+        },
         variants: [
           { props: { variant: 'text', color: 'primary' }, style: { color: accent } },
           {

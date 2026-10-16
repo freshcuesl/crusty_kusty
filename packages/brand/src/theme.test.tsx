@@ -1,3 +1,5 @@
+import { Button, Link, ThemeProvider } from '@mui/material';
+import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { meetsWcagAA } from './contrast';
 import { accentTextColor, createAppTheme } from './theme';
@@ -51,18 +53,24 @@ describe('createAppTheme', () => {
   it.each([
     ['light', light],
     ['dark', dark],
-  ] as const)('%s theme: links and text/outlined buttons use the readable teal', (mode, theme) => {
-    const accent = accentTextColor(mode);
-    expect(theme.components?.MuiLink?.defaultProps?.color).toBe(accent);
-    const variants = (theme.components?.MuiButton?.variants ?? []) as {
-      props: { variant?: string; color?: string };
-      style: { color?: string };
-    }[];
-    for (const variant of ['text', 'outlined']) {
-      const rule = variants.find((v) => v.props.variant === variant && v.props.color === 'primary');
-      expect(rule?.style.color).toBe(accent);
-    }
-  });
+  ] as const)(
+    '%s theme: links and text/outlined buttons render in the readable teal',
+    (mode, theme) => {
+      const accent = accentTextColor(mode);
+      render(
+        <ThemeProvider theme={theme}>
+          <Button variant="text">Text button</Button>
+          <Button variant="outlined">Outlined button</Button>
+          <Link href="#">A link</Link>
+        </ThemeProvider>,
+      );
+      expect(screen.getByRole('button', { name: 'Text button' })).toHaveStyle({ color: accent });
+      expect(screen.getByRole('button', { name: 'Outlined button' })).toHaveStyle({
+        color: accent,
+      });
+      expect(screen.getByRole('link', { name: 'A link' })).toHaveStyle({ color: accent });
+    },
+  );
 
   it('switches to a dark background in dark mode', () => {
     expect(dark.palette.mode).toBe('dark');
