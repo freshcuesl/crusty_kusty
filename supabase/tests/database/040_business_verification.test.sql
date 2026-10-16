@@ -21,6 +21,11 @@ insert into public.business_members (business_id, user_id, role) values
 insert into public.platform_roles (user_id, role)
 values ('00000000-0000-0000-0000-0000000004d1', 'moderator');
 
+-- Alpha's owner already passed the Stripe identity check (see 050 for that flow).
+insert into public.owner_identity_checks (business_id, user_id, stripe_session_id, status)
+values ('40000000-0000-0000-0000-00000000000a', '00000000-0000-0000-0000-0000000004a1',
+        'vs_fixture_alpha', 'verified');
+
 -- Files as if already uploaded to storage.
 insert into storage.objects (bucket_id, name) values
   ('business-documents', '40000000-0000-0000-0000-00000000000a/license.pdf'),
