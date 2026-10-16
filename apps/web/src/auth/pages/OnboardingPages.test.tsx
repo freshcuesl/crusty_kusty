@@ -1,3 +1,4 @@
+import { typeText } from '@cs/core/testing';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it } from 'vitest';
@@ -13,7 +14,7 @@ describe('creating a business', () => {
       return { data: 'b1', error: null };
     });
 
-    await userEvent.type(await screen.findByLabelText('Business name'), 'Alpha Plumbing');
+    await typeText(await screen.findByLabelText('Business name'), 'Alpha Plumbing');
     await userEvent.click(screen.getByRole('button', { name: 'Create business' }));
 
     expect(fake.mocks.rpc).toHaveBeenCalledWith('create_business', { p_name: 'Alpha Plumbing' });
@@ -27,7 +28,7 @@ describe('creating a business', () => {
       error: { code: '22023', message: 'Business name must be 2 to 120 characters' },
     });
 
-    await userEvent.type(await screen.findByLabelText('Business name'), 'A');
+    await typeText(await screen.findByLabelText('Business name'), 'A');
     await userEvent.click(screen.getByRole('button', { name: 'Create business' }));
 
     expect(await screen.findByRole('alert')).toHaveTextContent(

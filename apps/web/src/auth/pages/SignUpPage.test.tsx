@@ -1,12 +1,13 @@
+import { typeText } from '@cs/core/testing';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 import { as, renderApp } from '../../test/renderApp';
 
 async function fillForm(password = 'Shield-Strong-2026') {
-  await userEvent.type(await screen.findByLabelText('Your name'), 'Olive Owner');
-  await userEvent.type(screen.getByLabelText('Email'), 'Owner@Alpha.test');
-  await userEvent.type(screen.getByLabelText('Password'), password);
+  await typeText(await screen.findByLabelText('Your name'), 'Olive Owner');
+  await typeText(screen.getByLabelText('Email'), 'Owner@Alpha.test');
+  await typeText(screen.getByLabelText('Password'), password);
 }
 
 describe('sign up', () => {
@@ -30,7 +31,7 @@ describe('sign up', () => {
 
   it('shows which password rules are still missing as the user types', async () => {
     renderApp('/sign-up', as.signedOut);
-    await userEvent.type(await screen.findByLabelText('Password'), 'short');
+    await typeText(await screen.findByLabelText('Password'), 'short');
 
     const rules = screen.getByRole('list', { name: 'Password rules' });
     expect(rules).toHaveTextContent('At least 12 characters');

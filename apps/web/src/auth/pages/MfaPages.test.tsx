@@ -1,3 +1,4 @@
+import { typeText } from '@cs/core/testing';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
@@ -41,7 +42,7 @@ describe('setting up the authenticator app', () => {
       return { data: {}, error: null } as never;
     });
 
-    await userEvent.type(await screen.findByLabelText('6-digit code'), '123456');
+    await typeText(await screen.findByLabelText('6-digit code'), '123456');
     await userEvent.click(screen.getByRole('button', { name: 'Turn on two-step login' }));
 
     expect(fake.mocks.auth.mfa.challengeAndVerify).toHaveBeenCalledWith({
@@ -53,7 +54,7 @@ describe('setting up the authenticator app', () => {
 
   it('only accepts 6 digits', async () => {
     const { fake } = renderApp('/mfa/setup', as.needsMfaSetup);
-    await userEvent.type(await screen.findByLabelText('6-digit code'), '12a4');
+    await typeText(await screen.findByLabelText('6-digit code'), '12a4');
     await userEvent.click(screen.getByRole('button', { name: 'Turn on two-step login' }));
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Enter the 6-digit code');
@@ -69,7 +70,7 @@ describe('entering the code at sign-in', () => {
       return { data: {}, error: null } as never;
     });
 
-    await userEvent.type(await screen.findByLabelText('6-digit code'), '654321');
+    await typeText(await screen.findByLabelText('6-digit code'), '654321');
     await userEvent.click(screen.getByRole('button', { name: 'Verify' }));
 
     expect(fake.mocks.auth.mfa.challengeAndVerify).toHaveBeenCalledWith({
@@ -86,7 +87,7 @@ describe('entering the code at sign-in', () => {
       error: { code: 'mfa_verification_failed', message: 'Invalid TOTP code entered' },
     } as never);
 
-    await userEvent.type(await screen.findByLabelText('6-digit code'), '000000');
+    await typeText(await screen.findByLabelText('6-digit code'), '000000');
     await userEvent.click(screen.getByRole('button', { name: 'Verify' }));
 
     expect(await screen.findByRole('alert')).toHaveTextContent("That code didn't work");
@@ -102,7 +103,7 @@ describe('entering the code at sign-in', () => {
     });
 
     await userEvent.click(await screen.findByRole('radio', { name: 'Tablet' }));
-    await userEvent.type(screen.getByLabelText('6-digit code'), '111111');
+    await typeText(screen.getByLabelText('6-digit code'), '111111');
     await userEvent.click(screen.getByRole('button', { name: 'Verify' }));
 
     expect(fake.mocks.auth.mfa.challengeAndVerify).toHaveBeenCalledWith({

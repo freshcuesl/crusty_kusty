@@ -1,6 +1,6 @@
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import type { FakeState } from '@cs/core/testing';
+import { typeText, type FakeState } from '@cs/core/testing';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { as, ownerMembership, renderApp } from '../test/renderApp';
 
@@ -73,11 +73,11 @@ describe('verification page: owner, not yet submitted', () => {
   it('saves the business phone and address', async () => {
     const { fake } = renderApp('/verification', ownerWith(emptyBusiness));
 
-    await userEvent.type(await screen.findByLabelText('Business phone'), '(206) 555-0100');
-    await userEvent.type(screen.getByLabelText('Street address'), '1 Main St');
-    await userEvent.type(screen.getByLabelText('City'), 'Seattle');
+    await typeText(await screen.findByLabelText('Business phone'), '(206) 555-0100');
+    await typeText(screen.getByLabelText('Street address'), '1 Main St');
+    await typeText(screen.getByLabelText('City'), 'Seattle');
     await userEvent.selectOptions(screen.getByLabelText('State'), 'WA');
-    await userEvent.type(screen.getByLabelText('ZIP code'), '98101');
+    await typeText(screen.getByLabelText('ZIP code'), '98101');
     await userEvent.click(screen.getByRole('button', { name: 'Save details' }));
 
     expect(fake.mocks.rpc).toHaveBeenCalledWith('update_business_details', {
@@ -99,7 +99,7 @@ describe('verification page: owner, not yet submitted', () => {
 
   it('explains a phone number that is not a US number, without calling the server', async () => {
     const { fake } = renderApp('/verification', ownerWith(emptyBusiness));
-    await userEvent.type(await screen.findByLabelText('Business phone'), '555-0100');
+    await typeText(await screen.findByLabelText('Business phone'), '555-0100');
     await userEvent.click(screen.getByRole('button', { name: 'Save details' }));
     expect(await screen.findByRole('alert')).toHaveTextContent('Enter a 10-digit US phone number');
     expect(fake.mocks.rpc).not.toHaveBeenCalledWith('update_business_details', expect.anything());

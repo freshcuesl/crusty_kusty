@@ -1,3 +1,4 @@
+import { typeText } from '@cs/core/testing';
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
@@ -38,7 +39,7 @@ describe('team page', () => {
         : ({ data: team, error: null } as never),
     );
 
-    await userEvent.type(await screen.findByLabelText('Their email'), 'new@alpha.test');
+    await typeText(await screen.findByLabelText('Their email'), 'new@alpha.test');
     await userEvent.click(screen.getByRole('button', { name: 'Create invite link' }));
 
     expect(fake.mocks.rpc).toHaveBeenCalledWith('create_invite', {
@@ -61,7 +62,7 @@ describe('team page', () => {
         : ({ data: [], error: null } as never),
     );
 
-    await userEvent.type(await screen.findByLabelText('Their email'), 'new@alpha.test');
+    await typeText(await screen.findByLabelText('Their email'), 'new@alpha.test');
     await userEvent.click(screen.getByRole('button', { name: 'Create invite link' }));
     await userEvent.click(await screen.findByRole('button', { name: 'Copy link' }));
 

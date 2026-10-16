@@ -1,3 +1,4 @@
+import { typeText } from '@cs/core/testing';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
@@ -6,7 +7,7 @@ import { as, renderApp } from '../../test/renderApp';
 describe('forgot password', () => {
   it('sends a reset link that returns to the reset page', async () => {
     const { fake } = renderApp('/forgot-password', as.signedOut);
-    await userEvent.type(await screen.findByLabelText('Email'), 'owner@alpha.test');
+    await typeText(await screen.findByLabelText('Email'), 'owner@alpha.test');
     await userEvent.click(screen.getByRole('button', { name: 'Send reset link' }));
 
     expect(fake.mocks.auth.resetPasswordForEmail).toHaveBeenCalledWith('owner@alpha.test', {
@@ -16,7 +17,7 @@ describe('forgot password', () => {
 
   it('gives the same answer whether or not the account exists', async () => {
     renderApp('/forgot-password', as.signedOut);
-    await userEvent.type(await screen.findByLabelText('Email'), 'nobody@else.test');
+    await typeText(await screen.findByLabelText('Email'), 'nobody@else.test');
     await userEvent.click(screen.getByRole('button', { name: 'Send reset link' }));
 
     expect(await screen.findByRole('status')).toHaveTextContent(
@@ -33,7 +34,7 @@ describe('reset password', () => {
 
   it('saves a strong new password', async () => {
     const { fake } = renderApp('/reset-password', as.owner);
-    await userEvent.type(await screen.findByLabelText('New password'), 'Brand-New-Shield-9');
+    await typeText(await screen.findByLabelText('New password'), 'Brand-New-Shield-9');
     await userEvent.click(screen.getByRole('button', { name: 'Save password' }));
 
     expect(fake.mocks.auth.updateUser).toHaveBeenCalledWith({ password: 'Brand-New-Shield-9' });
@@ -42,7 +43,7 @@ describe('reset password', () => {
 
   it('rejects a weak new password without calling the server', async () => {
     const { fake } = renderApp('/reset-password', as.owner);
-    await userEvent.type(await screen.findByLabelText('New password'), 'weak');
+    await typeText(await screen.findByLabelText('New password'), 'weak');
     await userEvent.click(screen.getByRole('button', { name: 'Save password' }));
 
     expect(await screen.findByRole('alert')).toBeInTheDocument();
