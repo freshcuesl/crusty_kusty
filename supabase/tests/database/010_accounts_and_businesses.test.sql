@@ -257,8 +257,9 @@ select is(public.my_platform_role(), null::public.platform_role, 'a regular user
 
 select pg_temp.sign_in('00000000-0000-0000-0000-00000000000d', 'mod@clientshield.test', 'aal2');
 select is(public.my_platform_role(), 'moderator'::public.platform_role, 'a moderator can see their own role');
-select results_eq(
-  'select name from public.businesses order by name',
+-- set_has, not results_eq: a developer's local database may already hold other businesses.
+select set_has(
+  'select name from public.businesses',
   $$values ('Alpha Plumbing'), ('Bravo Steam Clean')$$,
   'moderators see every business, for verification'
 );
