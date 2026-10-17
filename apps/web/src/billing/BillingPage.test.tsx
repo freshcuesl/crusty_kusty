@@ -244,9 +244,8 @@ describe('plan reminders on the home screen', () => {
 
   it('stays quiet when the plan cannot load', async () => {
     const { fake } = renderApp('/', as.verifiedOwner);
-    fake.whenRpc('my_subscription', () => {
-      throw new TypeError('Failed to fetch');
-    });
+    // A dropped connection rejects the request, as the real client does.
+    fake.whenRpc('my_subscription', () => Promise.reject(new TypeError('Failed to fetch')));
     await screen.findByRole('heading', { name: 'What do you need?' });
     expect(screen.queryByRole('link', { name: /trial/ })).not.toBeInTheDocument();
   });
