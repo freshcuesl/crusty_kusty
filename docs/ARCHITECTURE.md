@@ -256,6 +256,27 @@ The 300-a-day fair-use limit applies on every plan.
 - **Email:** Supabase Auth sends through Resend SMTP from `mail.<domain>`.
 - Guides: `docs/launch/`.
 
+## Insights (implemented)
+
+- `admin_insights(p_weeks)` (staff only, two-step login) counts inside the database and returns no
+  personal details:
+  - **Totals:** businesses, verified, users, active incidents, checks and alerts in the last 30
+    days.
+  - **Weekly series:** sign-ups, verifications, checks, alerts, incidents submitted and verified.
+  - **Alert decisions:** the last 90 days.
+  - **Moderation:** waiting items, median and oldest review times.
+  - **Finances, admins only:**
+    - MRR and ARR, from `plans.monthly_price_cents` and `yearly_price_cents`; keep these in step
+      with `scripts/stripe-setup-plans.mjs`.
+    - Paying businesses, trials ending, failed payments, cancellations, trial conversion and plan
+      mix.
+- **Admin:** **Insights** (`/insights`) shows stat tiles and one small bar chart per measure (no
+  shared axes), with a table view. The chart colors are `brand.chart` and `brand.chartDark`,
+  contrast-tested at 3:1.
+- **Visitor stats:** Cloudflare Web Analytics loads on the landing page only, with `spa: false`,
+  and only when `VITE_CF_ANALYTICS_TOKEN` is set. The CSP allows it only then. There's no Google
+  Analytics and no ad networks: outside code would run next to customer details.
+
 ## Data model direction
 
 Two separate layers, joined only through the blind matching check:
@@ -296,3 +317,5 @@ Every change starts with a failing test. CI runs all layers on every push.
 9. `feature/crm-integrations` and later invoicing
 10. `feature/passkeys-recovery-codes`: when Supabase marks them stable
 11. `feature/launch-prep`: hosting, deploys, headers, error tracking, launch guides (done)
+12. `feature/insights`: admin metrics, finances, landing page visitor stats (done)
+13. Later: sponsored offers (admin-managed partner cards; no ad networks)

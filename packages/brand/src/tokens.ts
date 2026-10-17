@@ -16,6 +16,9 @@ export const brand = {
   slate: '#4A5568',
   /** Secondary text in dark mode. */
   haze: '#C5D0E0',
+  /** Single-series chart marks: 3:1 against white cards (light) and midnightSoft (dark). */
+  chart: '#00897B',
+  chartDark: '#26A69A',
 } as const;
 
 export const fonts = {
@@ -56,6 +59,19 @@ export const contrastPairs: ContrastPair[] = [
     name: 'logo accent on midnight header',
     foreground: brand.teal,
     background: brand.midnight,
+    largeText: true,
+  },
+  // Chart bars are graphics: WCAG asks 3:1, the same bar as large text.
+  {
+    name: 'chart bars on white cards',
+    foreground: brand.chart,
+    background: brand.white,
+    largeText: true,
+  },
+  {
+    name: 'chart bars on dark cards',
+    foreground: brand.chartDark,
+    background: brand.midnightSoft,
     largeText: true,
   },
 ];

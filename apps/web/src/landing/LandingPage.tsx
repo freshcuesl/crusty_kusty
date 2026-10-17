@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import CheckCircleOutlined from '@mui/icons-material/CheckCircleOutlined';
 import CloseOutlined from '@mui/icons-material/CloseOutlined';
 import FactCheckOutlined from '@mui/icons-material/FactCheckOutlined';
@@ -11,6 +12,7 @@ import WarningAmberOutlined from '@mui/icons-material/WarningAmberOutlined';
 import { Box, Button, Container, Grid, Stack, Typography } from '@mui/material';
 import type { SvgIconComponent } from '@mui/icons-material';
 import type { ReactNode } from 'react';
+import { loadWebAnalytics } from './webAnalytics';
 import { Link as RouterLink } from 'react-router';
 import { brand, fonts, Logo } from '@cs/brand';
 
@@ -503,6 +505,10 @@ function SiteFooter() {
 
 /** Public home page for signed-out visitors. */
 export function LandingPage() {
+  useEffect(() => {
+    loadWebAnalytics(import.meta.env.VITE_CF_ANALYTICS_TOKEN);
+  }, []);
+
   return (
     <Box sx={{ bgcolor: 'background.default', minHeight: '100dvh' }}>
       <SiteHeader />

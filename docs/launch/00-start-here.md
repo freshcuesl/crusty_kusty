@@ -5,16 +5,16 @@ one at a time. Each one is short, and you can stop between them.
 
 > **Merge every feature branch first.** The live site is built from `main`.
 
-| #   | Guide                                                     | Time   | What you get                                  |
-| --- | --------------------------------------------------------- | ------ | --------------------------------------------- |
-| 1   | [Domain and Cloudflare](01-domain-and-cloudflare.md)      | 20 min | Your web address, managed by Cloudflare       |
-| 2   | [Supabase production project](02-supabase-production.md)  | 30 min | The live database, with security settings     |
-| 3   | [Email with Resend](03-email-resend.md)                   | 20 min | Sign-up and password emails from your address |
-| 4   | [Deploy the backend](04-deploy-the-backend.md)            | 25 min | Tables and functions on the live database     |
-| 5   | [Stripe live mode](05-stripe-live.md)                     | 30 min | Real payments and ID checks                   |
-| 6   | [Deploy the apps](06-deploy-the-apps.md)                  | 30 min | The app and admin panel at your address       |
-| 7   | [Error tracking with Sentry](07-error-tracking-sentry.md) | 15 min | An email when something breaks                |
-| 8   | [Launch checklist](08-launch-checklist.md)                | 1 hour | Final checks before you tell anyone           |
+| #   | Guide                                                           | Time   | What you get                                   |
+| --- | --------------------------------------------------------------- | ------ | ---------------------------------------------- |
+| 1   | [Domain and Cloudflare](01-domain-and-cloudflare.md)            | 20 min | Your web address, managed by Cloudflare        |
+| 2   | [Supabase production project](02-supabase-production.md)        | 30 min | The live database, with security settings      |
+| 3   | [Email with Resend](03-email-resend.md)                         | 20 min | Sign-up and password emails from your address  |
+| 4   | [Deploy the backend](04-deploy-the-backend.md)                  | 25 min | Tables and functions on the live database      |
+| 5   | [Stripe live mode](05-stripe-live.md)                           | 30 min | Real payments and ID checks                    |
+| 6   | [Deploy the apps](06-deploy-the-apps.md)                        | 30 min | The app and admin panel at your address        |
+| 7   | [Error tracking and visitor stats](07-error-tracking-sentry.md) | 20 min | An email when something breaks; visitor counts |
+| 8   | [Launch checklist](08-launch-checklist.md)                      | 1 hour | Final checks before you tell anyone            |
 
 ## Accounts you'll create
 

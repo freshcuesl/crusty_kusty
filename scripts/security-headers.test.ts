@@ -40,6 +40,19 @@ describe('cspSources', () => {
   });
 });
 
+describe('visitor stats', () => {
+  it('allows Cloudflare Web Analytics only when it is turned on', () => {
+    const on = buildSecurityHeaders({
+      supabaseUrl: 'https://abcd.supabase.co',
+      webAnalytics: true,
+    });
+    expect(csp(on)).toContain("script-src 'self' https://static.cloudflareinsights.com");
+    expect(csp(on)).toContain('https://cloudflareinsights.com');
+    const off = buildSecurityHeaders({ supabaseUrl: 'https://abcd.supabase.co' });
+    expect(off).not.toContain('cloudflareinsights');
+  });
+});
+
 describe('buildSecurityHeaders', () => {
   const headers = buildSecurityHeaders({ supabaseUrl: 'https://abcd.supabase.co' });
 

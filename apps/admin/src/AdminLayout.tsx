@@ -1,4 +1,5 @@
 import HistoryOutlined from '@mui/icons-material/HistoryOutlined';
+import InsightsOutlined from '@mui/icons-material/InsightsOutlined';
 import { Box, Typography } from '@mui/material';
 import type { ReactNode } from 'react';
 import { AppBar, Layout, Menu, TitlePortal } from 'react-admin';
@@ -22,6 +23,7 @@ function AdminMenu() {
   return (
     <Menu>
       <Menu.DashboardItem />
+      <Menu.Item to="/insights" primaryText="Insights" leftIcon={<InsightsOutlined />} />
       <Menu.ResourceItems />
       <Menu.Item to="/retention" primaryText="Retention" leftIcon={<HistoryOutlined />} />
     </Menu>

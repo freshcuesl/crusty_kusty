@@ -15,6 +15,7 @@ import { BusinessList } from './businesses/BusinessList';
 import { BusinessShow } from './businesses/BusinessShow';
 import { createDataProvider } from './dataProvider';
 import { createLoginPage } from './LoginPage';
+import { InsightsPage } from './insights/InsightsPage';
 import { RetentionPage } from './retention/RetentionPage';
 
 export function AdminApp({ supabase }: { supabase: SupabaseClient }) {
@@ -58,6 +59,7 @@ export function AdminApp({ supabase }: { supabase: SupabaseClient }) {
           show={AbuseFlagShow}
         />
         <CustomRoutes>
+          <Route path="/insights" element={<InsightsPage />} />
           <Route path="/retention" element={<RetentionPage />} />
         </CustomRoutes>
       </Admin>

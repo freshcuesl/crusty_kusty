@@ -11,7 +11,11 @@ export default defineConfig(({ mode }) => {
     envDir: '../..',
     plugins: [
       react(),
-      securityHeaders({ supabaseUrl: env.VITE_SUPABASE_URL, sentryDsn: env.VITE_SENTRY_DSN }),
+      securityHeaders({
+        supabaseUrl: env.VITE_SUPABASE_URL,
+        sentryDsn: env.VITE_SENTRY_DSN,
+        webAnalytics: Boolean(env.VITE_CF_ANALYTICS_TOKEN),
+      }),
       VitePWA({
         registerType: 'prompt',
         injectRegister: false,

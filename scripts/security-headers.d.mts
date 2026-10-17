@@ -4,6 +4,7 @@ export interface SecurityHeaderOptions {
   supabaseUrl?: string | undefined;
   sentryDsn?: string | undefined;
   admin?: boolean;
+  webAnalytics?: boolean;
 }
 
 export function cspSources(options: Omit<SecurityHeaderOptions, 'admin'>): {

@@ -39,14 +39,22 @@ export function cspSources({ supabaseUrl, sentryDsn }) {
 }
 
 /**
- * @param {{ supabaseUrl?: string; sentryDsn?: string; admin?: boolean }} options
+ * @param {{ supabaseUrl?: string; sentryDsn?: string; admin?: boolean; webAnalytics?: boolean }} options
  * @returns {string}
  */
-export function buildSecurityHeaders({ supabaseUrl, sentryDsn, admin = false }) {
+export function buildSecurityHeaders({
+  supabaseUrl,
+  sentryDsn,
+  admin = false,
+  webAnalytics = false,
+}) {
   const { connect, img } = cspSources({ supabaseUrl, sentryDsn });
+  // Cloudflare Web Analytics (landing page visitor counts): its script and where it reports.
+  const scripts = webAnalytics ? ' https://static.cloudflareinsights.com' : '';
+  if (webAnalytics) connect.push('https://cloudflareinsights.com');
   const policy = [
     "default-src 'self'",
-    "script-src 'self'",
+    `script-src 'self'${scripts}`,
     "style-src 'self' 'unsafe-inline'",
     `img-src 'self' data: blob: ${img.join(' ')}`,
     "font-src 'self'",
@@ -85,7 +93,7 @@ export function buildSecurityHeaders({ supabaseUrl, sentryDsn, admin = false }) 
 
 /**
  * Vite plugin: writes `_headers` into the build output.
- * @param {{ supabaseUrl?: string; sentryDsn?: string; admin?: boolean }} options
+ * @param {{ supabaseUrl?: string; sentryDsn?: string; admin?: boolean; webAnalytics?: boolean }} options
  * @returns {import('vite').Plugin}
  */
 export function securityHeaders(options) {
