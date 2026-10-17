@@ -3,7 +3,7 @@
 // monthly and yearly prices (found later by lookup key), and the billing portal
 // settings. Safe to run again: anything already right is reused.
 // Usage: npm run stripe:setup-plans            (test mode key from supabase/functions/.env)
-//        npm run stripe:setup-plans -- --live  (only when launching, with the live key)
+//        npm run stripe:setup-plans -- --live  (at launch; see docs/launch/05-stripe-live.md)
 
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -165,15 +165,20 @@ export async function setupPlans(call, log) {
 
 async function main() {
   const args = process.argv.slice(2);
-  let envText = '';
-  try {
-    envText = readFileSync(ENV_FILE, 'utf8');
-  } catch {
-    throw new Error(
-      'Copy supabase/functions/.env.example to supabase/functions/.env first (Guide 4).',
-    );
+  // At launch the live key is given for one command only, never saved to a file:
+  //   $env:STRIPE_SECRET_KEY="sk_live_..."; npm run stripe:setup-plans -- --live
+  let key = process.env.STRIPE_SECRET_KEY?.trim() ?? '';
+  if (!key) {
+    let envText = '';
+    try {
+      envText = readFileSync(ENV_FILE, 'utf8');
+    } catch {
+      throw new Error(
+        'Copy supabase/functions/.env.example to supabase/functions/.env first (Guide 4).',
+      );
+    }
+    key = readEnvValue(envText, 'STRIPE_SECRET_KEY');
   }
-  const key = readEnvValue(envText, 'STRIPE_SECRET_KEY');
   checkSecretKey(key, args);
 
   /** @type {StripeCall} */

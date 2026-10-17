@@ -1,0 +1,75 @@
+# Publishes the contractor app and the admin panel to Cloudflare Pages.
+# Runs by itself after a merge to main once CI passes, or from the Actions tab
+# ("Run workflow"). Does nothing until the DEPLOY_ENABLED variable is "true"
+# (docs/launch/06-deploy-the-apps.md).
+name: Deploy apps
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-apps
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Build and publish
+    if: >-
+      vars.DEPLOY_ENABLED == 'true' &&
+      (github.event_name == 'workflow_dispatch' ||
+       (github.event.workflow_run.conclusion == 'success' &&
+        github.event.workflow_run.event == 'push'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: production
+    env:
+      COMMIT: ${{ github.event.workflow_run.head_sha || github.sha }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ env.COMMIT }}
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+
+      - name: Check the app settings
+        env:
+          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
+        run: |
+          fail() { echo "::error::$1"; exit 1; }
+          [ -n "$VITE_SUPABASE_URL" ] || fail "Add the VITE_SUPABASE_URL variable (launch guide 6)."
+          [ -n "$VITE_SUPABASE_ANON_KEY" ] || fail "Add the VITE_SUPABASE_ANON_KEY variable (launch guide 6)."
+          case "$VITE_SUPABASE_URL" in https://*.supabase.co) ;; *) fail "VITE_SUPABASE_URL must look like https://abcd.supabase.co" ;; esac
+          case "$VITE_SUPABASE_ANON_KEY" in sb_secret_*|*service_role*) fail "VITE_SUPABASE_ANON_KEY is a SECRET key. Use the publishable key and rotate the secret one now." ;; esac
+
+      - name: Build
+        run: npm run build
+        env:
+          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
+          VITE_ADMIN_URL: ${{ vars.VITE_ADMIN_URL }}
+          VITE_SENTRY_DSN: ${{ vars.VITE_SENTRY_DSN }}
+          VITE_CF_ANALYTICS_TOKEN: ${{ vars.VITE_CF_ANALYTICS_TOKEN }}
+          VITE_RELEASE: ${{ env.COMMIT }}
+
+      - name: Publish the contractor app
+        run: npx --yes wrangler@4.151.1 pages deploy apps/web/dist --project-name="${{ vars.CLOUDFLARE_WEB_PROJECT }}" --branch=main --commit-hash="$COMMIT"
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+
+      - name: Publish the admin panel
+        run: npx --yes wrangler@4.151.1 pages deploy apps/admin/dist --project-name="${{ vars.CLOUDFLARE_ADMIN_PROJECT }}" --branch=main --commit-hash="$COMMIT"
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
