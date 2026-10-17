@@ -39,6 +39,33 @@ describe('<AdminApp /> signed in', () => {
     expect(within(header).getByText('Admin')).toBeInTheDocument();
   });
 
+  it('links back to the contractor app from the header', async () => {
+    renderAdmin(moderator);
+    const header = await screen.findByRole('banner');
+    expect(
+      within(header).getByRole('link', { name: 'Back to the ClientShield app' }),
+    ).toHaveAttribute('href', 'http://localhost:5173/');
+  });
+
+  it('takes the logo back to the moderation dashboard', async () => {
+    renderAdmin(moderator);
+    const header = await screen.findByRole('banner');
+    expect(within(header).getByRole('link', { name: 'Admin dashboard' })).toHaveAttribute(
+      'href',
+      '#/',
+    );
+  });
+
+  it('offers the way back in the account menu too', async () => {
+    renderAdmin(moderator);
+    await userEvent.click(await screen.findByRole('button', { name: /profile|account|user/i }));
+    expect(await screen.findByRole('menuitem', { name: 'Back to the app' })).toHaveAttribute(
+      'href',
+      'http://localhost:5173/',
+    );
+    expect(screen.getByRole('menuitem', { name: /Logout|Sign out/i })).toBeInTheDocument();
+  });
+
   it.each(['Business verifications', 'Incident review', 'Abuse flags'])(
     'shows the "%s" queue',
     async (queue) => {

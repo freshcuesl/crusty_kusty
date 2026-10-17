@@ -58,6 +58,7 @@ jobs:
           VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
           VITE_ADMIN_URL: ${{ vars.VITE_ADMIN_URL }}
+          VITE_APP_URL: ${{ vars.VITE_APP_URL }}
           VITE_SENTRY_DSN: ${{ vars.VITE_SENTRY_DSN }}
           VITE_CF_ANALYTICS_TOKEN: ${{ vars.VITE_CF_ANALYTICS_TOKEN }}
           VITE_CONTACT_EMAIL: ${{ vars.VITE_CONTACT_EMAIL }}
