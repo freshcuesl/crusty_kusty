@@ -9,7 +9,8 @@ export type IncidentCategory =
   | 'fraud'
   | 'other_documented_dispute';
 
-export type IncidentStatus = 'draft' | 'submitted' | 'needs_info' | 'evidence_verified' | 'rejected';
+export type IncidentStatus =
+  'draft' | 'submitted' | 'needs_info' | 'evidence_verified' | 'rejected';
 
 export type EvidenceKind =
   | 'before_after_photo'
