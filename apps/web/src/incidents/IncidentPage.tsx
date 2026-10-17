@@ -39,6 +39,7 @@ import {
   storagePathFor,
 } from '../verification/verificationUtils';
 import { IncidentForm, type IncidentFormValues } from './IncidentForm';
+import { AskMilesButton } from '../miles/AskMilesButton';
 
 const BUCKET = 'incident-evidence';
 const MAX_EVIDENCE_BYTES = 15 * 1024 * 1024;
@@ -201,6 +202,13 @@ export function IncidentPage() {
       </Box>
 
       <StatusBanner incident={incident} />
+
+      {editable && (
+        <AskMilesButton
+          job={{ mode: 'report_coach', incidentId: incident.id }}
+          label="Review my report with Miles"
+        />
+      )}
 
       {editable ? (
         <>

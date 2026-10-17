@@ -18,13 +18,18 @@ import {
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { useCallback, useEffect, useState, type FormEvent, type ReactNode } from 'react';
 import { useSearchParams } from 'react-router';
-import { formatUsPhone, friendlyError, normalizeUsPhone, sha256Hex } from '@cs/core';
+import {
+  formatUsPhone,
+  friendlyError,
+  functionErrorMessage,
+  normalizeUsPhone,
+  sha256Hex,
+} from '@cs/core';
 import { useAuth } from '../auth/AuthProvider';
 import type { Membership } from '../auth/authStep';
 import { useSupabase } from '../auth/SupabaseProvider';
 import { FormError } from '../auth/ui';
 import { currentIdentity, identityReason, type IdentityCheck } from './identity';
-import { functionErrorMessage } from '../lib/functionError';
 import { redirectTo } from './redirect';
 import { US_STATES } from '../lib/usStates';
 import { ACCEPTED_DOCUMENT_TYPES, checkDocumentFile, storagePathFor } from './verificationUtils';

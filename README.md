@@ -19,6 +19,7 @@ matches a verified incident.
 - **Try customer matching and alerts:** [docs/setup/06-try-customer-matching.md](docs/setup/06-try-customer-matching.md)
 - **Try customer records, notes, retention and abuse flags:** [docs/setup/07-try-notes-retention-abuse.md](docs/setup/07-try-notes-retention-abuse.md)
 - **Try plans and billing (Stripe test mode):** [docs/setup/08-try-plans-and-billing.md](docs/setup/08-try-plans-and-billing.md)
+- **Try Miles, the AI assistant:** [docs/setup/09-try-miles.md](docs/setup/09-try-miles.md)
 - **How the system is built:** [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 - **How changes get merged:** [docs/WORKFLOW.md](docs/WORKFLOW.md)
 - **Security:** [SECURITY.md](SECURITY.md)

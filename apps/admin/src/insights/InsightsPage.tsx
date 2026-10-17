@@ -23,6 +23,7 @@ import { Title, usePermissions } from 'react-admin';
 import { brand } from '@cs/brand';
 import { friendlyError } from '@cs/core';
 import { useAdminSupabase } from '../AdminSupabase';
+import { AdminMiles } from './AdminMiles';
 
 interface Week {
   week: string;
@@ -367,6 +368,9 @@ export function InsightsPage() {
         <Typography color="text.secondary">
           Counted inside the database. No customer details are shown here.
         </Typography>
+        <Box sx={{ mt: 2 }}>
+          <AdminMiles />
+        </Box>
       </Box>
       {error && <Alert severity="error">{error}</Alert>}
       {data && (

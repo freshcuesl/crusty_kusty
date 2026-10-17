@@ -187,4 +187,41 @@ describe('insights', () => {
     render(<AdminApp supabase={fake.client} />);
     expect(await screen.findByText(/Can't reach the server/)).toBeInTheDocument();
   });
+
+  it('lets staff ask Miles about the numbers', async () => {
+    const fake = renderInsights(moderator, insights);
+    fake.mocks.functions.invoke.mockResolvedValueOnce({
+      data: { reply: 'Checks are up 20% this month.' },
+      error: null,
+    } as never);
+    await userEvent.click(await screen.findByRole('button', { name: 'Ask Miles' }));
+    const dialog = await screen.findByRole('dialog', { name: /Miles/ });
+    expect(dialog).toHaveTextContent('Admin advisor');
+    await userEvent.click(within(dialog).getByRole('button', { name: 'What stands out lately?' }));
+    expect(fake.mocks.functions.invoke).toHaveBeenCalledWith('miles', {
+      method: 'POST',
+      body: { mode: 'admin', messages: [{ role: 'user', content: 'What stands out lately?' }] },
+    });
+    expect(await within(dialog).findByText('Checks are up 20% this month.')).toBeInTheDocument();
+  });
+
+  it('shows why Miles could not answer', async () => {
+    const fake = renderInsights(moderator, insights);
+    fake.mocks.functions.invoke.mockResolvedValueOnce({
+      data: null,
+      error: {
+        name: 'FunctionsHttpError',
+        context: new Response(JSON.stringify({ error: 'Miles is unavailable right now.' }), {
+          status: 502,
+        }),
+      },
+    } as never);
+    await userEvent.click(await screen.findByRole('button', { name: 'Ask Miles' }));
+    const dialog = await screen.findByRole('dialog', { name: /Miles/ });
+    await userEvent.type(
+      within(dialog).getByRole('textbox', { name: 'Message Miles' }),
+      'Hi{Enter}',
+    );
+    expect(await within(dialog).findByRole('alert')).toHaveTextContent('Miles is unavailable');
+  });
 });
