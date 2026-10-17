@@ -136,6 +136,22 @@ exist. They never decide who was right.
   `private.normalize_identifier` (for example "Street" becomes "st", and plus-tags are removed
   from email addresses).
 
+## Customer matching (implemented)
+
+- `check_customer(p_customer)` checks a customer without saving them. `add_customer(p_customer)`
+  saves the customer in the business's private `customers` table and checks them. Only verified
+  businesses with two-step login can do either.
+- The details entered are normalized and fingerprinted exactly like incident identifiers.
+  An incident matches only if it is `evidence_verified`, not expired, and **at least two**
+  fingerprints agree.
+- Results come from `private.incident_facts`: dispute category, service month, evidence count and
+  kinds, Google rating, outcome and expiry month. They never include the customer, the reporting
+  business or incident ids. `match_alert_incidents` has no API access.
+- Every check is logged in `customer_checks` (which kinds of detail were given, never the values),
+  with a limit of 300 a day per business. Matches create a `match_alerts` row for that business
+  only. `respond_to_alert` records the choice: continue booking, require authorization or decline.
+- `alert_details` recomputes facts when an alert is opened, so expired incidents drop out.
+
 ## Data model direction
 
 Two separate layers, joined only through the blind matching check:

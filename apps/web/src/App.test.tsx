@@ -45,13 +45,6 @@ describe('home screen', () => {
     expect(await screen.findByText(/isn't verified yet/)).toBeInTheDocument();
   });
 
-  it('opens a placeholder for features still being built', async () => {
-    renderApp('/', as.verifiedOwner);
-    await userEvent.click(await screen.findByRole('link', { name: /Customer check/ }));
-    expect(screen.getByRole('heading', { name: 'Customer check' })).toBeInTheDocument();
-    expect(screen.getByText(/coming soon/i)).toBeInTheDocument();
-  });
-
   it('opens the incident report form from the home screen', async () => {
     renderApp('/', as.verifiedOwner);
     await userEvent.click(await screen.findByRole('link', { name: /Report incident/ }));
@@ -59,12 +52,6 @@ describe('home screen', () => {
       await screen.findByRole('heading', { level: 1, name: 'Report incident' }),
     ).toBeInTheDocument();
     expect(screen.getByLabelText('Customer name')).toBeInTheDocument();
-  });
-
-  it('can go back home from a placeholder', async () => {
-    renderApp('/alerts', as.owner);
-    await userEvent.click(await screen.findByRole('link', { name: 'Back to home' }));
-    expect(screen.getByRole('link', { name: /Customer check/ })).toBeInTheDocument();
   });
 });
 

@@ -22,9 +22,10 @@ import { IncidentPage } from './incidents/IncidentPage';
 import { MyIncidentsPage } from './incidents/MyIncidentsPage';
 import { ReportIncidentPage } from './incidents/ReportIncidentPage';
 import { LandingPage } from './landing/LandingPage';
+import { AlertDetailPage, AlertsPage } from './matching/AlertPages';
+import { CustomerCheckPage, NewCustomerPage } from './matching/CheckPages';
 import { AppShell } from './layout/AppShell';
 import { getSupabase } from './lib/supabase';
-import { ComingSoonPage } from './pages/ComingSoonPage';
 import { ConfigErrorPage } from './pages/ConfigErrorPage';
 import { HomePage } from './pages/HomePage';
 import { NotFoundPage } from './pages/NotFoundPage';
@@ -34,10 +35,13 @@ import { useColorMode } from './theme/useColorMode';
 import { RequireVerified } from './verification/RequireVerified';
 import { VerificationPage } from './verification/VerificationPage';
 
-/** Home actions that are built; the rest show a "coming soon" placeholder. */
-const BUILT_PAGES: Record<string, ComponentType> = {
+/** The page behind each home-screen action. */
+const ACTION_PAGES: Record<string, ComponentType> = {
   '/incidents/new': ReportIncidentPage,
   '/incidents': MyIncidentsPage,
+  '/customers/new': NewCustomerPage,
+  '/check': CustomerCheckPage,
+  '/alerts': AlertsPage,
 };
 
 /**
@@ -128,9 +132,9 @@ export function AppRoutes() {
 
       <Route element={<HomeOrLanding />}>
         <Route index element={<HomePage />} />
-        {homeActions.map(({ path, label, needsVerification }) => {
-          const Page = BUILT_PAGES[path];
-          const page = Page ? <Page /> : <ComingSoonPage title={label} />;
+        {homeActions.map(({ path, needsVerification }) => {
+          const Page = ACTION_PAGES[path] ?? NotFoundPage;
+          const page = <Page />;
           return (
             <Route
               key={path}
@@ -140,6 +144,7 @@ export function AppRoutes() {
           );
         })}
         <Route path="/incidents/:id" element={<IncidentPage />} />
+        <Route path="/alerts/:id" element={<AlertDetailPage />} />
         <Route path="/verification" element={<VerificationPage />} />
         <Route path="/team" element={<TeamPage />} />
         <Route path="/account/security" element={<SecurityPage />} />
