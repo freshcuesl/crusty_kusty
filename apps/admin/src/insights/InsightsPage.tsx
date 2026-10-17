@@ -400,6 +400,7 @@ export function InsightsPage() {
                   value={weeks}
                   onChange={(_, value: number | null) => value && setWeeks(value)}
                   aria-label="Time range"
+                  sx={{ '& .MuiToggleButton-root': { color: 'text.primary' } }}
                 >
                   {RANGES.map((n) => (
                     <ToggleButton key={n} value={n}>

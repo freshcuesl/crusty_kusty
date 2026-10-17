@@ -21,7 +21,8 @@ const PRODUCTS = {
   team: { name: 'ClientShield Team', description: 'Unlimited customer checks, up to 15 users.' },
 };
 
-const ENV_FILE = fileURLToPath(new URL('../supabase/functions/.env', import.meta.url));
+/** Worked out on use, so other code can import this file's plan list anywhere. */
+const envFile = () => fileURLToPath(new URL('../supabase/functions/.env', import.meta.url));
 
 /**
  * @param {string} key
@@ -171,7 +172,7 @@ async function main() {
   if (!key) {
     let envText = '';
     try {
-      envText = readFileSync(ENV_FILE, 'utf8');
+      envText = readFileSync(envFile(), 'utf8');
     } catch {
       throw new Error(
         'Copy supabase/functions/.env.example to supabase/functions/.env first (Guide 4).',
@@ -200,7 +201,11 @@ async function main() {
   console.log('\nDone. Plans are ready in Stripe.');
 }
 
-if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
+if (
+  import.meta.url.startsWith('file:') &&
+  process.argv[1] &&
+  fileURLToPath(import.meta.url) === process.argv[1]
+) {
   main().catch((error) => {
     console.error(`\n✖ ${error instanceof Error ? error.message : error}\n`);
     process.exit(1);

@@ -71,6 +71,7 @@ manager** as "Cloudflare deploy token".
 | `CLOUDFLARE_ACCOUNT_ID`    | the account ID from Step 6                                      |
 | `CLOUDFLARE_WEB_PROJECT`   | `clientshield-web`                                              |
 | `CLOUDFLARE_ADMIN_PROJECT` | `clientshield-admin`                                            |
+| `VITE_CONTACT_EMAIL`       | optional: the email for **Contact us** on the Business plan     |
 
 **Step 9 of 17.** Go to **Settings**, then **Secrets and variables**, then **Actions**, then the
 **Variables** tab. Add a **repository variable**:

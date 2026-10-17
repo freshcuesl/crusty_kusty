@@ -1,18 +1,4 @@
-import CheckOutlined from '@mui/icons-material/CheckOutlined';
-import {
-  Alert,
-  Box,
-  Button,
-  Chip,
-  LinearProgress,
-  List,
-  ListItem,
-  Paper,
-  Stack,
-  ToggleButton,
-  ToggleButtonGroup,
-  Typography,
-} from '@mui/material';
+import { Alert, Box, Button, LinearProgress, Paper, Stack, Typography } from '@mui/material';
 import { useId, useState } from 'react';
 import { useSearchParams } from 'react-router';
 import { friendlyError } from '@cs/core';
@@ -20,6 +6,8 @@ import { useSupabase } from '../auth/SupabaseProvider';
 import { FormError, FullPageSpinner } from '../auth/ui';
 import { functionErrorMessage } from '../lib/functionError';
 import { redirectTo } from '../verification/redirect';
+import { IntervalToggle, PlanCard, PlanGrid } from './PlanCards';
+import { PLANS } from './plans';
 import {
   daysLeft,
   isOnTrial,
@@ -27,44 +15,7 @@ import {
   useSubscription,
   type Interval,
   type Subscription,
-  type Tier,
 } from './subscription';
-
-interface PlanInfo {
-  tier: Tier;
-  name: string;
-  /** Dollars per month and per year; null means "Contact us". */
-  price: { month: number; year: number } | null;
-  features: string[];
-}
-
-// Keep in step with scripts/stripe-setup-plans.mjs (prices) and the plans table (limits).
-const PLANS: PlanInfo[] = [
-  {
-    tier: 'free',
-    name: 'Free',
-    price: { month: 0, year: 0 },
-    features: ['10 customer checks a month', '1 user', 'Incident reports and alerts'],
-  },
-  {
-    tier: 'pro',
-    name: 'Pro',
-    price: { month: 29, year: 290 },
-    features: ['Unlimited customer checks', 'Up to 3 users', 'Everything in Free'],
-  },
-  {
-    tier: 'team',
-    name: 'Team',
-    price: { month: 59, year: 590 },
-    features: ['Unlimited customer checks', 'Up to 15 users', 'Everything in Pro'],
-  },
-  {
-    tier: 'business',
-    name: 'Business',
-    price: null,
-    features: ['CRM and API connections', 'More users', 'Contact us to set it up'],
-  },
-];
 
 const formatDate = (iso: string) =>
   new Date(iso).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' });
@@ -130,67 +81,6 @@ function CurrentPlan({ sub }: { sub: Subscription }) {
         </Typography>
       </Stack>
     </Paper>
-  );
-}
-
-function PlanCard({
-  plan,
-  interval,
-  current,
-  action,
-}: {
-  plan: PlanInfo;
-  interval: Interval;
-  current: boolean;
-  action: React.ReactNode;
-}) {
-  const nameId = useId();
-  const price = plan.price;
-  return (
-    <ListItem aria-labelledby={nameId} disablePadding sx={{ display: 'block', height: '100%' }}>
-      <Paper
-        variant="outlined"
-        sx={{
-          p: 2,
-          height: '100%',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 1,
-          borderColor: current ? 'primary.main' : undefined,
-          borderWidth: current ? 2 : 1,
-        }}
-      >
-        <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
-          <Typography id={nameId} variant="h6" component="h3">
-            {plan.name}
-          </Typography>
-          {current && <Chip size="small" color="primary" label="Current" />}
-        </Stack>
-        <Typography variant="h4" component="p" sx={{ fontWeight: 700 }}>
-          {price ? `$${price[interval]}` : 'Contact us'}
-          {price && price.month > 0 && (
-            <Typography component="span" color="text.secondary">
-              {' '}
-              / {interval}
-            </Typography>
-          )}
-        </Typography>
-        {price && price.month > 0 && interval === 'year' && (
-          <Typography variant="body2" color="success.main" sx={{ fontWeight: 600 }}>
-            2 months free
-          </Typography>
-        )}
-        <Stack component="ul" spacing={0.5} sx={{ listStyle: 'none', p: 0, m: 0, flex: 1 }}>
-          {plan.features.map((feature) => (
-            <Stack component="li" key={feature} direction="row" spacing={1}>
-              <CheckOutlined fontSize="small" color="primary" aria-hidden="true" />
-              <Typography variant="body2">{feature}</Typography>
-            </Stack>
-          ))}
-        </Stack>
-        {action}
-      </Paper>
-    </ListItem>
   );
 }
 
@@ -279,31 +169,14 @@ export function BillingPage() {
           <Typography variant="h6" component="h2">
             Plans
           </Typography>
-          <ToggleButtonGroup
-            exclusive
-            size="small"
-            value={interval}
-            onChange={(_, value: Interval | null) => value && setInterval(value)}
-            aria-label="Billing period"
-          >
-            <ToggleButton value="month">Monthly</ToggleButton>
-            <ToggleButton value="year">Yearly</ToggleButton>
-          </ToggleButtonGroup>
+          <IntervalToggle value={interval} onChange={setInterval} />
         </Stack>
         {canChoose && trial && (
           <Typography variant="body2" color="text.secondary">
             Choose a plan now and you won&apos;t be charged until your trial ends.
           </Typography>
         )}
-        <List
-          aria-label="Plans"
-          disablePadding
-          sx={{
-            display: 'grid',
-            gap: 2,
-            gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', lg: 'repeat(4, 1fr)' },
-          }}
-        >
+        <PlanGrid>
           {PLANS.map((plan) => {
             const buyable = plan.tier === 'pro' || plan.tier === 'team';
             return (
@@ -311,7 +184,8 @@ export function BillingPage() {
                 key={plan.tier}
                 plan={plan}
                 interval={interval}
-                current={plan.tier === sub.tier}
+                badge={plan.tier === sub.tier ? 'Current' : undefined}
+                highlight={plan.tier === sub.tier}
                 action={
                   canChoose && buyable ? (
                     <Button
@@ -331,7 +205,7 @@ export function BillingPage() {
               />
             );
           })}
-        </List>
+        </PlanGrid>
         <Typography variant="body2" color="text.secondary">
           Prices in US dollars. Every plan keeps the 300-checks-a-day fair-use limit.
         </Typography>

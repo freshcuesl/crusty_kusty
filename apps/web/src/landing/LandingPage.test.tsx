@@ -87,3 +87,56 @@ describe('admin panel link', () => {
     expect(screen.queryByRole('menuitem', { name: 'Admin panel' })).not.toBeInTheDocument();
   });
 });
+
+describe('landing page pricing', () => {
+  it('is linked from the header', async () => {
+    renderApp('/', as.signedOut);
+    const nav = await screen.findByRole('navigation', { name: 'Site' });
+    expect(within(nav).getByRole('link', { name: 'Pricing' })).toHaveAttribute('href', '#pricing');
+  });
+
+  it('shows every plan with its monthly price', async () => {
+    renderApp('/', as.signedOut);
+    const pricing = await screen.findByRole('region', { name: 'Simple plans. Start free.' });
+    const plans = within(pricing).getByRole('list', { name: 'Plans' });
+    expect(within(plans).getByRole('listitem', { name: 'Free' })).toHaveTextContent('$0');
+    expect(within(plans).getByRole('listitem', { name: 'Pro' })).toHaveTextContent('$29');
+    expect(within(plans).getByRole('listitem', { name: 'Team' })).toHaveTextContent('$59');
+    expect(within(plans).getByRole('listitem', { name: 'Business' })).toHaveTextContent(
+      'Contact us',
+    );
+    expect(within(plans).getByRole('listitem', { name: 'Pro' })).toHaveTextContent('Most popular');
+  });
+
+  it('switches to yearly prices', async () => {
+    renderApp('/', as.signedOut);
+    const pricing = await screen.findByRole('region', { name: 'Simple plans. Start free.' });
+    await userEvent.click(within(pricing).getByRole('button', { name: 'Yearly' }));
+    const pro = within(pricing).getByRole('listitem', { name: 'Pro' });
+    expect(pro).toHaveTextContent('$290');
+    expect(pro).toHaveTextContent('2 months free');
+  });
+
+  it('sends visitors to sign up, with the free trial explained', async () => {
+    renderApp('/', as.signedOut);
+    const pricing = await screen.findByRole('region', { name: 'Simple plans. Start free.' });
+    const pro = within(pricing).getByRole('listitem', { name: 'Pro' });
+    expect(within(pro).getByRole('link', { name: 'Start 14-day free trial' })).toHaveAttribute(
+      'href',
+      '/sign-up',
+    );
+    expect(
+      within(within(pricing).getByRole('listitem', { name: 'Free' })).getByRole('link', {
+        name: 'Start free',
+      }),
+    ).toHaveAttribute('href', '/sign-up');
+    expect(pricing).toHaveTextContent(/no card needed/i);
+  });
+
+  it('answers common questions', async () => {
+    renderApp('/', as.signedOut);
+    const faq = await screen.findByRole('region', { name: 'Questions about pricing' });
+    expect(within(faq).getByText('What counts as a customer check?')).toBeInTheDocument();
+    expect(within(faq).getByText('What happens when the trial ends?')).toBeInTheDocument();
+  });
+});
