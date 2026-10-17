@@ -18,6 +18,8 @@ import { SignInPage } from './auth/pages/SignInPage';
 import { SignUpPage } from './auth/pages/SignUpPage';
 import { SupabaseProvider } from './auth/SupabaseProvider';
 import { AuthLayout } from './auth/ui';
+import { CustomerPage } from './customers/CustomerPage';
+import { CustomersPage } from './customers/CustomersPage';
 import { IncidentPage } from './incidents/IncidentPage';
 import { MyIncidentsPage } from './incidents/MyIncidentsPage';
 import { ReportIncidentPage } from './incidents/ReportIncidentPage';
@@ -42,6 +44,7 @@ const ACTION_PAGES: Record<string, ComponentType> = {
   '/customers/new': NewCustomerPage,
   '/check': CustomerCheckPage,
   '/alerts': AlertsPage,
+  '/customers': CustomersPage,
 };
 
 /**
@@ -144,6 +147,7 @@ export function AppRoutes() {
           );
         })}
         <Route path="/incidents/:id" element={<IncidentPage />} />
+        <Route path="/customers/:id" element={<CustomerPage />} />
         <Route path="/alerts/:id" element={<AlertDetailPage />} />
         <Route path="/verification" element={<VerificationPage />} />
         <Route path="/team" element={<TeamPage />} />

@@ -36,7 +36,7 @@
     "db:link": "supabase link --project-ref mnmlvmctxponwzltixub",
     "db:push": "supabase db push",
     "db:config:push": "supabase config push",
-    "functions:check": "deno check --config supabase/functions/deno.json supabase/functions/create-identity-session/index.ts supabase/functions/stripe-webhook/index.ts",
+    "functions:check": "deno check --config supabase/functions/deno.json supabase/functions/create-identity-session/index.ts supabase/functions/stripe-webhook/index.ts supabase/functions/purge-expired-files/index.ts",
     "dev:verify-identity": "node scripts/dev-verify-identity.mjs",
     "functions:serve": "supabase functions serve --env-file supabase/functions/.env"
   },

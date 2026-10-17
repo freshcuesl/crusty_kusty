@@ -15,6 +15,7 @@ matches a verified incident.
 - **Connect Stripe Identity (test mode):** [docs/setup/04-connect-stripe-identity.md](docs/setup/04-connect-stripe-identity.md)
 - **Report and review an incident:** [docs/setup/05-try-an-incident-report.md](docs/setup/05-try-an-incident-report.md)
 - **Try customer matching and alerts:** [docs/setup/06-try-customer-matching.md](docs/setup/06-try-customer-matching.md)
+- **Try customer records, notes, retention and abuse flags:** [docs/setup/07-try-notes-retention-abuse.md](docs/setup/07-try-notes-retention-abuse.md)
 - **How the system is built:** [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 - **How changes get merged:** [docs/WORKFLOW.md](docs/WORKFLOW.md)
 - **Security:** [SECURITY.md](SECURITY.md)

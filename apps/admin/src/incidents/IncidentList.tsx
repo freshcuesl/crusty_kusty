@@ -22,6 +22,7 @@ const STATUS_COLORS: Record<IncidentStatus, 'default' | 'info' | 'warning' | 'su
     needs_info: 'warning',
     evidence_verified: 'success',
     rejected: 'error',
+    expired: 'default',
   };
 
 export function IncidentStatusChip({ status }: { status: IncidentStatus }) {

@@ -1,5 +1,6 @@
 import { Box, Button, Stack, Typography } from '@mui/material';
 import { useState } from 'react';
+import { Link as RouterLink } from 'react-router';
 import { friendlyError } from '@cs/core';
 import { useSupabase } from '../auth/SupabaseProvider';
 import { CustomerForm } from './CustomerForm';
@@ -15,7 +16,7 @@ interface CheckPageProps {
 
 function CheckPage({ title, intro, rpc, submitLabel, againLabel }: CheckPageProps) {
   const supabase = useSupabase();
-  const [result, setResult] = useState<CheckResult | null>(null);
+  const [result, setResult] = useState<(CheckResult & { customer_id?: string }) | null>(null);
   const [round, setRound] = useState(0);
 
   return (
@@ -29,6 +30,15 @@ function CheckPage({ title, intro, rpc, submitLabel, againLabel }: CheckPageProp
       {result ? (
         <>
           <MatchResult result={result} />
+          {result.customer_id && (
+            <Button
+              variant="contained"
+              component={RouterLink}
+              to={`/customers/${result.customer_id}`}
+            >
+              Open customer record
+            </Button>
+          )}
           <Button
             variant="outlined"
             onClick={() => {
@@ -47,7 +57,7 @@ function CheckPage({ title, intro, rpc, submitLabel, againLabel }: CheckPageProp
             try {
               const { data, error } = await supabase.rpc(rpc, { p_customer: customer });
               if (error) return friendlyError(error);
-              setResult(data as CheckResult);
+              setResult(data as CheckResult & { customer_id?: string });
               return null;
             } catch (thrown) {
               return friendlyError(thrown);

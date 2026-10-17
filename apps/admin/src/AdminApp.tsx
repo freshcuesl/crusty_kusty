@@ -1,6 +1,9 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { useMemo } from 'react';
-import { Admin, Resource } from 'react-admin';
+import { Admin, CustomRoutes, Resource } from 'react-admin';
+import { Route } from 'react-router-dom';
+import { AbuseFlagList } from './abuse/AbuseFlagList';
+import { AbuseFlagShow } from './abuse/AbuseFlagShow';
 import { AdminLayout } from './AdminLayout';
 import { adminDarkTheme, adminTheme } from './adminTheme';
 import { createAuthProvider } from './authProvider';
@@ -12,6 +15,7 @@ import { BusinessList } from './businesses/BusinessList';
 import { BusinessShow } from './businesses/BusinessShow';
 import { createDataProvider } from './dataProvider';
 import { createLoginPage } from './LoginPage';
+import { RetentionPage } from './retention/RetentionPage';
 
 export function AdminApp({ supabase }: { supabase: SupabaseClient }) {
   const authProvider = useMemo(() => createAuthProvider(supabase), [supabase]);
@@ -47,6 +51,15 @@ export function AdminApp({ supabase }: { supabase: SupabaseClient }) {
           list={IncidentList}
           show={IncidentShow}
         />
+        <Resource
+          name="abuse_flags"
+          options={{ label: 'Abuse flags' }}
+          list={AbuseFlagList}
+          show={AbuseFlagShow}
+        />
+        <CustomRoutes>
+          <Route path="/retention" element={<RetentionPage />} />
+        </CustomRoutes>
       </Admin>
     </AdminSupabaseProvider>
   );

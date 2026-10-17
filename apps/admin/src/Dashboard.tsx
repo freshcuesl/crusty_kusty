@@ -11,7 +11,14 @@ interface Queue {
   description: string;
   icon: SvgIconComponent;
   /** The queue's list page and what counts as "waiting" there; absent until built. */
-  live?: { to: string; resource: string; filter: Record<string, string>; sortField: string };
+  live?: {
+    to: string;
+    resource: string;
+    filter: Record<string, string>;
+    sortField: string;
+    /** Word after the count, e.g. "3 waiting". */
+    word?: string;
+  };
 }
 
 const queues: Queue[] = [
@@ -39,8 +46,15 @@ const queues: Queue[] = [
   },
   {
     title: 'Abuse flags',
-    description: 'Businesses reporting far more customers than normal.',
+    description: 'Businesses checking or reporting far more customers than normal.',
     icon: FlagOutlined,
+    live: {
+      to: '/abuse_flags',
+      resource: 'abuse_flags',
+      filter: { 'resolved_at@is': 'null' },
+      sortField: 'created_at',
+      word: 'open',
+    },
   },
 ];
 
@@ -70,7 +84,7 @@ function LiveQueue({ queue, live }: { queue: Queue; live: NonNullable<Queue['liv
   });
   return (
     <CardActionArea component={RouterLink} to={live.to} sx={{ height: '100%' }}>
-      <QueueContent queue={queue} footer={`${total ?? 0} waiting`} />
+      <QueueContent queue={queue} footer={`${total ?? 0} ${live.word ?? 'waiting'}`} />
     </CardActionArea>
   );
 }

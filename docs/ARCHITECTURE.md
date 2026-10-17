@@ -19,7 +19,7 @@ It is not a blacklist and never offers public people search.
 | Hosting         | Cloudflare (static assets, `_headers` for security headers)                                                                                            |
 | Identity checks | Stripe Identity for owners, plus business documents reviewed by a moderator                                                                            |
 | Email / errors  | Resend and Sentry, added at deploy time                                                                                                                |
-| Retention       | Minor disputes 24 months; fraud and chargebacks 60 months (admin-configurable)                                                                         |
+| Retention       | Minor disputes 24 months; fraud and chargebacks 60 months (admins can change it, 6 to 60 months)                                                       |
 | Brand           | "C" monogram shield (B) with the "Midnight and teal" palette; amber for alerts, never red                                                              |
 | Future          | Invoicing and servicing (one-stop shop)                                                                                                                |
 
@@ -152,6 +152,52 @@ exist. They never decide who was right.
   only. `respond_to_alert` records the choice: continue booking, require authorization or decline.
 - `alert_details` recomputes facts when an alert is opened, so expired incidents drop out.
 
+## Customer records and private notes (implemented)
+
+- `/customers` lists the business's saved customers; `/customers/:id` shows details, **Check again**
+  (`recheck_customer`) and private notes.
+- `customer_notes`: readable only by members of that business (not other businesses, not
+  moderators) and never used for matching. Written through `add_customer_note` (1 to 2,000
+  characters); `delete_customer_note` is allowed for the author or the owner.
+- `delete_customer` (owner only) removes the record and its notes, for example at the customer's
+  request. Past alerts stay, with the name the business typed.
+
+## Retention (implemented)
+
+- `retention_rules` holds months per dispute type (default 60 for chargebacks and fraud, 24 for the
+  rest). Moderators can read it; only admins change it, through `set_retention_months` (6 to 60
+  months). `private.incident_expiry` reads it when an incident is verified, so changes apply to
+  incidents verified from then on.
+- `private.purge_expired()` runs nightly through pg_cron (`purge-expired-records`, 03:17 UTC):
+  - Verified incidents past `expires_at`, and rejected ones 12 months after the decision: deletes
+    customer details, fingerprints and evidence rows, clears notes and written details, sets status
+    `expired` and logs an `expired` event.
+  - Drafts and `needs_info` reports untouched for 12 months are deleted.
+  - `customer_checks` older than 24 months are deleted (their alerts go with them).
+- Storage files can only be deleted through the Storage API, so their paths go into
+  `private.storage_purge_queue`. The `purge-expired-files` Edge Function (logic in
+  `supabase/functions/_shared/purge.ts`) claims and deletes them. pg_cron calls it through pg_net
+  (`purge-expired-files`, 03:47 UTC) once Vault has `project_url` and `purge_files_secret` and the
+  function has the matching `PURGE_FILES_SECRET`. Set this up in the launch guide; until then the
+  job does nothing. Queue functions are for the service role only.
+
+## Abuse detection (implemented)
+
+Triggers on `customer_checks` and `incidents` open an `abuse_flags` row. There's at most one open
+flag per business and kind.
+
+| Flag                  | Raised when                                     |
+| --------------------- | ----------------------------------------------- |
+| `high_check_volume`   | 100 or more checks in 24 hours                  |
+| `many_unsaved_checks` | 40 or more checks in 24 hours of unsaved people |
+| `high_report_volume`  | 10 or more reports submitted in 7 days          |
+| `repeated_rejections` | 3 or more reports rejected in 90 days           |
+
+The thresholds sit below the hard limits (300 checks a day, 50 reports in 30 days). Only moderators
+can see flags, and businesses never do. `resolve_abuse_flag` needs a note. After a flag is
+resolved, a new one opens if the pattern continues. The admin panel shows them under
+**Abuse flags**, with an open count on the dashboard and **Retention** in the menu.
+
 ## Data model direction
 
 Two separate layers, joined only through the blind matching check:
@@ -164,8 +210,8 @@ Two separate layers, joined only through the blind matching check:
 A separate `customer_identity` concept keeps option B possible: a customer can later claim an
 identity after verification and respond to incidents about it.
 
-Incident statuses: `submitted` → `evidence_verified` or `disputed`, plus `resolved` and
-`expired`. Moderators confirm the job, the dispute and the evidence exist. They never
+Incident statuses (implemented): `draft` → `submitted` → `evidence_verified`, `needs_info` or
+`rejected`, then `expired` after retention. `disputed` and `resolved` arrive with option B. Moderators confirm the job, the dispute and the evidence exist. They never
 decide who was right.
 
 ## Testing strategy (test-driven development)
@@ -185,8 +231,8 @@ Every change starts with a failing test. CI runs all layers on every push.
 2. `feature/auth-mfa`: sign-up, sign-in, required MFA, roles, staff invites, admin login
 3. `feature/business-verification`: onboarding, Stripe Identity, documents, admin queue
 4. `feature/incidents`: incident records, evidence, moderator review, fingerprints (done)
-5. `feature/blind-matching`: normalization, hashing, alerts, incident cards
-6. `feature/private-notes-retention-abuse`: notes, expiration rules, abuse detection
+5. `feature/matching`: normalization, hashing, alerts, incident cards (done)
+6. `feature/notes-retention-abuse`: notes, expiration rules, abuse detection (done)
 7. `feature/subscriptions`: Stripe billing tiers
 8. `feature/analytics`
 9. `feature/crm-integrations` and later invoicing

@@ -16,7 +16,7 @@ describe('incident labels', () => {
   });
 
   it('cover every status and evidence type', () => {
-    expect(Object.keys(INCIDENT_STATUS_LABELS)).toHaveLength(5);
+    expect(Object.keys(INCIDENT_STATUS_LABELS)).toHaveLength(6); // + expired (20261020000000_retention_statuses.sql)
     expect(Object.keys(EVIDENCE_LABELS)).toHaveLength(9);
   });
 

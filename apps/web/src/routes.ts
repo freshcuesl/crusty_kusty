@@ -1,6 +1,7 @@
 import AddAlertOutlined from '@mui/icons-material/AddAlertOutlined';
 import FolderOpenOutlined from '@mui/icons-material/FolderOpenOutlined';
 import NotificationsOutlined from '@mui/icons-material/NotificationsOutlined';
+import PeopleOutlined from '@mui/icons-material/PeopleOutlined';
 import PersonAddAlt1Outlined from '@mui/icons-material/PersonAddAlt1Outlined';
 import VerifiedUserOutlined from '@mui/icons-material/VerifiedUserOutlined';
 import type { SvgIconComponent } from '@mui/icons-material';
@@ -38,6 +39,12 @@ export const homeActions: HomeAction[] = [
     path: '/check',
     icon: VerifiedUserOutlined,
     needsVerification: true,
+  },
+  {
+    label: 'Customers',
+    description: 'Saved customers and private notes',
+    path: '/customers',
+    icon: PeopleOutlined,
   },
   {
     label: 'My incidents',

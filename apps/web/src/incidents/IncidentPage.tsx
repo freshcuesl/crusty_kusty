@@ -151,6 +151,13 @@ function StatusBanner({ incident }: { incident: IncidentRow }) {
           </Box>
         </Alert>
       );
+    case 'expired':
+      return (
+        <Alert severity="info" role="status">
+          This record has expired. Its customer details and evidence were deleted, and it no longer
+          appears in customer checks.
+        </Alert>
+      );
   }
 }
 

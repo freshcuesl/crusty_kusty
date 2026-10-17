@@ -10,7 +10,7 @@ export type IncidentCategory =
   | 'other_documented_dispute';
 
 export type IncidentStatus =
-  'draft' | 'submitted' | 'needs_info' | 'evidence_verified' | 'rejected';
+  'draft' | 'submitted' | 'needs_info' | 'evidence_verified' | 'rejected' | 'expired';
 
 export type EvidenceKind =
   | 'before_after_photo'
@@ -39,6 +39,7 @@ export const INCIDENT_STATUS_LABELS: Record<IncidentStatus, string> = {
   needs_info: 'Needs more info',
   evidence_verified: 'Evidence verified',
   rejected: 'Not verified',
+  expired: 'Expired',
 };
 
 export const EVIDENCE_LABELS: Record<EvidenceKind, string> = {
@@ -62,4 +63,5 @@ export const INCIDENT_EVENT_LABELS: Record<string, string> = {
   evidence_verified: 'Evidence verified',
   needs_info: 'Asked for more info',
   rejected: 'Not verified',
+  expired: 'Record expired',
 };
