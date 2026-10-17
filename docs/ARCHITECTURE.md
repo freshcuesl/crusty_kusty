@@ -238,6 +238,24 @@ The 300-a-day fair-use limit applies on every plan.
 - **Web:** **Plan and billing** (`/billing`, in the account menu) shows the plan, usage and the
   choices. The home screen shows the trial days left, and warns when Free checks run low.
 
+## Hosting and deploys (implemented)
+
+- **Apps:** Cloudflare Pages projects `clientshield-web` (the domain root) and
+  `clientshield-admin` (`admin.` subdomain, behind Cloudflare Access). The `Deploy apps` workflow
+  builds and publishes both after CI passes on `main`. It is off until the `DEPLOY_ENABLED`
+  variable is `true`, and it refuses a secret key in `VITE_SUPABASE_ANON_KEY`.
+- **Security headers:** `_headers` is generated per build by `scripts/security-headers.mjs`. The
+  CSP `connect-src` names the real Supabase project and Sentry host, never a wildcard. The admin
+  panel adds `X-Robots-Tag: noindex` and blocks the camera.
+- **Backend:** the `Deploy backend` workflow is manual (type DEPLOY). It runs `supabase db push`
+  and `supabase functions deploy`. Both workflows use the `production` GitHub environment with
+  required reviewers.
+- **Errors:** Sentry only when `VITE_SENTRY_DSN` is set. `@cs/core` `monitoringOptions` sets no
+  PII, no tracing and no replays. `scrubEvent` drops the user, cookies, headers, request bodies and
+  query strings, and masks emails and phone numbers.
+- **Email:** Supabase Auth sends through Resend SMTP from `mail.<domain>`.
+- Guides: `docs/launch/`.
+
 ## Data model direction
 
 Two separate layers, joined only through the blind matching check:
@@ -277,3 +295,4 @@ Every change starts with a failing test. CI runs all layers on every push.
 8. `feature/analytics`
 9. `feature/crm-integrations` and later invoicing
 10. `feature/passkeys-recovery-codes`: when Supabase marks them stable
+11. `feature/launch-prep`: hosting, deploys, headers, error tracking, launch guides (done)
