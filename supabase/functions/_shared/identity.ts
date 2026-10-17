@@ -1,6 +1,9 @@
-// Owner identity verification with Stripe Identity: request handling logic.
+// Owner identity verification with Stripe Identity, and the Stripe webhook
+// (identity results and billing events): request handling logic.
 // Pure TypeScript with injected dependencies, so it runs in Deno (Edge Functions)
 // and in Vitest. The index.ts files wire in real Stripe and Supabase clients.
+
+import { corsHeaders, json } from './http.ts';
 
 export type IdentityStatus = 'requires_input' | 'processing' | 'verified' | 'canceled';
 
@@ -28,22 +31,6 @@ export interface CreateSessionDeps {
 
 const MAX_SESSIONS_PER_DAY = 5;
 const DAY_MS = 24 * 60 * 60 * 1000;
-
-function corsHeaders(appUrl: string): Record<string, string> {
-  return {
-    'Access-Control-Allow-Origin': new URL(appUrl).origin,
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    Vary: 'Origin',
-  };
-}
-
-function json(body: unknown, status: number, headers: Record<string, string> = {}): Response {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { 'Content-Type': 'application/json', ...headers },
-  });
-}
 
 export async function handleCreateSession(
   req: Request,
@@ -102,13 +89,39 @@ export async function handleCreateSession(
 
 export interface StripeEventLike {
   type: string;
-  data: { object: { id: string; last_error?: { code?: string | null } | null } };
+  data: {
+    object: {
+      id: string;
+      last_error?: { code?: string | null } | null;
+      /** Checkout sessions: "subscription" for plan purchases, and the new subscription's id. */
+      mode?: string;
+      subscription?: string | null;
+    };
+  };
 }
 
 export interface WebhookDeps {
   /** Checks Stripe's signature and parses the event. Throws if the signature is wrong. */
   verifyEvent(rawBody: string, signature: string): Promise<StripeEventLike>;
   recordResult(sessionId: string, status: IdentityStatus, errorCode: string | null): Promise<void>;
+  /** Copies a subscription's current state from Stripe (see billing.ts). */
+  syncSubscription(subscriptionId: string): Promise<void>;
+}
+
+const SUBSCRIPTION_EVENTS = [
+  'customer.subscription.created',
+  'customer.subscription.updated',
+  'customer.subscription.deleted',
+];
+
+/** The subscription an event is about, if it is a billing event we handle. */
+function subscriptionIdOf(event: StripeEventLike): string | null {
+  const object = event.data.object;
+  if (SUBSCRIPTION_EVENTS.includes(event.type)) return object.id;
+  if (event.type === 'checkout.session.completed' && object.mode === 'subscription') {
+    return object.subscription ?? null;
+  }
+  return null;
 }
 
 const EVENT_STATUS: Record<string, IdentityStatus> = {
@@ -131,16 +144,21 @@ export async function handleStripeWebhook(req: Request, deps: WebhookDeps): Prom
     return json({ error: 'Invalid signature.' }, 400);
   }
 
+  const subscriptionId = subscriptionIdOf(event);
   const status = EVENT_STATUS[event.type];
-  if (!status) return json({ received: true }, 200);
+  if (!subscriptionId && !status) return json({ received: true }, 200);
 
-  const session = event.data.object;
   try {
-    await deps.recordResult(session.id, status, session.last_error?.code ?? null);
+    if (subscriptionId) {
+      await deps.syncSubscription(subscriptionId);
+    } else if (status) {
+      const session = event.data.object;
+      await deps.recordResult(session.id, status, session.last_error?.code ?? null);
+    }
   } catch (error) {
     if ((error as { code?: string }).code === 'P0002') {
-      // Not one of ours (for example a session from another environment). Don't retry.
-      console.warn('stripe-webhook: unknown identity session', session.id);
+      // Not one of ours (for example from another environment). Don't retry.
+      console.warn('stripe-webhook: not ours', event.type, event.data.object.id);
       return json({ received: true }, 200);
     }
     console.error('stripe-webhook: could not save result', error);
