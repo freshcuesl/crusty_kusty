@@ -198,6 +198,46 @@ can see flags, and businesses never do. `resolve_abuse_flag` needs a note. After
 resolved, a new one opens if the pattern continues. The admin panel shows them under
 **Abuse flags**, with an open count on the dashboard and **Retention** in the menu.
 
+## Plans and billing (implemented)
+
+| Plan     | Price                | Checks a month | Users |
+| -------- | -------------------- | -------------- | ----- |
+| Free     | $0                   | 10             | 1     |
+| Pro      | $29/month, $290/year | Unlimited      | 3     |
+| Team     | $59/month, $590/year | Unlimited      | 15    |
+| Business | Contact us           | Unlimited      | 100   |
+
+The 300-a-day fair-use limit applies on every plan.
+
+- **Stripe is the source of truth for payments.** `npm run stripe:setup-plans` creates the
+  products, the prices (lookup keys `clientshield_<plan>_<month|year>`) and the billing portal
+  settings. Prices change in Stripe, not in code; keep `apps/web/src/billing/BillingPage.tsx` in
+  step for display.
+- **Trial:** every business gets a `subscriptions` row. The first time it is verified, a 14-day
+  Pro trial starts, with no card needed. Before verification it has trial limits, so it can set up
+  its team.
+- **Plan in force:** `private.effective_tier()`. It's the Stripe tier while the subscription is
+  `active`, `trialing` or `past_due` (Stripe is retrying), then the trial, then Free.
+- **Limits are enforced by triggers**, wherever rows are written:
+  - `customer_checks`: the monthly checks.
+  - `business_members`: users.
+  - `business_invites`: users, with pending invites counted.
+
+  Existing members are never removed on a downgrade.
+
+- **Edge Functions** (logic in `supabase/functions/_shared/billing.ts`):
+  - `create-checkout-session`: owner only, two-step login.
+    - Creates the Stripe customer once.
+    - Refuses if a subscription is already live (that goes through the portal instead).
+    - Keeps the remaining trial days as a Stripe `trial_end` when at least 48 hours are left.
+  - `create-billing-portal`: owner only. Change plan, update card, invoices, cancel at the end of
+    the period.
+  - `stripe-webhook` also handles `checkout.session.completed` and `customer.subscription.*`. It
+    re-reads the subscription from Stripe, so events arriving out of order can't save stale
+    state. It then calls `record_subscription` (service role only).
+- **Web:** **Plan and billing** (`/billing`, in the account menu) shows the plan, usage and the
+  choices. The home screen shows the trial days left, and warns when Free checks run low.
+
 ## Data model direction
 
 Two separate layers, joined only through the blind matching check:
@@ -233,7 +273,7 @@ Every change starts with a failing test. CI runs all layers on every push.
 4. `feature/incidents`: incident records, evidence, moderator review, fingerprints (done)
 5. `feature/matching`: normalization, hashing, alerts, incident cards (done)
 6. `feature/notes-retention-abuse`: notes, expiration rules, abuse detection (done)
-7. `feature/subscriptions`: Stripe billing tiers
+7. `feature/subscriptions`: Stripe billing tiers (done)
 8. `feature/analytics`
 9. `feature/crm-integrations` and later invoicing
 10. `feature/passkeys-recovery-codes`: when Supabase marks them stable

@@ -18,6 +18,7 @@ import { SignInPage } from './auth/pages/SignInPage';
 import { SignUpPage } from './auth/pages/SignUpPage';
 import { SupabaseProvider } from './auth/SupabaseProvider';
 import { AuthLayout } from './auth/ui';
+import { BillingPage } from './billing/BillingPage';
 import { CustomerPage } from './customers/CustomerPage';
 import { CustomersPage } from './customers/CustomersPage';
 import { IncidentPage } from './incidents/IncidentPage';
@@ -151,6 +152,7 @@ export function AppRoutes() {
         <Route path="/alerts/:id" element={<AlertDetailPage />} />
         <Route path="/verification" element={<VerificationPage />} />
         <Route path="/team" element={<TeamPage />} />
+        <Route path="/billing" element={<BillingPage />} />
         <Route path="/account/security" element={<SecurityPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Route>

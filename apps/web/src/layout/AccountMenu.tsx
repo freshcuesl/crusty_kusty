@@ -1,5 +1,6 @@
 import AccountCircle from '@mui/icons-material/AccountCircle';
 import AdminPanelSettingsOutlined from '@mui/icons-material/AdminPanelSettingsOutlined';
+import CreditCardOutlined from '@mui/icons-material/CreditCardOutlined';
 import GroupsOutlined from '@mui/icons-material/GroupsOutlined';
 import LockOutlined from '@mui/icons-material/LockOutlined';
 import VerifiedOutlined from '@mui/icons-material/VerifiedOutlined';
@@ -59,6 +60,12 @@ export function AccountMenu() {
             <GroupsOutlined fontSize="small" />
           </ListItemIcon>
           Team
+        </MenuItem>
+        <MenuItem onClick={() => go('/billing')}>
+          <ListItemIcon>
+            <CreditCardOutlined fontSize="small" />
+          </ListItemIcon>
+          Plan and billing
         </MenuItem>
         <MenuItem onClick={() => go('/account/security')}>
           <ListItemIcon>

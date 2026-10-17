@@ -141,6 +141,7 @@ function webhookDeps(overrides: Partial<WebhookDeps> = {}): WebhookDeps {
   return {
     verifyEvent: vi.fn(async (body: string) => JSON.parse(body)),
     recordResult: vi.fn(async () => {}),
+    syncSubscription: vi.fn(async () => {}),
     ...overrides,
   };
 }
@@ -231,6 +232,67 @@ describe('stripe-webhook', () => {
     });
     const res = await handleStripeWebhook(
       stripeEvent('identity.verification_session.verified'),
+      deps,
+    );
+    expect(res.status).toBe(500);
+  });
+});
+
+describe('stripe-webhook: billing', () => {
+  it.each([
+    'customer.subscription.created',
+    'customer.subscription.updated',
+    'customer.subscription.deleted',
+  ])('syncs the subscription on %s', async (type) => {
+    const deps = webhookDeps();
+    const res = await handleStripeWebhook(stripeEvent(type, { id: 'sub_1' }), deps);
+    expect(res.status).toBe(200);
+    expect(deps.syncSubscription).toHaveBeenCalledWith('sub_1');
+  });
+
+  it('syncs the new subscription when checkout completes', async () => {
+    const deps = webhookDeps();
+    await handleStripeWebhook(
+      stripeEvent('checkout.session.completed', {
+        id: 'cs_1',
+        mode: 'subscription',
+        subscription: 'sub_2',
+      }),
+      deps,
+    );
+    expect(deps.syncSubscription).toHaveBeenCalledWith('sub_2');
+  });
+
+  it('ignores checkouts that are not subscriptions', async () => {
+    const deps = webhookDeps();
+    await handleStripeWebhook(
+      stripeEvent('checkout.session.completed', { id: 'cs_1', mode: 'payment' }),
+      deps,
+    );
+    expect(deps.syncSubscription).not.toHaveBeenCalled();
+  });
+
+  it('acknowledges subscriptions that are not ours', async () => {
+    const deps = webhookDeps({
+      syncSubscription: vi.fn(async () => {
+        throw Object.assign(new Error('Unknown business'), { code: 'P0002' });
+      }),
+    });
+    const res = await handleStripeWebhook(
+      stripeEvent('customer.subscription.updated', { id: 'sub_1' }),
+      deps,
+    );
+    expect(res.status).toBe(200);
+  });
+
+  it('asks Stripe to retry when saving fails', async () => {
+    const deps = webhookDeps({
+      syncSubscription: vi.fn(async () => {
+        throw new Error('database unavailable');
+      }),
+    });
+    const res = await handleStripeWebhook(
+      stripeEvent('customer.subscription.updated', { id: 'sub_1' }),
       deps,
     );
     expect(res.status).toBe(500);
