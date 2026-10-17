@@ -1,0 +1,47 @@
+# Updates the live database (new migrations) and the Edge Functions.
+# Only runs when you click "Run workflow" in the Actions tab and type DEPLOY.
+# Run it after merging a branch that changes supabase/ (launch guide 4).
+name: Deploy backend
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: Type DEPLOY to update the live database and functions
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-backend
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Database and functions
+    if: inputs.confirm == 'DEPLOY' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: production
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+      PROJECT_REF: ${{ vars.SUPABASE_PROJECT_REF }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: supabase/setup-cli@v3
+        with:
+          version: latest
+
+      - name: Connect to the live project
+        run: supabase link --project-ref "$PROJECT_REF"
+
+      - name: Show database changes
+        run: supabase db push --dry-run
+
+      - name: Apply database changes
+        run: supabase db push
+
+      - name: Publish Edge Functions
+        run: supabase functions deploy --project-ref "$PROJECT_REF"
