@@ -60,6 +60,7 @@ jobs:
           VITE_ADMIN_URL: ${{ vars.VITE_ADMIN_URL }}
           VITE_SENTRY_DSN: ${{ vars.VITE_SENTRY_DSN }}
           VITE_CF_ANALYTICS_TOKEN: ${{ vars.VITE_CF_ANALYTICS_TOKEN }}
+          VITE_CONTACT_EMAIL: ${{ vars.VITE_CONTACT_EMAIL }}
           VITE_RELEASE: ${{ env.COMMIT }}
 
       - name: Publish the contractor app

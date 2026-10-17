@@ -11,7 +11,8 @@ import VerifiedUserOutlined from '@mui/icons-material/VerifiedUserOutlined';
 import WarningAmberOutlined from '@mui/icons-material/WarningAmberOutlined';
 import { Box, Button, Container, Grid, Stack, Typography } from '@mui/material';
 import type { SvgIconComponent } from '@mui/icons-material';
-import type { ReactNode } from 'react';
+import { Pricing } from './Pricing';
+import { SectionTitle } from './SectionTitle';
 import { loadWebAnalytics } from './webAnalytics';
 import { Link as RouterLink } from 'react-router';
 import { brand, fonts, Logo } from '@cs/brand';
@@ -36,6 +37,9 @@ function SiteHeader() {
           <Logo size={34} withWordmark onDark decorative />
         </RouterLink>
         <Box sx={{ flex: 1 }} />
+        <Button href="#pricing" sx={{ color: brand.mist }}>
+          Pricing
+        </Button>
         <Button component={RouterLink} to="/sign-in" sx={{ color: brand.mist }}>
           Sign in
         </Button>
@@ -275,26 +279,6 @@ function Principles() {
   );
 }
 
-function SectionTitle({ eyebrow, children }: { eyebrow: string; children: ReactNode }) {
-  return (
-    <Box sx={{ mb: { xs: 4, md: 6 }, maxWidth: 640 }}>
-      <Typography
-        variant="overline"
-        sx={{ color: 'primary.dark', fontWeight: 700, letterSpacing: '0.12em' }}
-      >
-        {eyebrow}
-      </Typography>
-      <Typography
-        variant="h2"
-        component="h2"
-        sx={{ fontSize: { xs: 32, md: 42 }, letterSpacing: '-0.02em', mt: 0.5 }}
-      >
-        {children}
-      </Typography>
-    </Box>
-  );
-}
-
 const steps: [SvgIconComponent, string, string][] = [
   [
     StorefrontOutlined,
@@ -517,6 +501,7 @@ export function LandingPage() {
         <Principles />
         <HowItWorks />
         <FactsNotLabels />
+        <Pricing />
         <FinalCta />
       </Box>
       <SiteFooter />
