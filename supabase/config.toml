@@ -418,3 +418,8 @@ enabled = true
 # signature instead, so platform JWT checks are off for this function only.
 [functions.stripe-webhook]
 verify_jwt = false
+
+# Called by the nightly cleanup job (pg_cron + pg_net), not by users. It checks the
+# x-purge-secret header (PURGE_FILES_SECRET) instead of a user's JWT.
+[functions.purge-expired-files]
+verify_jwt = false

@@ -1,4 +1,4 @@
-import { createFakeSupabase, type FakeState } from '@cs/core/testing';
+import { createFakeSupabase, type FakeState, typeText } from '@cs/core/testing';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
@@ -71,11 +71,11 @@ describe('<AdminApp /> login', () => {
       return { data: {}, error: null } as never;
     });
 
-    await userEvent.type(await screen.findByLabelText('Email'), 'mod@clientshield.test');
-    await userEvent.type(screen.getByLabelText('Password'), 'Shield-Strong-2026');
+    await typeText(await screen.findByLabelText('Email'), 'mod@clientshield.test');
+    await typeText(screen.getByLabelText('Password'), 'Shield-Strong-2026');
     await userEvent.click(screen.getByRole('button', { name: 'Continue' }));
 
-    await userEvent.type(await screen.findByLabelText('6-digit code'), '123456');
+    await typeText(await screen.findByLabelText('6-digit code'), '123456');
     await userEvent.click(screen.getByRole('button', { name: 'Verify' }));
 
     expect(fake.mocks.auth.mfa.challengeAndVerify).toHaveBeenCalledWith({
@@ -94,8 +94,8 @@ describe('<AdminApp /> login', () => {
       return { data: { user: null, session: null }, error: null } as never;
     });
 
-    await userEvent.type(await screen.findByLabelText('Email'), 'mod@clientshield.test');
-    await userEvent.type(screen.getByLabelText('Password'), 'Shield-Strong-2026');
+    await typeText(await screen.findByLabelText('Email'), 'mod@clientshield.test');
+    await typeText(screen.getByLabelText('Password'), 'Shield-Strong-2026');
     await userEvent.click(screen.getByRole('button', { name: 'Continue' }));
 
     expect(await screen.findByRole('alert')).toHaveTextContent(
@@ -120,10 +120,10 @@ describe('<AdminApp /> login', () => {
       return { data: {}, error: null } as never;
     });
 
-    await userEvent.type(await screen.findByLabelText('Email'), 'owner@alpha.test');
-    await userEvent.type(screen.getByLabelText('Password'), 'Shield-Strong-2026');
+    await typeText(await screen.findByLabelText('Email'), 'owner@alpha.test');
+    await typeText(screen.getByLabelText('Password'), 'Shield-Strong-2026');
     await userEvent.click(screen.getByRole('button', { name: 'Continue' }));
-    await userEvent.type(await screen.findByLabelText('6-digit code'), '123456');
+    await typeText(await screen.findByLabelText('6-digit code'), '123456');
     await userEvent.click(screen.getByRole('button', { name: 'Verify' }));
 
     expect(await screen.findByRole('alert')).toHaveTextContent(
@@ -146,8 +146,8 @@ describe('<AdminApp /> login problems', () => {
       data: { user: null, session: null },
       error: { code: 'invalid_credentials', message: 'Invalid login credentials' },
     } as never);
-    await userEvent.type(await screen.findByLabelText('Email'), 'mod@clientshield.test');
-    await userEvent.type(screen.getByLabelText('Password'), 'wrong');
+    await typeText(await screen.findByLabelText('Email'), 'mod@clientshield.test');
+    await typeText(screen.getByLabelText('Password'), 'wrong');
     await userEvent.click(screen.getByRole('button', { name: 'Continue' }));
     expect(await screen.findByRole('alert')).toHaveTextContent('Email or password is incorrect.');
   });
@@ -163,10 +163,10 @@ describe('<AdminApp /> login problems', () => {
       });
       return { data: { user: null, session: null }, error: null } as never;
     });
-    await userEvent.type(await screen.findByLabelText('Email'), 'mod@clientshield.test');
-    await userEvent.type(screen.getByLabelText('Password'), 'Shield-Strong-2026');
+    await typeText(await screen.findByLabelText('Email'), 'mod@clientshield.test');
+    await typeText(screen.getByLabelText('Password'), 'Shield-Strong-2026');
     await userEvent.click(screen.getByRole('button', { name: 'Continue' }));
-    await userEvent.type(await screen.findByLabelText('6-digit code'), '12');
+    await typeText(await screen.findByLabelText('6-digit code'), '12');
     await userEvent.click(screen.getByRole('button', { name: 'Verify' }));
     expect(await screen.findByRole('alert')).toHaveTextContent('Enter the 6-digit code');
     expect(fake.mocks.auth.mfa.challengeAndVerify).not.toHaveBeenCalled();

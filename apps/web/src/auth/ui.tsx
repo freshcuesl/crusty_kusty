@@ -16,7 +16,7 @@ import {
   useTheme,
 } from '@mui/material';
 import { useId, useState, type ReactNode } from 'react';
-import { Outlet } from 'react-router';
+import { Outlet, Link as RouterLink } from 'react-router';
 import { Logo } from '@cs/brand';
 import { visuallyHidden } from './a11y';
 import { passwordRules } from './passwordPolicy';
@@ -38,7 +38,13 @@ export function AuthLayout() {
     >
       <Container maxWidth="xs">
         <Stack spacing={3} sx={{ alignItems: 'center' }}>
-          <Logo size={56} withWordmark onDark={onDark} />
+          <RouterLink
+            to="/"
+            aria-label="ClientShield home"
+            style={{ color: 'inherit', display: 'inline-flex', textDecoration: 'none' }}
+          >
+            <Logo size={56} withWordmark onDark={onDark} decorative />
+          </RouterLink>
           <Paper variant="outlined" sx={{ p: { xs: 2.5, sm: 4 }, width: '100%', borderRadius: 4 }}>
             <Outlet />
           </Paper>

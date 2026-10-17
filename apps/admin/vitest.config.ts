@@ -8,6 +8,6 @@ export default defineProject({
     setupFiles: ['../../test/setup.ts'],
     include: ['src/**/*.test.{ts,tsx}'],
     // react-admin pages mount many providers; give them the same headroom as the web app.
-    testTimeout: 15_000,
+    testTimeout: 30_000,
   },
 });

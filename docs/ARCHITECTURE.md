@@ -19,7 +19,7 @@ It is not a blacklist and never offers public people search.
 | Hosting         | Cloudflare (static assets, `_headers` for security headers)                                                                                            |
 | Identity checks | Stripe Identity for owners, plus business documents reviewed by a moderator                                                                            |
 | Email / errors  | Resend and Sentry, added at deploy time                                                                                                                |
-| Retention       | Minor disputes 24 months; fraud and chargebacks 60 months (admin-configurable)                                                                         |
+| Retention       | Minor disputes 24 months; fraud and chargebacks 60 months (admins can change it, 6 to 60 months)                                                       |
 | Brand           | "C" monogram shield (B) with the "Midnight and teal" palette; amber for alerts, never red                                                              |
 | Future          | Invoicing and servicing (one-stop shop)                                                                                                                |
 
@@ -114,6 +114,90 @@ Stripe Identity checks a government ID plus a live selfie on Stripe's own page.
   type-checked with `npm run functions:check` (Deno) in CI.
 - Local without Stripe: `npm run dev:verify-identity -- email` (local database only).
 
+## Incidents (implemented)
+
+Flow: `draft` → submit (needs at least one piece of evidence) → `submitted` (locked) →
+a moderator chooses `evidence_verified`, `needs_info` (note required; reporter edits and
+resubmits) or `rejected` (note required). Moderators confirm the job, the dispute and the evidence
+exist. They never decide who was right.
+
+- **Who can report:** members (owner or staff) of a **verified** business, with two-step login.
+  Abuse guard: 50 reports per 30 days per business.
+- **Customer details:** stored in `incident_customers`. Only the reporting business and
+  moderators can read them.
+- **Evidence:** the private `incident-evidence` bucket, at
+  `<business id>/<incident id>/<random name>`, 15 MB, PDF or photo. Files can't be replaced, and
+  each carries a SHA-256 fingerprint that moderators can check.
+- **Expiry:** set when verified. Chargebacks and fraud expire after 60 months, everything else
+  after 24.
+- **Matching fingerprints:** written when an incident is verified, into `incident_identifiers`.
+  Each one is an HMAC-SHA256 of the normalized name, phone, email or address, keyed with
+  `identifier_pepper` in Supabase Vault. The table has no API access. Normalization lives in
+  `private.normalize_identifier` (for example "Street" becomes "st", and plus-tags are removed
+  from email addresses).
+
+## Customer matching (implemented)
+
+- `check_customer(p_customer)` checks a customer without saving them. `add_customer(p_customer)`
+  saves the customer in the business's private `customers` table and checks them. Only verified
+  businesses with two-step login can do either.
+- The details entered are normalized and fingerprinted exactly like incident identifiers.
+  An incident matches only if it is `evidence_verified`, not expired, and **at least two**
+  fingerprints agree.
+- Results come from `private.incident_facts`: dispute category, service month, evidence count and
+  kinds, Google rating, outcome and expiry month. They never include the customer, the reporting
+  business or incident ids. `match_alert_incidents` has no API access.
+- Every check is logged in `customer_checks` (which kinds of detail were given, never the values),
+  with a limit of 300 a day per business. Matches create a `match_alerts` row for that business
+  only. `respond_to_alert` records the choice: continue booking, require authorization or decline.
+- `alert_details` recomputes facts when an alert is opened, so expired incidents drop out.
+
+## Customer records and private notes (implemented)
+
+- `/customers` lists the business's saved customers; `/customers/:id` shows details, **Check again**
+  (`recheck_customer`) and private notes.
+- `customer_notes`: readable only by members of that business (not other businesses, not
+  moderators) and never used for matching. Written through `add_customer_note` (1 to 2,000
+  characters); `delete_customer_note` is allowed for the author or the owner.
+- `delete_customer` (owner only) removes the record and its notes, for example at the customer's
+  request. Past alerts stay, with the name the business typed.
+
+## Retention (implemented)
+
+- `retention_rules` holds months per dispute type (default 60 for chargebacks and fraud, 24 for the
+  rest). Moderators can read it; only admins change it, through `set_retention_months` (6 to 60
+  months). `private.incident_expiry` reads it when an incident is verified, so changes apply to
+  incidents verified from then on.
+- `private.purge_expired()` runs nightly through pg_cron (`purge-expired-records`, 03:17 UTC):
+  - Verified incidents past `expires_at`, and rejected ones 12 months after the decision: deletes
+    customer details, fingerprints and evidence rows, clears notes and written details, sets status
+    `expired` and logs an `expired` event.
+  - Drafts and `needs_info` reports untouched for 12 months are deleted.
+  - `customer_checks` older than 24 months are deleted (their alerts go with them).
+- Storage files can only be deleted through the Storage API, so their paths go into
+  `private.storage_purge_queue`. The `purge-expired-files` Edge Function (logic in
+  `supabase/functions/_shared/purge.ts`) claims and deletes them. pg_cron calls it through pg_net
+  (`purge-expired-files`, 03:47 UTC) once Vault has `project_url` and `purge_files_secret` and the
+  function has the matching `PURGE_FILES_SECRET`. Set this up in the launch guide; until then the
+  job does nothing. Queue functions are for the service role only.
+
+## Abuse detection (implemented)
+
+Triggers on `customer_checks` and `incidents` open an `abuse_flags` row. There's at most one open
+flag per business and kind.
+
+| Flag                  | Raised when                                     |
+| --------------------- | ----------------------------------------------- |
+| `high_check_volume`   | 100 or more checks in 24 hours                  |
+| `many_unsaved_checks` | 40 or more checks in 24 hours of unsaved people |
+| `high_report_volume`  | 10 or more reports submitted in 7 days          |
+| `repeated_rejections` | 3 or more reports rejected in 90 days           |
+
+The thresholds sit below the hard limits (300 checks a day, 50 reports in 30 days). Only moderators
+can see flags, and businesses never do. `resolve_abuse_flag` needs a note. After a flag is
+resolved, a new one opens if the pattern continues. The admin panel shows them under
+**Abuse flags**, with an open count on the dashboard and **Retention** in the menu.
+
 ## Data model direction
 
 Two separate layers, joined only through the blind matching check:
@@ -126,8 +210,8 @@ Two separate layers, joined only through the blind matching check:
 A separate `customer_identity` concept keeps option B possible: a customer can later claim an
 identity after verification and respond to incidents about it.
 
-Incident statuses: `submitted` → `evidence_verified` or `disputed`, plus `resolved` and
-`expired`. Moderators confirm the job, the dispute and the evidence exist. They never
+Incident statuses (implemented): `draft` → `submitted` → `evidence_verified`, `needs_info` or
+`rejected`, then `expired` after retention. `disputed` and `resolved` arrive with option B. Moderators confirm the job, the dispute and the evidence exist. They never
 decide who was right.
 
 ## Testing strategy (test-driven development)
@@ -146,11 +230,10 @@ Every change starts with a failing test. CI runs all layers on every push.
 1. `setup/project-foundation`: this branch
 2. `feature/auth-mfa`: sign-up, sign-in, required MFA, roles, staff invites, admin login
 3. `feature/business-verification`: onboarding, Stripe Identity, documents, admin queue
-4. `feature/incidents-evidence`: incident records, uploads, integrity and audit
-5. `feature/moderation`: react-admin review workflow
-6. `feature/blind-matching`: normalization, hashing, alerts, incident cards
-7. `feature/private-notes-retention-abuse`: notes, expiration rules, abuse detection
-8. `feature/subscriptions`: Stripe billing tiers
-9. `feature/analytics`
-10. `feature/crm-integrations` and later invoicing
-11. `feature/passkeys-recovery-codes`: when Supabase marks them stable
+4. `feature/incidents`: incident records, evidence, moderator review, fingerprints (done)
+5. `feature/matching`: normalization, hashing, alerts, incident cards (done)
+6. `feature/notes-retention-abuse`: notes, expiration rules, abuse detection (done)
+7. `feature/subscriptions`: Stripe billing tiers
+8. `feature/analytics`
+9. `feature/crm-integrations` and later invoicing
+10. `feature/passkeys-recovery-codes`: when Supabase marks them stable

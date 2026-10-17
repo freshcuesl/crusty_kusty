@@ -1,3 +1,4 @@
+import { typeText } from '@cs/core/testing';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
@@ -7,8 +8,8 @@ describe('sign in', () => {
   it('signs in with the email and password entered', async () => {
     const { fake } = renderApp('/sign-in', as.signedOut);
 
-    await userEvent.type(await screen.findByLabelText('Email'), '  Owner@Alpha.test ');
-    await userEvent.type(screen.getByLabelText('Password'), 'Shield-Strong-2026');
+    await typeText(await screen.findByLabelText('Email'), '  Owner@Alpha.test ');
+    await typeText(screen.getByLabelText('Password'), 'Shield-Strong-2026');
     await userEvent.click(screen.getByRole('button', { name: 'Sign in' }));
 
     expect(fake.mocks.auth.signInWithPassword).toHaveBeenCalledWith({
@@ -24,8 +25,8 @@ describe('sign in', () => {
       error: { code: 'invalid_credentials', message: 'Invalid login credentials' },
     } as never);
 
-    await userEvent.type(await screen.findByLabelText('Email'), 'owner@alpha.test');
-    await userEvent.type(screen.getByLabelText('Password'), 'wrong-password');
+    await typeText(await screen.findByLabelText('Email'), 'owner@alpha.test');
+    await typeText(screen.getByLabelText('Password'), 'wrong-password');
     await userEvent.click(screen.getByRole('button', { name: 'Sign in' }));
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Email or password is incorrect.');
@@ -47,8 +48,8 @@ describe('sign in', () => {
       return { data: { user: null, session: null }, error: null } as never;
     });
 
-    await userEvent.type(await screen.findByLabelText('Email'), 'owner@alpha.test');
-    await userEvent.type(screen.getByLabelText('Password'), 'Shield-Strong-2026');
+    await typeText(await screen.findByLabelText('Email'), 'owner@alpha.test');
+    await typeText(screen.getByLabelText('Password'), 'Shield-Strong-2026');
     await userEvent.click(screen.getByRole('button', { name: 'Sign in' }));
 
     await waitFor(() => expect(path()).toBe('/mfa/verify'));

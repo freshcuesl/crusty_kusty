@@ -1,3 +1,4 @@
+import { typeText } from '@cs/core/testing';
 import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
@@ -17,9 +18,9 @@ describe('when things go wrong', () => {
   it('sign-up explains a rate limit from the server', async () => {
     const { fake } = renderApp('/sign-up', as.signedOut);
     fake.mocks.auth.signUp.mockResolvedValueOnce(refused('over_email_send_rate_limit'));
-    await userEvent.type(await screen.findByLabelText('Your name'), 'Olive');
-    await userEvent.type(screen.getByLabelText('Email'), 'o@alpha.test');
-    await userEvent.type(screen.getByLabelText('Password'), 'Shield-Strong-2026');
+    await typeText(await screen.findByLabelText('Your name'), 'Olive');
+    await typeText(screen.getByLabelText('Email'), 'o@alpha.test');
+    await typeText(screen.getByLabelText('Password'), 'Shield-Strong-2026');
     await userEvent.click(screen.getByRole('button', { name: 'Create account' }));
     expect(await screen.findByRole('alert')).toHaveTextContent('Too many emails sent');
   });
@@ -27,8 +28,8 @@ describe('when things go wrong', () => {
   it('sign-in explains a lost connection', async () => {
     const { fake } = renderApp('/sign-in', as.signedOut);
     fake.mocks.auth.signInWithPassword.mockRejectedValueOnce(new TypeError('Failed to fetch'));
-    await userEvent.type(await screen.findByLabelText('Email'), 'o@alpha.test');
-    await userEvent.type(screen.getByLabelText('Password'), 'anything-at-all');
+    await typeText(await screen.findByLabelText('Email'), 'o@alpha.test');
+    await typeText(screen.getByLabelText('Password'), 'anything-at-all');
     await userEvent.click(screen.getByRole('button', { name: 'Sign in' }));
     expect(await screen.findByRole('alert')).toHaveTextContent("Can't reach the server");
   });
@@ -43,7 +44,7 @@ describe('when things go wrong', () => {
   it('forgot-password shows rate limits but hides every other server answer', async () => {
     const { fake } = renderApp('/forgot-password', as.signedOut);
     fake.mocks.auth.resetPasswordForEmail.mockResolvedValueOnce(refused('over_request_rate_limit'));
-    await userEvent.type(await screen.findByLabelText('Email'), 'o@alpha.test');
+    await typeText(await screen.findByLabelText('Email'), 'o@alpha.test');
     await userEvent.click(screen.getByRole('button', { name: 'Send reset link' }));
     expect(await screen.findByRole('alert')).toHaveTextContent('Too many attempts');
 
@@ -55,7 +56,7 @@ describe('when things go wrong', () => {
   it('reset-password shows a server refusal', async () => {
     const { fake } = renderApp('/reset-password', as.owner);
     fake.mocks.auth.updateUser.mockResolvedValueOnce(refused('same_password'));
-    await userEvent.type(await screen.findByLabelText('New password'), 'Brand-New-Shield-9');
+    await typeText(await screen.findByLabelText('New password'), 'Brand-New-Shield-9');
     await userEvent.click(screen.getByRole('button', { name: 'Save password' }));
     expect(await screen.findByRole('alert')).toHaveTextContent('not used before');
   });
@@ -71,14 +72,14 @@ describe('when things go wrong', () => {
     fake.mocks.auth.mfa.challengeAndVerify.mockResolvedValueOnce(
       refused('mfa_verification_failed'),
     );
-    await userEvent.type(await screen.findByLabelText('6-digit code'), '000000');
+    await typeText(await screen.findByLabelText('6-digit code'), '000000');
     await userEvent.click(screen.getByRole('button', { name: 'Turn on two-step login' }));
     expect(await screen.findByRole('alert')).toHaveTextContent("That code didn't work");
   });
 
   it('code screen only accepts 6 digits', async () => {
     const { fake } = renderApp('/mfa/verify', as.needsMfaCode);
-    await userEvent.type(await screen.findByLabelText('6-digit code'), '12');
+    await typeText(await screen.findByLabelText('6-digit code'), '12');
     await userEvent.click(screen.getByRole('button', { name: 'Verify' }));
     expect(await screen.findByRole('alert')).toHaveTextContent('Enter the 6-digit code');
     expect(fake.mocks.auth.mfa.challengeAndVerify).not.toHaveBeenCalled();
@@ -91,7 +92,7 @@ describe('when things go wrong', () => {
         ? refused('22023', 'Enter a valid email address')
         : ({ data: [], error: null } as never),
     );
-    await userEvent.type(await screen.findByLabelText('Their email'), 'not-an-email');
+    await typeText(await screen.findByLabelText('Their email'), 'not-an-email');
     await userEvent.click(screen.getByRole('button', { name: 'Create invite link' }));
     expect(await screen.findByRole('alert')).toHaveTextContent('Enter a valid email address');
   });
@@ -107,7 +108,7 @@ describe('when things go wrong', () => {
         ? ({ data: 'tok', error: null } as never)
         : ({ data: [], error: null } as never),
     );
-    await userEvent.type(await screen.findByLabelText('Their email'), 'n@alpha.test');
+    await typeText(await screen.findByLabelText('Their email'), 'n@alpha.test');
     await userEvent.click(screen.getByRole('button', { name: 'Create invite link' }));
     await userEvent.click(await screen.findByRole('button', { name: 'Copy link' }));
     expect(await screen.findByRole('alert')).toHaveTextContent('Press and hold the link');

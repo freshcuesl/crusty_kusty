@@ -15,8 +15,11 @@ export function createDataProvider(supabase: SupabaseClient): DataProvider {
   async function list(resource: string, params: GetListParams) {
     const { page, perPage } = params.pagination ?? { page: 1, perPage: 25 };
     let query = supabase.from(resource).select('*', { count: 'exact' });
-    for (const [field, value] of Object.entries(params.filter ?? {})) {
-      if (value !== '' && value !== undefined && value !== null) query = query.eq(field, value);
+    for (const [key, value] of Object.entries(params.filter ?? {})) {
+      if (value === '' || value === undefined || value === null) continue;
+      // "field@is": "null" filters on a missing value, e.g. open flags (resolved_at is null).
+      if (key.endsWith('@is')) query = query.is(key.slice(0, -3), value === 'null' ? null : value);
+      else query = query.eq(key, value);
     }
     if (params.sort) {
       query = query.order(params.sort.field, { ascending: params.sort.order === 'ASC' });

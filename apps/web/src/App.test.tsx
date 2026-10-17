@@ -45,17 +45,13 @@ describe('home screen', () => {
     expect(await screen.findByText(/isn't verified yet/)).toBeInTheDocument();
   });
 
-  it('opens a placeholder for features still being built', async () => {
+  it('opens the incident report form from the home screen', async () => {
     renderApp('/', as.verifiedOwner);
     await userEvent.click(await screen.findByRole('link', { name: /Report incident/ }));
-    expect(screen.getByRole('heading', { name: 'Report incident' })).toBeInTheDocument();
-    expect(screen.getByText(/coming soon/i)).toBeInTheDocument();
-  });
-
-  it('can go back home from a placeholder', async () => {
-    renderApp('/alerts', as.owner);
-    await userEvent.click(await screen.findByRole('link', { name: 'Back to home' }));
-    expect(screen.getByRole('link', { name: /Customer check/ })).toBeInTheDocument();
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Report incident' }),
+    ).toBeInTheDocument();
+    expect(screen.getByLabelText('Customer name')).toBeInTheDocument();
   });
 });
 
@@ -67,10 +63,12 @@ describe('unknown pages', () => {
 });
 
 describe('<App />', () => {
-  it('boots into sign-in with the real router', async () => {
+  it('boots into the landing page with the real router', async () => {
     getSupabase.mockReturnValue(createFakeSupabase().client);
     render(<App />);
-    expect(await screen.findByRole('heading', { name: 'Sign in' })).toBeInTheDocument();
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Know before you go.' }),
+    ).toBeInTheDocument();
   });
 
   it('explains how to connect when configuration is missing', () => {

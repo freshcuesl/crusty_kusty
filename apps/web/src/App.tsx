@@ -1,11 +1,11 @@
 import { CssBaseline, ThemeProvider } from '@mui/material';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { useMemo } from 'react';
-import { BrowserRouter, Route, Routes } from 'react-router';
+import { useMemo, type ComponentType } from 'react';
+import { BrowserRouter, Route, Routes, useLocation } from 'react-router';
 import { createAppTheme } from '@cs/brand';
 import { SecurityPage } from './account/SecurityPage';
 import { TeamPage } from './account/TeamPage';
-import { AuthProvider } from './auth/AuthProvider';
+import { AuthProvider, useAuth } from './auth/AuthProvider';
 import { Gate } from './auth/Gate';
 import { CheckEmailPage } from './auth/pages/CheckEmailPage';
 import { ForgotPasswordPage } from './auth/pages/ForgotPasswordPage';
@@ -18,9 +18,16 @@ import { SignInPage } from './auth/pages/SignInPage';
 import { SignUpPage } from './auth/pages/SignUpPage';
 import { SupabaseProvider } from './auth/SupabaseProvider';
 import { AuthLayout } from './auth/ui';
+import { CustomerPage } from './customers/CustomerPage';
+import { CustomersPage } from './customers/CustomersPage';
+import { IncidentPage } from './incidents/IncidentPage';
+import { MyIncidentsPage } from './incidents/MyIncidentsPage';
+import { ReportIncidentPage } from './incidents/ReportIncidentPage';
+import { LandingPage } from './landing/LandingPage';
+import { AlertDetailPage, AlertsPage } from './matching/AlertPages';
+import { CustomerCheckPage, NewCustomerPage } from './matching/CheckPages';
 import { AppShell } from './layout/AppShell';
 import { getSupabase } from './lib/supabase';
-import { ComingSoonPage } from './pages/ComingSoonPage';
 import { ConfigErrorPage } from './pages/ConfigErrorPage';
 import { HomePage } from './pages/HomePage';
 import { NotFoundPage } from './pages/NotFoundPage';
@@ -29,6 +36,31 @@ import { homeActions } from './routes';
 import { useColorMode } from './theme/useColorMode';
 import { RequireVerified } from './verification/RequireVerified';
 import { VerificationPage } from './verification/VerificationPage';
+
+/** The page behind each home-screen action. */
+const ACTION_PAGES: Record<string, ComponentType> = {
+  '/incidents/new': ReportIncidentPage,
+  '/incidents': MyIncidentsPage,
+  '/customers/new': NewCustomerPage,
+  '/check': CustomerCheckPage,
+  '/alerts': AlertsPage,
+  '/customers': CustomersPage,
+};
+
+/**
+ * Signed-out visitors at "/" see the public landing page. Every other app page,
+ * and "/" for members, goes through the usual sign-in gate.
+ */
+function HomeOrLanding() {
+  const { step } = useAuth();
+  const { pathname } = useLocation();
+  if (step === 'signed-out' && pathname === '/') return <LandingPage />;
+  return (
+    <Gate allow={['ready']} rememberAsDestination>
+      <AppShell />
+    </Gate>
+  );
+}
 
 export function AppRoutes() {
   return (
@@ -101,29 +133,22 @@ export function AppRoutes() {
         <Route path="/invite/:token" element={<InvitePage />} />
       </Route>
 
-      <Route
-        element={
-          <Gate allow={['ready']} rememberAsDestination>
-            <AppShell />
-          </Gate>
-        }
-      >
+      <Route element={<HomeOrLanding />}>
         <Route index element={<HomePage />} />
-        {homeActions.map(({ path, label, needsVerification }) => (
-          <Route
-            key={path}
-            path={path}
-            element={
-              needsVerification ? (
-                <RequireVerified>
-                  <ComingSoonPage title={label} />
-                </RequireVerified>
-              ) : (
-                <ComingSoonPage title={label} />
-              )
-            }
-          />
-        ))}
+        {homeActions.map(({ path, needsVerification }) => {
+          const Page = ACTION_PAGES[path] ?? NotFoundPage;
+          const page = <Page />;
+          return (
+            <Route
+              key={path}
+              path={path}
+              element={needsVerification ? <RequireVerified>{page}</RequireVerified> : page}
+            />
+          );
+        })}
+        <Route path="/incidents/:id" element={<IncidentPage />} />
+        <Route path="/customers/:id" element={<CustomerPage />} />
+        <Route path="/alerts/:id" element={<AlertDetailPage />} />
         <Route path="/verification" element={<VerificationPage />} />
         <Route path="/team" element={<TeamPage />} />
         <Route path="/account/security" element={<SecurityPage />} />

@@ -1,4 +1,5 @@
 import AccountCircle from '@mui/icons-material/AccountCircle';
+import AdminPanelSettingsOutlined from '@mui/icons-material/AdminPanelSettingsOutlined';
 import GroupsOutlined from '@mui/icons-material/GroupsOutlined';
 import LockOutlined from '@mui/icons-material/LockOutlined';
 import VerifiedOutlined from '@mui/icons-material/VerifiedOutlined';
@@ -8,8 +9,11 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useAuth } from '../auth/AuthProvider';
 
+/** Where the admin panel lives. Set VITE_ADMIN_URL for hosted deployments. */
+const ADMIN_URL = import.meta.env.VITE_ADMIN_URL || 'http://localhost:5174';
+
 export function AccountMenu() {
-  const { user, signOut } = useAuth();
+  const { user, signOut, platformRole } = useAuth();
   const navigate = useNavigate();
   const [anchor, setAnchor] = useState<HTMLElement | null>(null);
   const close = () => setAnchor(null);
@@ -36,6 +40,14 @@ export function AccountMenu() {
           </Typography>
         )}
         <Divider />
+        {platformRole && (
+          <MenuItem component="a" href={ADMIN_URL} onClick={close}>
+            <ListItemIcon>
+              <AdminPanelSettingsOutlined fontSize="small" />
+            </ListItemIcon>
+            Admin panel
+          </MenuItem>
+        )}
         <MenuItem onClick={() => go('/verification')}>
           <ListItemIcon>
             <VerifiedOutlined fontSize="small" />

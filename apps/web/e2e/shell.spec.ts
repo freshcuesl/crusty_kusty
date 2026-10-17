@@ -2,11 +2,12 @@ import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 
 test.describe('signed-out visitors', () => {
-  test('are sent to sign in', async ({ page }) => {
+  test('see the landing page at the home address', async ({ page }) => {
     await page.goto('/');
     await expect(page).toHaveTitle('ClientShield');
-    await expect(page).toHaveURL(/\/sign-in$/);
-    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Sign in');
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Know before you go.');
+    await page.getByRole('link', { name: 'Get started free' }).click();
+    await expect(page).toHaveURL(/\/sign-up$/);
   });
 
   test('cannot open app pages directly', async ({ page }) => {
@@ -14,7 +15,7 @@ test.describe('signed-out visitors', () => {
     await expect(page).toHaveURL(/\/sign-in$/);
   });
 
-  for (const path of ['/sign-in', '/sign-up', '/forgot-password']) {
+  for (const path of ['/', '/sign-in', '/sign-up', '/forgot-password']) {
     test(`${path} has no automatically detectable accessibility problems`, async ({ page }) => {
       await page.goto(path);
       await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
@@ -86,6 +87,6 @@ test.describe('installable PWA', () => {
     await page.reload();
     await context.setOffline(true);
     await page.reload();
-    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Sign in');
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Know before you go.');
   });
 });

@@ -8,13 +8,14 @@ export const ACCEPTED_DOCUMENT_TYPES = [
 ];
 
 /** Returns a plain-language problem with the file, or null when it can be uploaded. */
-export function checkDocumentFile(file: File): string | null {
+export function checkDocumentFile(file: File, maxBytes = MAX_DOCUMENT_BYTES): string | null {
   if (!ACCEPTED_DOCUMENT_TYPES.includes(file.type)) {
     return 'Upload a PDF or a photo (JPG, PNG, WEBP or HEIC).';
   }
   if (file.size === 0) return 'That file is empty.';
-  if (file.size > MAX_DOCUMENT_BYTES) {
-    return 'That file is over 10 MB. Try a smaller photo or a scanned PDF.';
+  if (file.size > maxBytes) {
+    const mb = Math.round(maxBytes / (1024 * 1024));
+    return `That file is over ${mb} MB. Try a smaller photo or a scanned PDF.`;
   }
   return null;
 }

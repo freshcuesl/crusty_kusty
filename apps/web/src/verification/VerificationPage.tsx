@@ -25,6 +25,7 @@ import { useSupabase } from '../auth/SupabaseProvider';
 import { FormError } from '../auth/ui';
 import { currentIdentity, identityReason, type IdentityCheck } from './identity';
 import { redirectTo } from './redirect';
+import { US_STATES } from '../lib/usStates';
 import { ACCEPTED_DOCUMENT_TYPES, checkDocumentFile, storagePathFor } from './verificationUtils';
 
 type Status = Membership['verificationStatus'] | 'needs_info';
@@ -55,60 +56,6 @@ const KIND_LABELS: Record<DocumentKind, string> = {
   ein_letter: 'EIN letter from the IRS',
   insurance_certificate: 'Certificate of insurance',
 };
-
-const US_STATES = [
-  'AL',
-  'AK',
-  'AZ',
-  'AR',
-  'CA',
-  'CO',
-  'CT',
-  'DE',
-  'DC',
-  'FL',
-  'GA',
-  'HI',
-  'ID',
-  'IL',
-  'IN',
-  'IA',
-  'KS',
-  'KY',
-  'LA',
-  'ME',
-  'MD',
-  'MA',
-  'MI',
-  'MN',
-  'MS',
-  'MO',
-  'MT',
-  'NE',
-  'NV',
-  'NH',
-  'NJ',
-  'NM',
-  'NY',
-  'NC',
-  'ND',
-  'OH',
-  'OK',
-  'OR',
-  'PA',
-  'RI',
-  'SC',
-  'SD',
-  'TN',
-  'TX',
-  'UT',
-  'VT',
-  'VA',
-  'WA',
-  'WV',
-  'WI',
-  'WY',
-];
 
 const BUCKET = 'business-documents';
 const EDITABLE: Status[] = ['unverified', 'needs_info', 'rejected'];

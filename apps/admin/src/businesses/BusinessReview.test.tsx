@@ -1,4 +1,4 @@
-import { createFakeSupabase, type FakeState } from '@cs/core/testing';
+import { createFakeSupabase, type FakeState, typeText } from '@cs/core/testing';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -152,7 +152,7 @@ describe('reviewing a business', () => {
     );
     expect(fake.mocks.rpc).not.toHaveBeenCalledWith('review_business', expect.anything());
 
-    await userEvent.type(screen.getByLabelText('Note to the business'), 'License is expired.');
+    await typeText(screen.getByLabelText('Note to the business'), 'License is expired.');
     await userEvent.click(screen.getByRole('button', { name: 'Ask for more info' }));
     expect(fake.mocks.rpc).toHaveBeenCalledWith('review_business', {
       p_business_id: 'b1',
@@ -163,7 +163,7 @@ describe('reviewing a business', () => {
 
   it('rejects with a note', async () => {
     const { fake } = await openReview();
-    await userEvent.type(screen.getByLabelText('Note to the business'), 'Not a real business.');
+    await typeText(screen.getByLabelText('Note to the business'), 'Not a real business.');
     await userEvent.click(screen.getByRole('button', { name: 'Reject' }));
     expect(fake.mocks.rpc).toHaveBeenCalledWith('review_business', {
       p_business_id: 'b1',

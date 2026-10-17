@@ -1,3 +1,4 @@
+import { typeText } from '@cs/core/testing';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it } from 'vitest';
@@ -8,12 +9,12 @@ afterEach(() => sessionStorage.clear());
 describe('creating a business', () => {
   it('creates the business and opens the app', async () => {
     const { fake, path } = renderApp('/onboarding', as.needsBusiness);
-    fake.mocks.rpc.mockImplementationOnce(async () => {
+    fake.whenRpc('create_business', () => {
       fake.state.membership = ownerMembership;
-      return { data: 'b1', error: null } as never;
+      return { data: 'b1', error: null };
     });
 
-    await userEvent.type(await screen.findByLabelText('Business name'), 'Alpha Plumbing');
+    await typeText(await screen.findByLabelText('Business name'), 'Alpha Plumbing');
     await userEvent.click(screen.getByRole('button', { name: 'Create business' }));
 
     expect(fake.mocks.rpc).toHaveBeenCalledWith('create_business', { p_name: 'Alpha Plumbing' });
@@ -22,12 +23,12 @@ describe('creating a business', () => {
 
   it('shows the database reason when creation is refused', async () => {
     const { fake } = renderApp('/onboarding', as.needsBusiness);
-    fake.mocks.rpc.mockResolvedValueOnce({
+    fake.whenRpc('create_business', {
       data: null,
       error: { code: '22023', message: 'Business name must be 2 to 120 characters' },
-    } as never);
+    });
 
-    await userEvent.type(await screen.findByLabelText('Business name'), 'A');
+    await typeText(await screen.findByLabelText('Business name'), 'A');
     await userEvent.click(screen.getByRole('button', { name: 'Create business' }));
 
     expect(await screen.findByRole('alert')).toHaveTextContent(
@@ -53,9 +54,9 @@ describe('joining with an invite link', () => {
   it('joins the team once the person is signed in with two-step login', async () => {
     sessionStorage.setItem('cs.pendingInvite', 'tok_123');
     const { fake, path } = renderApp('/onboarding', as.needsBusiness);
-    fake.mocks.rpc.mockImplementationOnce(async () => {
+    fake.whenRpc('accept_invite', () => {
       fake.state.membership = { ...ownerMembership, role: 'staff' };
-      return { data: 'b1', error: null } as never;
+      return { data: 'b1', error: null };
     });
 
     await userEvent.click(await screen.findByRole('button', { name: 'Join the team' }));
@@ -68,10 +69,10 @@ describe('joining with an invite link', () => {
   it('explains an invite that no longer works and lets them discard it', async () => {
     sessionStorage.setItem('cs.pendingInvite', 'tok_old');
     const { fake } = renderApp('/onboarding', as.needsBusiness);
-    fake.mocks.rpc.mockResolvedValueOnce({
+    fake.whenRpc('accept_invite', {
       data: null,
       error: { code: 'P0002', message: 'Invite not found, expired, or for a different email' },
-    } as never);
+    });
 
     await userEvent.click(await screen.findByRole('button', { name: 'Join the team' }));
     expect(await screen.findByRole('alert')).toHaveTextContent('Invite not found');
