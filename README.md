@@ -13,6 +13,7 @@ matches a verified incident.
 - **Try sign-up and two-step login:** [docs/setup/02-try-sign-in-locally.md](docs/setup/02-try-sign-in-locally.md)
 - **Try business verification:** [docs/setup/03-try-business-verification.md](docs/setup/03-try-business-verification.md)
 - **Connect Stripe Identity (test mode):** [docs/setup/04-connect-stripe-identity.md](docs/setup/04-connect-stripe-identity.md)
+- **Report and review an incident:** [docs/setup/05-try-an-incident-report.md](docs/setup/05-try-an-incident-report.md)
 - **How the system is built:** [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 - **How changes get merged:** [docs/WORKFLOW.md](docs/WORKFLOW.md)
 - **Security:** [SECURITY.md](SECURITY.md)

@@ -5,6 +5,8 @@ import { AdminLayout } from './AdminLayout';
 import { adminDarkTheme, adminTheme } from './adminTheme';
 import { createAuthProvider } from './authProvider';
 import { Dashboard } from './Dashboard';
+import { IncidentList } from './incidents/IncidentList';
+import { IncidentShow } from './incidents/IncidentShow';
 import { AdminSupabaseProvider } from './AdminSupabase';
 import { BusinessList } from './businesses/BusinessList';
 import { BusinessShow } from './businesses/BusinessShow';
@@ -38,6 +40,12 @@ export function AdminApp({ supabase }: { supabase: SupabaseClient }) {
           list={BusinessList}
           show={BusinessShow}
           recordRepresentation="name"
+        />
+        <Resource
+          name="incidents"
+          options={{ label: 'Incident review' }}
+          list={IncidentList}
+          show={IncidentShow}
         />
       </Admin>
     </AdminSupabaseProvider>

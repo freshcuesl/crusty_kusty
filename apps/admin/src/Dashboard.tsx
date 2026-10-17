@@ -10,8 +10,8 @@ interface Queue {
   title: string;
   description: string;
   icon: SvgIconComponent;
-  /** react-admin route for the queue, once it exists. */
-  to?: string;
+  /** The queue's list page and what counts as "waiting" there; absent until built. */
+  live?: { to: string; resource: string; filter: Record<string, string>; sortField: string };
 }
 
 const queues: Queue[] = [
@@ -19,12 +19,23 @@ const queues: Queue[] = [
     title: 'Business verifications',
     description: 'Confirm new contractors are real, operating businesses.',
     icon: StorefrontOutlined,
-    to: '/businesses',
+    live: {
+      to: '/businesses',
+      resource: 'businesses',
+      filter: { verification_status: 'pending' },
+      sortField: 'submitted_at',
+    },
   },
   {
     title: 'Incident review',
     description: 'Confirm the job happened, the dispute happened, and the evidence exists.',
     icon: FactCheckOutlined,
+    live: {
+      to: '/incidents',
+      resource: 'incidents',
+      filter: { status: 'submitted' },
+      sortField: 'submitted_at',
+    },
   },
   {
     title: 'Abuse flags',
@@ -33,17 +44,38 @@ const queues: Queue[] = [
   },
 ];
 
-function usePendingBusinesses(): number | undefined {
-  const { total } = useGetList('businesses', {
-    filter: { verification_status: 'pending' },
+function QueueContent({ queue, footer }: { queue: Queue; footer: string }) {
+  const Icon = queue.icon;
+  return (
+    <CardContent>
+      <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', mb: 1 }}>
+        <Icon color="primary" aria-hidden="true" />
+        <Typography variant="h6" component="h2">
+          {queue.title}
+        </Typography>
+      </Stack>
+      <Typography color="text.secondary">{queue.description}</Typography>
+      <Typography variant="body2" sx={{ mt: 2, fontWeight: 600 }}>
+        {footer}
+      </Typography>
+    </CardContent>
+  );
+}
+
+function LiveQueue({ queue, live }: { queue: Queue; live: NonNullable<Queue['live']> }) {
+  const { total } = useGetList(live.resource, {
+    filter: live.filter,
     pagination: { page: 1, perPage: 1 },
-    sort: { field: 'submitted_at', order: 'ASC' },
+    sort: { field: live.sortField, order: 'ASC' },
   });
-  return total;
+  return (
+    <CardActionArea component={RouterLink} to={live.to} sx={{ height: '100%' }}>
+      <QueueContent queue={queue} footer={`${total ?? 0} waiting`} />
+    </CardActionArea>
+  );
 }
 
 export function Dashboard() {
-  const pending = usePendingBusinesses();
   return (
     <Stack spacing={3} sx={{ py: 3 }}>
       <Title title="Moderation" />
@@ -51,35 +83,17 @@ export function Dashboard() {
         Moderation
       </Typography>
       <Grid container spacing={2}>
-        {queues.map(({ title, description, icon: Icon, to }) => {
-          const content = (
-            <CardContent>
-              <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', mb: 1 }}>
-                <Icon color="primary" aria-hidden="true" />
-                <Typography variant="h6" component="h2">
-                  {title}
-                </Typography>
-              </Stack>
-              <Typography color="text.secondary">{description}</Typography>
-              <Typography variant="body2" sx={{ mt: 2, fontWeight: 600 }}>
-                {to ? `${pending ?? 0} waiting` : 'Coming soon'}
-              </Typography>
-            </CardContent>
-          );
-          return (
-            <Grid key={title} size={{ xs: 12, md: 4 }}>
-              <Card variant="outlined" sx={{ height: '100%' }}>
-                {to ? (
-                  <CardActionArea component={RouterLink} to={to} sx={{ height: '100%' }}>
-                    {content}
-                  </CardActionArea>
-                ) : (
-                  content
-                )}
-              </Card>
-            </Grid>
-          );
-        })}
+        {queues.map((queue) => (
+          <Grid key={queue.title} size={{ xs: 12, md: 4 }}>
+            <Card variant="outlined" sx={{ height: '100%' }}>
+              {queue.live ? (
+                <LiveQueue queue={queue} live={queue.live} />
+              ) : (
+                <QueueContent queue={queue} footer="Coming soon" />
+              )}
+            </Card>
+          </Grid>
+        ))}
       </Grid>
     </Stack>
   );

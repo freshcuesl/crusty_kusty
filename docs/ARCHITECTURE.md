@@ -114,6 +114,28 @@ Stripe Identity checks a government ID plus a live selfie on Stripe's own page.
   type-checked with `npm run functions:check` (Deno) in CI.
 - Local without Stripe: `npm run dev:verify-identity -- email` (local database only).
 
+## Incidents (implemented)
+
+Flow: `draft` → submit (needs at least one piece of evidence) → `submitted` (locked) →
+a moderator chooses `evidence_verified`, `needs_info` (note required; reporter edits and
+resubmits) or `rejected` (note required). Moderators confirm the job, the dispute and the evidence
+exist. They never decide who was right.
+
+- **Who can report:** members (owner or staff) of a **verified** business, with two-step login.
+  Abuse guard: 50 reports per 30 days per business.
+- **Customer details:** stored in `incident_customers`. Only the reporting business and
+  moderators can read them.
+- **Evidence:** the private `incident-evidence` bucket, at
+  `<business id>/<incident id>/<random name>`, 15 MB, PDF or photo. Files can't be replaced, and
+  each carries a SHA-256 fingerprint that moderators can check.
+- **Expiry:** set when verified. Chargebacks and fraud expire after 60 months, everything else
+  after 24.
+- **Matching fingerprints:** written when an incident is verified, into `incident_identifiers`.
+  Each one is an HMAC-SHA256 of the normalized name, phone, email or address, keyed with
+  `identifier_pepper` in Supabase Vault. The table has no API access. Normalization lives in
+  `private.normalize_identifier` (for example "Street" becomes "st", and plus-tags are removed
+  from email addresses).
+
 ## Data model direction
 
 Two separate layers, joined only through the blind matching check:
@@ -146,11 +168,10 @@ Every change starts with a failing test. CI runs all layers on every push.
 1. `setup/project-foundation`: this branch
 2. `feature/auth-mfa`: sign-up, sign-in, required MFA, roles, staff invites, admin login
 3. `feature/business-verification`: onboarding, Stripe Identity, documents, admin queue
-4. `feature/incidents-evidence`: incident records, uploads, integrity and audit
-5. `feature/moderation`: react-admin review workflow
-6. `feature/blind-matching`: normalization, hashing, alerts, incident cards
-7. `feature/private-notes-retention-abuse`: notes, expiration rules, abuse detection
-8. `feature/subscriptions`: Stripe billing tiers
-9. `feature/analytics`
-10. `feature/crm-integrations` and later invoicing
-11. `feature/passkeys-recovery-codes`: when Supabase marks them stable
+4. `feature/incidents`: incident records, evidence, moderator review, fingerprints (done)
+5. `feature/blind-matching`: normalization, hashing, alerts, incident cards
+6. `feature/private-notes-retention-abuse`: notes, expiration rules, abuse detection
+7. `feature/subscriptions`: Stripe billing tiers
+8. `feature/analytics`
+9. `feature/crm-integrations` and later invoicing
+10. `feature/passkeys-recovery-codes`: when Supabase marks them stable
