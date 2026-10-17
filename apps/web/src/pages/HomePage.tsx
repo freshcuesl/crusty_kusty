@@ -3,6 +3,7 @@ import LockOutlined from '@mui/icons-material/LockOutlined';
 import { Alert, Box, Button, Card, CardActionArea, Stack, Typography } from '@mui/material';
 import { Link as RouterLink } from 'react-router';
 import { useAuth } from '../auth/AuthProvider';
+import { PlanReminder } from '../billing/PlanReminder';
 import { InstallBanner } from '../pwa/InstallBanner';
 import { homeActions } from '../routes';
 
@@ -34,6 +35,8 @@ export function HomePage() {
           Your business isn't verified yet. Customer checks and incident reports unlock once it is.
         </Alert>
       )}
+
+      {verified && <PlanReminder />}
 
       <Stack component="nav" aria-label="Main actions" spacing={1.5}>
         {homeActions.map(({ label, description, path, icon: Icon, primary, needsVerification }) => {

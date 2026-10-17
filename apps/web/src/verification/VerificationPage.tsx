@@ -24,6 +24,7 @@ import type { Membership } from '../auth/authStep';
 import { useSupabase } from '../auth/SupabaseProvider';
 import { FormError } from '../auth/ui';
 import { currentIdentity, identityReason, type IdentityCheck } from './identity';
+import { functionErrorMessage } from '../lib/functionError';
 import { redirectTo } from './redirect';
 import { US_STATES } from '../lib/usStates';
 import { ACCEPTED_DOCUMENT_TYPES, checkDocumentFile, storagePathFor } from './verificationUtils';
@@ -537,20 +538,6 @@ function SubmitSection({ onSubmitted }: { onSubmitted: () => Promise<void> }) {
       </Stack>
     </Section>
   );
-}
-
-/** Reads the {error} message our Edge Functions return, or a friendly fallback. */
-async function functionErrorMessage(error: unknown): Promise<string> {
-  const context = (error as { context?: unknown } | null)?.context;
-  if (context instanceof Response) {
-    try {
-      const body = (await context.clone().json()) as { error?: unknown };
-      if (typeof body.error === 'string') return body.error;
-    } catch {
-      // Not JSON; fall through.
-    }
-  }
-  return friendlyError(error);
 }
 
 function IdentitySection({

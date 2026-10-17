@@ -196,6 +196,23 @@ describe('customer record', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent("Can't reach the server");
   });
 
+  it('explains a lost connection during a re-check or delete', async () => {
+    const { fake } = openJane();
+    fake.whenRpc('recheck_customer', () => {
+      throw new TypeError('Failed to fetch');
+    });
+    fake.whenRpc('delete_customer', () => {
+      throw new TypeError('Failed to fetch');
+    });
+    await userEvent.click(await screen.findByRole('button', { name: 'Check again' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent("Can't reach the server");
+    await userEvent.click(screen.getByRole('button', { name: 'Delete customer' }));
+    const dialog = await screen.findByRole('dialog');
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Delete customer' }));
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    expect(screen.getByRole('alert')).toHaveTextContent("Can't reach the server");
+  });
+
   it('says when a customer cannot be found', async () => {
     renderApp('/customers/missing', as.verifiedOwner);
     expect(await screen.findByRole('alert')).toHaveTextContent('Customer not found');
