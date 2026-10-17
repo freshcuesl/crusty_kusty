@@ -47,9 +47,18 @@ describe('home screen', () => {
 
   it('opens a placeholder for features still being built', async () => {
     renderApp('/', as.verifiedOwner);
-    await userEvent.click(await screen.findByRole('link', { name: /Report incident/ }));
-    expect(screen.getByRole('heading', { name: 'Report incident' })).toBeInTheDocument();
+    await userEvent.click(await screen.findByRole('link', { name: /Customer check/ }));
+    expect(screen.getByRole('heading', { name: 'Customer check' })).toBeInTheDocument();
     expect(screen.getByText(/coming soon/i)).toBeInTheDocument();
+  });
+
+  it('opens the incident report form from the home screen', async () => {
+    renderApp('/', as.verifiedOwner);
+    await userEvent.click(await screen.findByRole('link', { name: /Report incident/ }));
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Report incident' }),
+    ).toBeInTheDocument();
+    expect(screen.getByLabelText('Customer name')).toBeInTheDocument();
   });
 
   it('can go back home from a placeholder', async () => {

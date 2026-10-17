@@ -1,6 +1,6 @@
 import { CssBaseline, ThemeProvider } from '@mui/material';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { useMemo } from 'react';
+import { useMemo, type ComponentType } from 'react';
 import { BrowserRouter, Route, Routes, useLocation } from 'react-router';
 import { createAppTheme } from '@cs/brand';
 import { SecurityPage } from './account/SecurityPage';
@@ -18,6 +18,9 @@ import { SignInPage } from './auth/pages/SignInPage';
 import { SignUpPage } from './auth/pages/SignUpPage';
 import { SupabaseProvider } from './auth/SupabaseProvider';
 import { AuthLayout } from './auth/ui';
+import { IncidentPage } from './incidents/IncidentPage';
+import { MyIncidentsPage } from './incidents/MyIncidentsPage';
+import { ReportIncidentPage } from './incidents/ReportIncidentPage';
 import { LandingPage } from './landing/LandingPage';
 import { AppShell } from './layout/AppShell';
 import { getSupabase } from './lib/supabase';
@@ -30,6 +33,12 @@ import { homeActions } from './routes';
 import { useColorMode } from './theme/useColorMode';
 import { RequireVerified } from './verification/RequireVerified';
 import { VerificationPage } from './verification/VerificationPage';
+
+/** Home actions that are built; the rest show a "coming soon" placeholder. */
+const BUILT_PAGES: Record<string, ComponentType> = {
+  '/incidents/new': ReportIncidentPage,
+  '/incidents': MyIncidentsPage,
+};
 
 /**
  * Signed-out visitors at "/" see the public landing page. Every other app page,
@@ -119,21 +128,18 @@ export function AppRoutes() {
 
       <Route element={<HomeOrLanding />}>
         <Route index element={<HomePage />} />
-        {homeActions.map(({ path, label, needsVerification }) => (
-          <Route
-            key={path}
-            path={path}
-            element={
-              needsVerification ? (
-                <RequireVerified>
-                  <ComingSoonPage title={label} />
-                </RequireVerified>
-              ) : (
-                <ComingSoonPage title={label} />
-              )
-            }
-          />
-        ))}
+        {homeActions.map(({ path, label, needsVerification }) => {
+          const Page = BUILT_PAGES[path];
+          const page = Page ? <Page /> : <ComingSoonPage title={label} />;
+          return (
+            <Route
+              key={path}
+              path={path}
+              element={needsVerification ? <RequireVerified>{page}</RequireVerified> : page}
+            />
+          );
+        })}
+        <Route path="/incidents/:id" element={<IncidentPage />} />
         <Route path="/verification" element={<VerificationPage />} />
         <Route path="/team" element={<TeamPage />} />
         <Route path="/account/security" element={<SecurityPage />} />

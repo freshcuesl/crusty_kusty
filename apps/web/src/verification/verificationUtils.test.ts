@@ -23,6 +23,15 @@ describe('checkDocumentFile', () => {
     );
   });
 
+  it('accepts a larger limit when asked, for incident evidence', () => {
+    const big = file('photo.jpg', 'image/jpeg', 12 * 1024 * 1024);
+    expect(checkDocumentFile(big)).toMatch(/over 10 MB/);
+    expect(checkDocumentFile(big, 15 * 1024 * 1024)).toBeNull();
+    expect(checkDocumentFile(file('x.jpg', 'image/jpeg', 16 * 1024 * 1024), 15 * 1024 * 1024)).toBe(
+      'That file is over 15 MB. Try a smaller photo or a scanned PDF.',
+    );
+  });
+
   it('refuses empty files', () => {
     expect(checkDocumentFile(file('empty.pdf', 'application/pdf', 0))).toBe('That file is empty.');
   });
