@@ -277,38 +277,26 @@ The 300-a-day fair-use limit applies on every plan.
   and only when `VITE_CF_ANALYTICS_TOKEN` is set. The CSP allows it only then. There's no Google
   Analytics and no ad networks: outside code would run next to customer details.
 
-## Miles, the AI assistant (implemented)
+## Miles, customer service AI (implemented)
 
-- **Jobs:**
-  - `help`: help and how-to.
-  - `report_coach`: incident report coach.
-  - `alert_advisor`: alert advisor.
-  - `admin`: admin advisor, for staff only.
-- **The `miles` Edge Function** (logic in `supabase/functions/_shared/miles.ts`) checks the
-  request, then calls `miles_begin(mode)` _as the caller_. `miles_begin` checks two-step login,
-  the plan (Pro, Team, Business or the trial), staff access for `admin`, and the daily limit (40
-  messages per person; 200 for staff), and records a `miles_usage` row. That table has no API
-  access; the token counts are added by the service role.
-- **Context is read with the caller's own permissions (RLS), only what the job needs:**
-  - **Alert:** `alert_details` facts, without the customer label.
-  - **Report:** the saved incident and its evidence kinds, never `incident_customers`.
-  - **Admin:** `admin_insights`.
-  - **Help:** the caller's plan and usage.
-
-  Emails and phone numbers are masked before anything is sent. Context is wrapped in `<context>`
-  tags and treated as data. Conversations are not stored.
-
-- **Model:** `claude-opus-5-5` through the Anthropic TypeScript SDK.
-  - Effort is `low` for help and `medium` for advice.
-  - Server-side refusal fallback is on (`fallbacks: "default"`).
-  - The per-mode system prompt is cached.
-- **Prompt rules:** never label customers, never decide who was right, never tell a business to
-  refuse service, not legal advice, plain language.
-- **UI:** `MilesChat` in `@cs/brand`. The web app has an **Ask Miles** button on every page, plus
-  shortcuts on draft incidents and alerts. On Free, it shows an upgrade note. The admin panel has
-  **Ask Miles** on Insights.
-- **Secrets:** `ANTHROPIC_API_KEY` and `ADMIN_URL` (Edge Function secrets). Set a monthly spend
-  limit in the Anthropic Console.
+- **Scope:** customer service only. Miles answers questions about using ClientShield: sign-in,
+  verification, checks and alerts, incidents, plans and billing, team and privacy. He never
+  discusses specific customers or disputes, and he hands account problems to human support
+  (`SUPPORT_EMAIL`). He's open to every signed-in person on any plan, including people still
+  getting verified.
+- **The `miles` Edge Function** (logic in `supabase/functions/_shared/miles.ts`) calls
+  `miles_begin()` _as the caller_. It checks two-step login and a daily limit of 20 messages per
+  person, and records a `miles_usage` row. That table has no API access; the token counts are
+  added by the service role. Conversations are not stored.
+- **Context:** only the caller's plan and usage (`my_subscription`), read with their own
+  permissions, in `<account>` tags treated as data. Emails and phone numbers the person types are
+  masked before anything is sent.
+- **Model:** `claude-opus-5-5` through the Anthropic TypeScript SDK, effort `low`. Server-side
+  refusal fallback is on (`fallbacks: "default"`), and the system prompt is cached.
+- **UI:** an **Ask Miles** button on every app page opens `MilesChat` (`@cs/brand`). It shows
+  `MilesAvatar`: a service pro in a teal cap and headset.
+- **Secrets:** `ANTHROPIC_API_KEY`, and optionally `SUPPORT_EMAIL`. Set a monthly spend limit in
+  the Anthropic Console.
 
 ## Data model direction
 
@@ -351,5 +339,5 @@ Every change starts with a failing test. CI runs all layers on every push.
 10. `feature/passkeys-recovery-codes`: when Supabase marks them stable
 11. `feature/launch-prep`: hosting, deploys, headers, error tracking, launch guides (done)
 12. `feature/insights`: admin metrics, finances, landing page visitor stats (done)
-13. `feature/miles`: Miles, the AI assistant (done)
+13. `feature/miles`: Miles, customer service AI (done)
 14. Later: sponsored offers (admin-managed partner cards; no ad networks)

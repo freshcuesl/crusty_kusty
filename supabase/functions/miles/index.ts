@@ -1,18 +1,10 @@
-// Miles, ClientShield's AI assistant. Reads only what each job needs, using the
-// signed-in person's own permissions, then asks Claude. See _shared/miles.ts.
+// Miles, ClientShield's customer service assistant. See _shared/miles.ts.
 import Anthropic from 'npm:@anthropic-ai/sdk@0.135.0';
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { getAdmin, requireEnv } from '../_shared/clients.ts';
-import { handleMiles, type MilesMode } from '../_shared/miles.ts';
+import { handleMiles } from '../_shared/miles.ts';
 
 const MODEL = 'claude-opus-5-5';
-// Opus 5.5 always thinks; effort sets how much. Quick answers for how-to, more care for advice.
-const EFFORT: Record<MilesMode, 'low' | 'medium'> = {
-  help: 'low',
-  report_coach: 'medium',
-  alert_advisor: 'medium',
-  admin: 'medium',
-};
 
 let anthropic: Anthropic | undefined;
 function claude(): Anthropic {
@@ -29,88 +21,44 @@ function asCaller(authHeader: string) {
   });
 }
 
-async function loadContext(
-  authHeader: string,
-  mode: MilesMode,
-  ref: { incidentId: string | undefined; alertId: string | undefined },
-): Promise<string | null> {
-  const db = asCaller(authHeader);
-  if (mode === 'alert_advisor' && ref.alertId) {
-    const { data, error } = await db.rpc('alert_details', { p_alert_id: ref.alertId });
-    if (error) throw error;
-    // Facts only: never the name the business typed for its customer.
-    const { incidents, decision } = data as { incidents: unknown; decision: unknown };
-    return JSON.stringify({ alert: { decision, incidents } });
-  }
-  if (mode === 'report_coach' && ref.incidentId) {
-    const { data: incident, error } = await db
-      .from('incidents')
-      .select(
-        'status, category, service_date, service_type, description, review_rating, review_text, review_note',
-      )
-      .eq('id', ref.incidentId)
-      .single();
-    if (error) throw error;
-    const { data: evidence } = await db
-      .from('incident_evidence')
-      .select('kind')
-      .eq('incident_id', ref.incidentId);
-    return JSON.stringify({
-      incident_report: incident,
-      evidence_kinds: (evidence ?? []).map((e) => e.kind),
-    });
-  }
-  if (mode === 'admin') {
-    const { data, error } = await db.rpc('admin_insights', { p_weeks: 12 });
-    if (error) throw error;
-    return JSON.stringify({ insights: data });
-  }
-  if (mode === 'help') {
-    const { data } = await db.rpc('my_subscription');
-    if (!data) return null;
-    const { plan_name, checks_used, monthly_checks, members, max_members, trial_ends_at, status } =
-      data as Record<string, unknown>;
-    return JSON.stringify({
-      their_plan: {
-        plan_name,
-        checks_used,
-        monthly_checks,
-        members,
-        max_members,
-        trial_ends_at,
-        status,
-      },
-    });
-  }
-  return null;
-}
-
-const allowedOrigins = [requireEnv('APP_URL'), Deno.env.get('ADMIN_URL')].filter((o): o is string =>
-  Boolean(o),
-);
-
 Deno.serve((req) =>
   handleMiles(req, {
-    allowedOrigins,
+    appUrl: requireEnv('APP_URL'),
+    supportEmail: Deno.env.get('SUPPORT_EMAIL') || undefined,
 
-    async begin(authHeader, mode) {
-      const { data, error } = await asCaller(authHeader).rpc('miles_begin', { p_mode: mode });
+    async begin(authHeader) {
+      const { data, error } = await asCaller(authHeader).rpc('miles_begin');
       if (error) throw error;
-      const started = data as { request_id: string; business_id: string | null };
-      return { requestId: started.request_id, businessId: started.business_id };
+      return { requestId: (data as { request_id: string }).request_id };
     },
 
-    loadContext,
+    // Only the plan and usage, so Miles can answer "how many checks do I have left?".
+    async loadAccount(authHeader) {
+      const { data } = await asCaller(authHeader).rpc('my_subscription');
+      if (!data) return null;
+      const s = data as Record<string, unknown>;
+      return JSON.stringify({
+        plan_name: s.plan_name,
+        checks_used_this_month: s.checks_used,
+        monthly_checks: s.monthly_checks ?? 'unlimited',
+        members: s.members,
+        max_members: s.max_members,
+        trial_ends_at: s.trial_ends_at,
+        billing_status: s.status,
+        is_owner: s.can_manage,
+      });
+    },
 
-    async ask({ mode, system, messages }) {
+    async ask({ system, messages }) {
       const response = await claude().beta.messages.create({
         model: MODEL,
         max_tokens: 16000,
         // A declined request is retried on Anthropic's recommended fallback model.
         betas: ['server-side-fallback-2026-07-01'],
         fallbacks: 'default',
-        output_config: { effort: EFFORT[mode] },
-        // The system prompt is identical for every request in a mode, so it caches.
+        // Support answers are short and factual; Opus 5.5 always thinks, low keeps it quick.
+        output_config: { effort: 'low' },
+        // The system prompt is identical for every request, so it caches.
         system: [{ type: 'text', text: system, cache_control: { type: 'ephemeral' } }],
         messages,
       });

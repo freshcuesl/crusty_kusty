@@ -65,8 +65,8 @@ the Stripe ones in Guide 5):
 | -------------------- | -------------------------------------------------------------------------- |
 | `APP_URL`            | `https://clientshield.example`                                             |
 | `PURGE_FILES_SECRET` | the secret from Step 7                                                     |
-| `ADMIN_URL`          | `https://admin.clientshield.example`                                       |
 | `ANTHROPIC_API_KEY`  | for Miles: a new Anthropic key named `ClientShield production` (see below) |
+| `SUPPORT_EMAIL`      | optional: the email Miles gives people who need a human                    |
 
 > **Miles's key:** In **https://console.anthropic.com**, set a **monthly spend limit** under
 > **Settings**, then **Limits**. Then create a key under **API keys** just for production. Use a

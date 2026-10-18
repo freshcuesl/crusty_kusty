@@ -2,7 +2,7 @@ import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import { typeText } from '@cs/core/testing';
-import { MilesChat, type MilesChatProps } from './MilesChat';
+import { MilesAvatar, MilesChat, type MilesChatProps } from './MilesChat';
 
 function setup(props: Partial<MilesChatProps> = {}) {
   const onSend = vi.fn();
@@ -90,5 +90,11 @@ describe('MilesChat', () => {
     setup({ blocked: <p>Miles is included in Pro and Team.</p> });
     expect(screen.getByText('Miles is included in Pro and Team.')).toBeInTheDocument();
     expect(screen.queryByRole('textbox', { name: 'Message Miles' })).not.toBeInTheDocument();
+  });
+
+  it('shows Miles as a service pro, with a name for screen readers when asked', () => {
+    render(<MilesAvatar size={48} title="Miles, customer service" />);
+    const picture = screen.getByRole('img', { name: 'Miles, customer service' });
+    expect(picture).toHaveAttribute('width', '48');
   });
 });

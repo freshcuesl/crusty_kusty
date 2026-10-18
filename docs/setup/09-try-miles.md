@@ -1,4 +1,4 @@
-# Guide 9: Try Miles, the AI assistant
+# Guide 9: Try Miles, the customer service assistant
 
 **Time:** about 15 minutes.
 **You need:** Guide 4 finished (`supabase/functions/.env` exists and `npm run functions:serve`
@@ -35,7 +35,7 @@ lines at the bottom, pasting your key in place of `PASTE_KEY`:
 
 ```
 ANTHROPIC_API_KEY=PASTE_KEY
-ADMIN_URL=http://localhost:5174
+SUPPORT_EMAIL=you@example.com
 ```
 
 Save the file.
@@ -60,40 +60,34 @@ npm run functions:serve
 ## Part C: Talk to Miles
 
 **Step 8 of 10.** Open **http://localhost:5173** and sign in. At the bottom right, click **Ask
-Miles**. Then click **How do customer checks work?**
+Miles**.
 
-✅ **You should see:** "Miles is thinking…", then an answer after a few seconds.
+✅ **You should see:** Miles in his teal cap and headset, and three starter questions.
 
-**Step 9 of 10.** Open one of your draft incidents (**My incidents**, then a draft). Click **Review
-my report with Miles**, then **Review my report**.
+**Step 9 of 10.** Click **How do customer checks work?**
 
-✅ **You should see:** suggestions to make the report clearer and more neutral, and which evidence
-to add.
+✅ **You should see:** "Miles is thinking…", then a short answer after a few seconds.
 
-**Step 10 of 10.** Open **http://localhost:5174** (admin panel), click **Insights**, then **Ask
-Miles**, then **What stands out lately?**
+**Step 10 of 10.** Type `How many checks do I have left this month?` and press **Enter**.
 
-✅ **You should see:** a short summary of your numbers.
+✅ **You should see:** an answer that uses your real plan and usage.
 
 ---
 
 ## Good to know
 
-- **Plans:** Miles is part of Pro and Team, and the free trial. On Free, **Ask Miles** shows an
-  upgrade note.
-- **Limits:** 40 messages per person per day (200 for ClientShield staff).
-- **Privacy:** Conversations aren't saved. Miles never sees customer contact details: emails and
-  phone numbers are masked before anything is sent, and alerts reach him without names. In the
-  report coach, he reads your report as you wrote it. Only the type of question and the
-  size of each answer are recorded, to track costs.
-- **Miles can make mistakes.** He never decides who was right and never tells anyone to refuse a
-  customer.
+- **What Miles does:** customer service only. He answers questions about using ClientShield, like
+  checks, verification, plans and billing. He doesn't discuss specific customers or disputes. For
+  account problems he points people to the `SUPPORT_EMAIL` address.
+- **Who can use him:** everyone who is signed in, on any plan.
+- **Limits:** 20 messages per person per day.
+- **Privacy:** conversations aren't saved. Emails and phone numbers people type are masked before
+  anything is sent. Only the size of each answer is recorded, to track costs.
+- **Miles can make mistakes.** The chat says so, every time.
 
 ## If something goes wrong
 
-| What you see                        | What to do                                                                                      |
-| ----------------------------------- | ----------------------------------------------------------------------------------------------- |
-| "Miles is unavailable right now"    | Check the key in `.env` starts with `sk-ant-`, then restart `npm run functions:serve` (Step 7). |
-| Nothing happens in the admin panel  | Check `ADMIN_URL=http://localhost:5174` is in `.env`, then restart Step 7.                      |
-| "Miles is included in Pro and Team" | Your test business is on Free. Its trial has ended or it has no plan.                           |
-| "...messages for you today"         | You reached the daily limit. Try tomorrow.                                                      |
+| What you see                     | What to do                                                                                      |
+| -------------------------------- | ----------------------------------------------------------------------------------------------- |
+| "Miles is unavailable right now" | Check the key in `.env` starts with `sk-ant-`, then restart `npm run functions:serve` (Step 7). |
+| "...messages for you today"      | You reached the daily limit. Try tomorrow.                                                      |

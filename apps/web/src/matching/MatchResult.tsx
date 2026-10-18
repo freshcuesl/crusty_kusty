@@ -11,7 +11,6 @@ import {
 } from '@cs/core';
 import { useSupabase } from '../auth/SupabaseProvider';
 import { FormError } from '../auth/ui';
-import { AskMilesButton } from '../miles/AskMilesButton';
 import { DECISION_LABELS, formatMonth, type AlertDecision } from './format';
 
 export interface IncidentFacts {
@@ -133,10 +132,6 @@ export function MatchResult({ result, initialDecision = null }: MatchResultProps
           businesses match these customer details. Each was documented with evidence and checked by
           a ClientShield moderator. You decide how to proceed.
         </Typography>
-        <AskMilesButton
-          job={{ mode: 'alert_advisor', alertId: result.alert_id }}
-          label="Ask Miles about this alert"
-        />
         {result.incidents.map((facts, index) => (
           <IncidentCard key={index} facts={facts} />
         ))}

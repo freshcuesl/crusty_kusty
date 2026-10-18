@@ -1,6 +1,5 @@
 import {
   Alert,
-  Avatar,
   Box,
   Button,
   Chip,
@@ -34,22 +33,59 @@ export interface MilesChatProps {
   onClose(): void;
 }
 
-/** Miles's avatar: an "M" in brand teal. */
-export function MilesAvatar({ size = 36 }: { size?: number }) {
+/**
+ * Miles's picture: a friendly service pro in a teal ClientShield cap, a support
+ * headset and a midnight polo with a name badge. Drawn in SVG so it stays sharp.
+ */
+export function MilesAvatar({ size = 36, title }: { size?: number; title?: string }) {
   return (
-    <Avatar
-      aria-hidden="true"
-      sx={{
-        width: size,
-        height: size,
-        bgcolor: brand.teal,
-        color: brand.midnight,
-        fontWeight: 800,
-        fontSize: size * 0.45,
-      }}
+    <Box
+      component="svg"
+      viewBox="-88 -88 176 176"
+      width={size}
+      height={size}
+      role={title ? 'img' : undefined}
+      aria-hidden={title ? undefined : true}
+      aria-label={title}
+      sx={{ flexShrink: 0, borderRadius: '50%', display: 'block' }}
     >
-      M
-    </Avatar>
+      <circle r="88" fill={brand.teal} />
+      <path d="M-62 70 Q-60 20 0 18 Q60 20 62 70 A88 88 0 0 1 -62 70Z" fill={brand.midnight} />
+      <path d="M-14 18 L0 34 L14 18Z" fill={brand.mist} />
+      <rect x="20" y="40" width="28" height="12" rx="3" fill={brand.mist} />
+      <rect x="-10" y="4" width="20" height="18" fill="#C68B65" />
+      <ellipse cx="0" cy="-20" rx="30" ry="34" fill="#D9A27C" />
+      <path
+        d="M-32 -30 Q-30 -62 0 -62 Q30 -62 32 -30 L32 -34 Q0 -44 -32 -34Z"
+        fill={brand.midnight}
+      />
+      <path d="M-32 -34 Q0 -46 32 -34 L46 -30 Q20 -40 -32 -30Z" fill={brand.tealDark} />
+      <circle cx="0" cy="-50" r="6" fill={brand.teal} />
+      <circle cx="-11" cy="-20" r="3.2" fill={brand.midnight} />
+      <circle cx="11" cy="-20" r="3.2" fill={brand.midnight} />
+      <path
+        d="M-11 -3 Q0 6 11 -3"
+        fill="none"
+        stroke={brand.midnight}
+        strokeWidth="3"
+        strokeLinecap="round"
+      />
+      <path
+        d="M-34 -22 Q-36 -52 0 -54 Q36 -52 34 -22"
+        fill="none"
+        stroke={brand.midnightDeep}
+        strokeWidth="4"
+      />
+      <rect x="-40" y="-30" width="10" height="18" rx="4" fill={brand.midnightDeep} />
+      <path
+        d="M-35 -12 Q-30 8 -10 6"
+        fill="none"
+        stroke={brand.midnightDeep}
+        strokeWidth="3"
+        strokeLinecap="round"
+      />
+      <circle cx="-9" cy="6" r="3.5" fill={brand.midnightDeep} />
+    </Box>
   );
 }
 
