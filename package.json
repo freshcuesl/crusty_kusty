@@ -38,6 +38,7 @@
     "db:config:push": "supabase config push",
     "functions:check": "deno check --config supabase/functions/deno.json supabase/functions/create-identity-session/index.ts supabase/functions/stripe-webhook/index.ts supabase/functions/purge-expired-files/index.ts supabase/functions/create-checkout-session/index.ts supabase/functions/create-billing-portal/index.ts supabase/functions/miles/index.ts",
     "dev:verify-identity": "node scripts/dev-verify-identity.mjs",
+    "dev:demo": "node scripts/dev-demo.mjs",
     "stripe:setup-plans": "node scripts/stripe-setup-plans.mjs",
     "generate-secret": "node scripts/generate-secret.mjs",
     "functions:serve": "supabase functions serve --env-file supabase/functions/.env"
