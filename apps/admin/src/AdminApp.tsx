@@ -17,6 +17,7 @@ import { createDataProvider } from './dataProvider';
 import { createLoginPage } from './LoginPage';
 import { InsightsPage } from './insights/InsightsPage';
 import { RetentionPage } from './retention/RetentionPage';
+import { StaffPage } from './staff/StaffPage';
 
 export function AdminApp({ supabase }: { supabase: SupabaseClient }) {
   const authProvider = useMemo(() => createAuthProvider(supabase), [supabase]);
@@ -61,6 +62,7 @@ export function AdminApp({ supabase }: { supabase: SupabaseClient }) {
         <CustomRoutes>
           <Route path="/insights" element={<InsightsPage />} />
           <Route path="/retention" element={<RetentionPage />} />
+          <Route path="/staff" element={<StaffPage />} />
         </CustomRoutes>
       </Admin>
     </AdminSupabaseProvider>

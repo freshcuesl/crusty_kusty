@@ -5,6 +5,7 @@ import { Card, CardActionArea, CardContent, Grid, Stack, Typography } from '@mui
 import type { SvgIconComponent } from '@mui/icons-material';
 import { Title, useGetList } from 'react-admin';
 import { Link as RouterLink } from 'react-router-dom';
+import { DashboardOverview } from './DashboardOverview';
 
 interface Queue {
   title: string;
@@ -96,6 +97,7 @@ export function Dashboard() {
       <Typography variant="h4" component="h1">
         Moderation
       </Typography>
+      <DashboardOverview />
       <Grid container spacing={2}>
         {queues.map((queue) => (
           <Grid key={queue.title} size={{ xs: 12, md: 4 }}>

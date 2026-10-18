@@ -1,9 +1,10 @@
 import ArrowBackOutlined from '@mui/icons-material/ArrowBackOutlined';
 import HistoryOutlined from '@mui/icons-material/HistoryOutlined';
 import InsightsOutlined from '@mui/icons-material/InsightsOutlined';
+import ManageAccountsOutlined from '@mui/icons-material/ManageAccountsOutlined';
 import { Box, Button, Chip, ListItemIcon, ListItemText, MenuItem } from '@mui/material';
 import type { ReactNode } from 'react';
-import { AppBar, Layout, Logout, Menu, TitlePortal, UserMenu } from 'react-admin';
+import { AppBar, Layout, Logout, Menu, TitlePortal, UserMenu, usePermissions } from 'react-admin';
 import { Link as RouterLink } from 'react-router-dom';
 import { brand, Logo } from '@cs/brand';
 
@@ -79,12 +80,16 @@ function BrandAppBar() {
 }
 
 function AdminMenu() {
+  const { permissions } = usePermissions();
   return (
     <Menu>
       <Menu.DashboardItem />
       <Menu.Item to="/insights" primaryText="Insights" leftIcon={<InsightsOutlined />} />
       <Menu.ResourceItems />
       <Menu.Item to="/retention" primaryText="Retention" leftIcon={<HistoryOutlined />} />
+      {permissions === 'admin' && (
+        <Menu.Item to="/staff" primaryText="Staff" leftIcon={<ManageAccountsOutlined />} />
+      )}
     </Menu>
   );
 }
