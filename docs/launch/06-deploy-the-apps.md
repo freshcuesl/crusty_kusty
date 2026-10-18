@@ -73,6 +73,9 @@ manager** as "Cloudflare deploy token".
 | `CLOUDFLARE_WEB_PROJECT`   | `clientshield-web`                                              |
 | `CLOUDFLARE_ADMIN_PROJECT` | `clientshield-admin`                                            |
 | `VITE_CONTACT_EMAIL`       | optional: the email for **Contact us** on the Business plan     |
+| `VITE_SOCIAL_FACEBOOK`     | optional: your Facebook page address (starts with `https://`)   |
+| `VITE_SOCIAL_INSTAGRAM`    | optional: your Instagram address                                |
+| `VITE_SOCIAL_X`            | optional: your X address                                        |
 
 **Step 9 of 17.** Go to **Settings**, then **Secrets and variables**, then **Actions**, then the
 **Variables** tab. Add a **repository variable**:

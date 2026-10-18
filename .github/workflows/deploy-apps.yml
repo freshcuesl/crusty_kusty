@@ -62,6 +62,9 @@ jobs:
           VITE_SENTRY_DSN: ${{ vars.VITE_SENTRY_DSN }}
           VITE_CF_ANALYTICS_TOKEN: ${{ vars.VITE_CF_ANALYTICS_TOKEN }}
           VITE_CONTACT_EMAIL: ${{ vars.VITE_CONTACT_EMAIL }}
+          VITE_SOCIAL_FACEBOOK: ${{ vars.VITE_SOCIAL_FACEBOOK }}
+          VITE_SOCIAL_INSTAGRAM: ${{ vars.VITE_SOCIAL_INSTAGRAM }}
+          VITE_SOCIAL_X: ${{ vars.VITE_SOCIAL_X }}
           VITE_RELEASE: ${{ env.COMMIT }}
 
       - name: Publish the contractor app
