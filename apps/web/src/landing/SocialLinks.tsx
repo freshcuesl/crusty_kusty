@@ -20,12 +20,22 @@ function safeUrl(value: string | undefined): string | null {
   }
 }
 
-/** Social media icons. Each shows once its VITE_SOCIAL_* address is set. */
+/** Social media icons for the landing page header and footer. */
 export function SocialLinks({ color }: { color: string }) {
+  // Placeholders until the real pages exist: each site's home page. Set VITE_SOCIAL_*
+  // (GitHub variables at launch) to point the icons at ClientShield's own accounts.
   const networks: Network[] = [
-    { name: 'Facebook', icon: Facebook, url: import.meta.env.VITE_SOCIAL_FACEBOOK },
-    { name: 'Instagram', icon: Instagram, url: import.meta.env.VITE_SOCIAL_INSTAGRAM },
-    { name: 'X', icon: X, url: import.meta.env.VITE_SOCIAL_X },
+    {
+      name: 'Facebook',
+      icon: Facebook,
+      url: import.meta.env.VITE_SOCIAL_FACEBOOK || 'https://www.facebook.com/',
+    },
+    {
+      name: 'Instagram',
+      icon: Instagram,
+      url: import.meta.env.VITE_SOCIAL_INSTAGRAM || 'https://www.instagram.com/',
+    },
+    { name: 'X', icon: X, url: import.meta.env.VITE_SOCIAL_X || 'https://x.com/' },
   ];
   const links = networks
     .map((n) => ({ ...n, href: safeUrl(n.url) }))

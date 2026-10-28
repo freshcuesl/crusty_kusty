@@ -65,16 +65,22 @@ describe('social media links', () => {
     ).toBeInTheDocument();
   });
 
-  it('shows only the accounts that are set up', async () => {
+  it('shows placeholder links until the real accounts are set up', async () => {
     vi.stubEnv('VITE_SOCIAL_INSTAGRAM', 'https://instagram.com/clientshield');
     renderApp('/', as.signedOut);
     const nav = await screen.findByRole('navigation', { name: 'Site' });
-    expect(
-      within(nav).getByRole('link', { name: 'ClientShield on Instagram' }),
-    ).toBeInTheDocument();
-    expect(
-      within(nav).queryByRole('link', { name: 'ClientShield on Facebook' }),
-    ).not.toBeInTheDocument();
+    expect(within(nav).getByRole('link', { name: 'ClientShield on Instagram' })).toHaveAttribute(
+      'href',
+      'https://instagram.com/clientshield',
+    );
+    expect(within(nav).getByRole('link', { name: 'ClientShield on Facebook' })).toHaveAttribute(
+      'href',
+      'https://www.facebook.com/',
+    );
+    expect(within(nav).getByRole('link', { name: 'ClientShield on X' })).toHaveAttribute(
+      'href',
+      'https://x.com/',
+    );
   });
 
   it('never links anywhere unsafe', async () => {
