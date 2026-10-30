@@ -21,14 +21,14 @@ it.
 
 | Setting                   | Value                                                  |
 | ------------------------- | ------------------------------------------------------ |
-| **Project / Worker name** | `clientshield-web`                                     |
+| **Project / Worker name** | `crusty-kusty`                                         |
 | **Production branch**     | `main`                                                 |
 | **Root directory** (Path) | leave empty (the top of the repository)                |
 | **Build command**         | `npm run build --workspace @cs/web`                    |
 | **Deploy command**        | `npx wrangler deploy --config apps/web/wrangler.jsonc` |
 
-The name must be exactly `clientshield-web`. It has to match the name in
-`apps/web/wrangler.jsonc`.
+The name must match the `name` in `apps/web/wrangler.jsonc` (`crusty-kusty`). If you use another
+name, ask Claude to change that file to match.
 
 **Step 3 of 14.** Open **Advanced settings** (or, after creating it, **Settings**, then **Build**,
 then **Variables and secrets**). Add these **build variables**:
@@ -91,11 +91,11 @@ same way as Step 5.
 
 ---
 
-## Part C: If you already made a Worker with another name
+## Part C: If Cloudflare says the Worker name doesn't match
 
-Did you connect the repository before this guide, for example as `crusty-kusty`? Then delete that
-Worker (**Settings**, then **Delete**) and follow Parts A and B. Its build fails with "detection logic
-has been run in the root of a workspace", because it doesn't know which of the two apps to publish.
+The build log says "Failed to match Worker name" when the Worker's name in Cloudflare differs from
+the `name` in `apps/web/wrangler.jsonc` (or `apps/admin/wrangler.jsonc`). Ask Claude to change the
+file to your Worker's name. Don't merge the pull request Cloudflare opens to fix it.
 
 > The **Deploy apps** workflow in GitHub's Actions tab is a second way to publish (Pages plus a
 > GitHub token). Leave it switched off (`DEPLOY_ENABLED` not set) when Cloudflare builds from
