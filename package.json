@@ -29,7 +29,7 @@
     "db:test": "supabase test db",
     "setup:env": "node scripts/setup-env.mjs",
     "db:status": "supabase status",
-    "audit": "npm audit --audit-level=high",
+    "audit": "node scripts/audit.mjs",
     "make-admin": "node scripts/make-admin.mjs",
     "setup:env:cloud": "node scripts/setup-env.mjs --cloud",
     "db:login": "supabase login",
