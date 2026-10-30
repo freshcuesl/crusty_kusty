@@ -19,6 +19,8 @@ matches a verified incident.
 - **Try customer matching and alerts:** [docs/setup/06-try-customer-matching.md](docs/setup/06-try-customer-matching.md)
 - **Try customer records, notes, retention and abuse flags:** [docs/setup/07-try-notes-retention-abuse.md](docs/setup/07-try-notes-retention-abuse.md)
 - **Try plans and billing (Stripe test mode):** [docs/setup/08-try-plans-and-billing.md](docs/setup/08-try-plans-and-billing.md)
+- **Try Miles, the customer service assistant:** [docs/setup/09-try-miles.md](docs/setup/09-try-miles.md)
+- **A fully verified demo business:** [docs/setup/10-demo-business.md](docs/setup/10-demo-business.md)
 - **How the system is built:** [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 - **How changes get merged:** [docs/WORKFLOW.md](docs/WORKFLOW.md)
 - **Security:** [SECURITY.md](SECURITY.md)
@@ -33,5 +35,6 @@ npm run dev          # contractor app  → http://localhost:5173
 npm run dev:admin    # admin panel     → http://localhost:5174
 npm run make-admin -- you@example.com   # make a local account a moderator
 npm run stripe:setup-plans               # create the plans and prices in Stripe (test mode)
+npm run dev:demo -- you@example.com      # local only: fully verified business + sample data
 npm run check        # everything CI checks, except e2e and database tests
 ```

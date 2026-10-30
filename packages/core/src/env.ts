@@ -1,14 +1,18 @@
-import { z } from 'zod';
-
 export interface AppConfig {
   supabaseUrl: string;
   supabaseAnonKey: string;
 }
 
-const schema = z.object({
-  VITE_SUPABASE_URL: z.url(),
-  VITE_SUPABASE_ANON_KEY: z.string().min(1),
-});
+/** True for an absolute http(s) URL. Plain code instead of a validation library: smaller app. */
+function isUrl(value: unknown): value is string {
+  if (typeof value !== 'string') return false;
+  try {
+    const url = new URL(value);
+    return url.protocol === 'http:' || url.protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
 
 const SETUP_HINT = 'See docs/setup/01-run-the-app-locally.md.';
 
@@ -32,13 +36,18 @@ function jwtRole(key: string): string | undefined {
  * would bypass row-level security if they ever reached a browser.
  */
 export function parseEnv(env: Record<string, unknown>): AppConfig {
-  const result = schema.safeParse(env);
-  if (!result.success) {
-    const problems = result.error.issues.map((issue) => issue.path.join('.')).join(', ');
-    throw new Error(`Missing or invalid environment variables: ${problems}. ${SETUP_HINT}`);
+  const url = env.VITE_SUPABASE_URL;
+  const key = env.VITE_SUPABASE_ANON_KEY;
+  const problems = [
+    ...(isUrl(url) ? [] : ['VITE_SUPABASE_URL']),
+    ...(typeof key === 'string' && key.length > 0 ? [] : ['VITE_SUPABASE_ANON_KEY']),
+  ];
+  if (problems.length > 0 || !isUrl(url) || typeof key !== 'string') {
+    throw new Error(
+      `Missing or invalid environment variables: ${problems.join(', ')}. ${SETUP_HINT}`,
+    );
   }
 
-  const key = result.data.VITE_SUPABASE_ANON_KEY;
   if (key.startsWith('sb_secret_')) {
     throw new Error(
       `VITE_SUPABASE_ANON_KEY is a secret key. Use the publishable key. ${SETUP_HINT}`,
@@ -50,5 +59,5 @@ export function parseEnv(env: Record<string, unknown>): AppConfig {
     );
   }
 
-  return { supabaseUrl: result.data.VITE_SUPABASE_URL, supabaseAnonKey: key };
+  return { supabaseUrl: url, supabaseAnonKey: key };
 }

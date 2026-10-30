@@ -277,6 +277,69 @@ The 300-a-day fair-use limit applies on every plan.
   and only when `VITE_CF_ANALYTICS_TOKEN` is set. The CSP allows it only then. There's no Google
   Analytics and no ad networks: outside code would run next to customer details.
 
+## Miles, customer service AI (implemented)
+
+- **Scope:** customer service only. Miles answers questions about using ClientShield: sign-in,
+  verification, checks and alerts, incidents, plans and billing, team and privacy. He never
+  discusses specific customers or disputes, and he hands account problems to human support
+  (`SUPPORT_EMAIL`). He's open to every signed-in person on any plan, including people still
+  getting verified.
+- **The `miles` Edge Function** (logic in `supabase/functions/_shared/miles.ts`) calls
+  `miles_begin()` _as the caller_. It checks two-step login and a daily limit of 20 messages per
+  person, and records a `miles_usage` row. That table has no API access; the token counts are
+  added by the service role. Conversations are not stored.
+- **Context:** only the caller's plan and usage (`my_subscription`), read with their own
+  permissions, in `<account>` tags treated as data. Emails and phone numbers the person types are
+  masked before anything is sent.
+- **Model:** `claude-opus-5-5` through the Anthropic TypeScript SDK, effort `low`. Server-side
+  refusal fallback is on (`fallbacks: "default"`), and the system prompt is cached.
+- **UI:** an **Ask Miles** button on every app page opens `MilesChat` (`@cs/brand`). It shows
+  `MilesAvatar`: a service pro in a teal cap and headset.
+- **Secrets:** `ANTHROPIC_API_KEY`, and optionally `SUPPORT_EMAIL`. Set a monthly spend limit in
+  the Anthropic Console.
+
+## Performance (implemented)
+
+Measured with 2,000 businesses, 100,000 customers, 300,000 checks and 20,000 incidents
+(`docker exec ... psql` on the local stack).
+
+| What                                          | Before                       | After                      |
+| --------------------------------------------- | ---------------------------- | -------------------------- |
+| Security-rule-filtered read of 100k customers | 2,654 ms                     | 0.5 ms                     |
+| A business's own customers                    | 4.4 ms                       | 1.0 ms                     |
+| `my_subscription`                             | 10.4 ms                      | 3.9 ms                     |
+| `admin_insights(52)` / `(12)`                 | 792 / 298 ms                 | 217 / 99 ms                |
+| One customer check                            | 26 ms                        | 15 ms                      |
+| Web app first load                            | 1,080 KB (320 KB compressed) | 765 KB (229 KB compressed) |
+| Admin first load                              | 1,773 KB                     | 1,245 KB                   |
+
+- **Security rules** (`20261029000000_performance.sql`):
+  - Each person has one business, so the rules compare with `(SELECT private.my_business_id())`,
+    evaluated once per query, and the index is used.
+  - `is_aal2()`, `is_platform_staff()` and `auth.uid()` are wrapped in `SELECT` the same way.
+  - The `130_performance` tests fail if a rule goes back to a per-row function call.
+- **Indexes:** for foreign keys that deletes and the nightly cleanup follow, and for the
+  platform-wide date ranges insights reads.
+- **Insights:** one grouped pass per table over the chosen weeks, instead of one scan per week.
+  The plan mix is computed in one join, and a test checks it against `effective_tier()`.
+- **Checks:** the matching key is read from Vault once per check (it used to be up to 8 times), and
+  the details are fingerprinted once. A test checks the fingerprints are identical to the stored
+  ones.
+- **Web app:**
+  - Pages load on first visit (`lazyPage` in `App.tsx`).
+  - Sentry downloads in the background, and only when `VITE_SENTRY_DSN` is set
+    (`createErrorReporter` keeps early errors until it arrives).
+  - `zod` was replaced by plain validation (76 KB).
+- **Requests run in parallel:** app start (role and business), incident page (4 reads) and
+  verification page (3 reads).
+- **Admin:**
+  - Chart pages and the dashboard overview load on demand.
+  - The staff check is reused for 60 seconds per sign-in instead of running on every page
+    change. The database still checks every request.
+- **Security audit** (`npm run audit`, `scripts/audit.mjs`): fails on any high or critical
+  advisory, except entries in `scripts/audit-allowlist.json`. Each entry has a reason and an
+  expiry date, and the audit fails again after that date.
+
 ## Data model direction
 
 Two separate layers, joined only through the blind matching check:
@@ -318,4 +381,5 @@ Every change starts with a failing test. CI runs all layers on every push.
 10. `feature/passkeys-recovery-codes`: when Supabase marks them stable
 11. `feature/launch-prep`: hosting, deploys, headers, error tracking, launch guides (done)
 12. `feature/insights`: admin metrics, finances, landing page visitor stats (done)
-13. Later: sponsored offers (admin-managed partner cards; no ad networks)
+13. `feature/miles`: Miles, customer service AI (done)
+14. Later: sponsored offers (admin-managed partner cards; no ad networks)

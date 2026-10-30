@@ -49,24 +49,27 @@ export function AccountMenu() {
             Admin panel
           </MenuItem>
         )}
-        <MenuItem onClick={() => go('/verification')}>
-          <ListItemIcon>
-            <VerifiedOutlined fontSize="small" />
-          </ListItemIcon>
-          Verification
-        </MenuItem>
-        <MenuItem onClick={() => go('/team')}>
-          <ListItemIcon>
-            <GroupsOutlined fontSize="small" />
-          </ListItemIcon>
-          Team
-        </MenuItem>
-        <MenuItem onClick={() => go('/billing')}>
-          <ListItemIcon>
-            <CreditCardOutlined fontSize="small" />
-          </ListItemIcon>
-          Plan and billing
-        </MenuItem>
+        {/* Staff accounts run ClientShield, not a business: they get a short menu. */}
+        {!platformRole && [
+          <MenuItem key="verification" onClick={() => go('/verification')}>
+            <ListItemIcon>
+              <VerifiedOutlined fontSize="small" />
+            </ListItemIcon>
+            Verification
+          </MenuItem>,
+          <MenuItem key="team" onClick={() => go('/team')}>
+            <ListItemIcon>
+              <GroupsOutlined fontSize="small" />
+            </ListItemIcon>
+            Team
+          </MenuItem>,
+          <MenuItem key="billing" onClick={() => go('/billing')}>
+            <ListItemIcon>
+              <CreditCardOutlined fontSize="small" />
+            </ListItemIcon>
+            Plan and billing
+          </MenuItem>,
+        ]}
         <MenuItem onClick={() => go('/account/security')}>
           <ListItemIcon>
             <LockOutlined fontSize="small" />

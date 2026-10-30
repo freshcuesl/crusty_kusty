@@ -1,32 +1,12 @@
 import { CssBaseline, ThemeProvider } from '@mui/material';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { useMemo, type ComponentType } from 'react';
+import { lazy, Suspense, useMemo, type ComponentType } from 'react';
 import { BrowserRouter, Route, Routes, useLocation } from 'react-router';
 import { createAppTheme } from '@cs/brand';
-import { SecurityPage } from './account/SecurityPage';
-import { TeamPage } from './account/TeamPage';
 import { AuthProvider, useAuth } from './auth/AuthProvider';
 import { Gate } from './auth/Gate';
-import { CheckEmailPage } from './auth/pages/CheckEmailPage';
-import { ForgotPasswordPage } from './auth/pages/ForgotPasswordPage';
-import { InvitePage } from './auth/pages/InvitePage';
-import { MfaSetupPage } from './auth/pages/MfaSetupPage';
-import { MfaVerifyPage } from './auth/pages/MfaVerifyPage';
-import { OnboardingPage } from './auth/pages/OnboardingPage';
-import { ResetPasswordPage } from './auth/pages/ResetPasswordPage';
-import { SignInPage } from './auth/pages/SignInPage';
-import { SignUpPage } from './auth/pages/SignUpPage';
 import { SupabaseProvider } from './auth/SupabaseProvider';
-import { AuthLayout } from './auth/ui';
-import { BillingPage } from './billing/BillingPage';
-import { CustomerPage } from './customers/CustomerPage';
-import { CustomersPage } from './customers/CustomersPage';
-import { IncidentPage } from './incidents/IncidentPage';
-import { MyIncidentsPage } from './incidents/MyIncidentsPage';
-import { ReportIncidentPage } from './incidents/ReportIncidentPage';
-import { LandingPage } from './landing/LandingPage';
-import { AlertDetailPage, AlertsPage } from './matching/AlertPages';
-import { CustomerCheckPage, NewCustomerPage } from './matching/CheckPages';
+import { AuthLayout, FullPageSpinner } from './auth/ui';
 import { AppShell } from './layout/AppShell';
 import { getSupabase } from './lib/supabase';
 import { ConfigErrorPage } from './pages/ConfigErrorPage';
@@ -36,7 +16,55 @@ import { UpdatePrompt } from './pwa/UpdatePrompt';
 import { homeActions } from './routes';
 import { useColorMode } from './theme/useColorMode';
 import { RequireVerified } from './verification/RequireVerified';
-import { VerificationPage } from './verification/VerificationPage';
+
+// Pages load when first visited, so the landing page and sign-in download only what
+// they need. A spinner shows for the moment a page takes to arrive.
+function lazyPage<K extends string>(load: () => Promise<Record<K, ComponentType>>, name: K) {
+  const Page = lazy(async () => ({ default: (await load())[name] as ComponentType }));
+  return function LazyPage() {
+    return (
+      <Suspense fallback={<FullPageSpinner />}>
+        <Page />
+      </Suspense>
+    );
+  };
+}
+
+const SecurityPage = lazyPage(() => import('./account/SecurityPage'), 'SecurityPage');
+const TeamPage = lazyPage(() => import('./account/TeamPage'), 'TeamPage');
+const CheckEmailPage = lazyPage(() => import('./auth/pages/CheckEmailPage'), 'CheckEmailPage');
+const ForgotPasswordPage = lazyPage(
+  () => import('./auth/pages/ForgotPasswordPage'),
+  'ForgotPasswordPage',
+);
+const InvitePage = lazyPage(() => import('./auth/pages/InvitePage'), 'InvitePage');
+const MfaSetupPage = lazyPage(() => import('./auth/pages/MfaSetupPage'), 'MfaSetupPage');
+const MfaVerifyPage = lazyPage(() => import('./auth/pages/MfaVerifyPage'), 'MfaVerifyPage');
+const OnboardingPage = lazyPage(() => import('./auth/pages/OnboardingPage'), 'OnboardingPage');
+const ResetPasswordPage = lazyPage(
+  () => import('./auth/pages/ResetPasswordPage'),
+  'ResetPasswordPage',
+);
+const SignInPage = lazyPage(() => import('./auth/pages/SignInPage'), 'SignInPage');
+const SignUpPage = lazyPage(() => import('./auth/pages/SignUpPage'), 'SignUpPage');
+const BillingPage = lazyPage(() => import('./billing/BillingPage'), 'BillingPage');
+const CustomerPage = lazyPage(() => import('./customers/CustomerPage'), 'CustomerPage');
+const CustomersPage = lazyPage(() => import('./customers/CustomersPage'), 'CustomersPage');
+const IncidentPage = lazyPage(() => import('./incidents/IncidentPage'), 'IncidentPage');
+const MyIncidentsPage = lazyPage(() => import('./incidents/MyIncidentsPage'), 'MyIncidentsPage');
+const ReportIncidentPage = lazyPage(
+  () => import('./incidents/ReportIncidentPage'),
+  'ReportIncidentPage',
+);
+const LandingPage = lazyPage(() => import('./landing/LandingPage'), 'LandingPage');
+const VerificationPage = lazyPage(
+  () => import('./verification/VerificationPage'),
+  'VerificationPage',
+);
+const AlertDetailPage = lazyPage(() => import('./matching/AlertPages'), 'AlertDetailPage');
+const AlertsPage = lazyPage(() => import('./matching/AlertPages'), 'AlertsPage');
+const CustomerCheckPage = lazyPage(() => import('./matching/CheckPages'), 'CustomerCheckPage');
+const NewCustomerPage = lazyPage(() => import('./matching/CheckPages'), 'NewCustomerPage');
 
 /** The page behind each home-screen action. */
 const ACTION_PAGES: Record<string, ComponentType> = {

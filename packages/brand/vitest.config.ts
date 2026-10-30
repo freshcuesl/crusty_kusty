@@ -6,5 +6,7 @@ export default defineProject({
     environment: 'jsdom',
     globals: true,
     setupFiles: ['../../test/setup.ts'],
+    // Same as the apps: user-event typing is slow while coverage is measured.
+    testTimeout: 30_000,
   },
 });

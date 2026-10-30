@@ -74,13 +74,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       let membership: Membership | null = null;
       let platformRole: PlatformRole | null = null;
       if (currentLevel === 'aal2') {
-        const { data: role } = await supabase.rpc('my_platform_role');
+        // Independent questions, asked together: one round trip instead of two.
+        const [{ data: role }, { data }] = await Promise.all([
+          supabase.rpc('my_platform_role'),
+          supabase
+            .from('business_members')
+            .select('role, business:businesses(id, name, verification_status)')
+            .eq('user_id', session.user.id)
+            .maybeSingle<MembershipRow>(),
+        ]);
         platformRole = role === 'moderator' || role === 'admin' ? role : null;
-        const { data } = await supabase
-          .from('business_members')
-          .select('role, business:businesses(id, name, verification_status)')
-          .eq('user_id', session.user.id)
-          .maybeSingle<MembershipRow>();
         if (data) {
           membership = {
             role: data.role,

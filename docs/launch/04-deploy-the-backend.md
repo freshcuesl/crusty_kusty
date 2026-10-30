@@ -61,10 +61,16 @@ Copy the line it prints **straight into your password manager** as "Purge files 
 **Step 8 of 13.** In Supabase, go to **Edge Functions**, then **Secrets**. Add these two (you'll add
 the Stripe ones in Guide 5):
 
-| Name                 | Value                          |
-| -------------------- | ------------------------------ |
-| `APP_URL`            | `https://clientshield.example` |
-| `PURGE_FILES_SECRET` | the secret from Step 7         |
+| Name                 | Value                                                                      |
+| -------------------- | -------------------------------------------------------------------------- |
+| `APP_URL`            | `https://clientshield.example`                                             |
+| `PURGE_FILES_SECRET` | the secret from Step 7                                                     |
+| `ANTHROPIC_API_KEY`  | for Miles: a new Anthropic key named `ClientShield production` (see below) |
+| `SUPPORT_EMAIL`      | optional: the email Miles gives people who need a human                    |
+
+> **Miles's key:** In **https://console.anthropic.com**, set a **monthly spend limit** under
+> **Settings**, then **Limits**. Then create a key under **API keys** just for production. Use a
+> different key from the one on your computer.
 
 **Step 9 of 13.** In Supabase, click **SQL Editor**, then **New query**. Paste the following. Replace
 the two `PASTE_...` parts: use your project URL from Guide 2, Step 14, and the secret from
