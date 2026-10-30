@@ -1,0 +1,15 @@
+// Cloudflare Workers settings for the contractor app (static files only, no server code).
+// Cloudflare builds it from GitHub: see docs/launch/06-deploy-the-apps.md.
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "clientshield-web",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./dist",
+    // Any address the app owns (like /customers/123) opens the app; it shows its own pages.
+    "not_found_handling": "single-page-application",
+  },
+  // Visitors use your own domain; the extra workers.dev address stays off.
+  "workers_dev": false,
+  "preview_urls": false,
+}

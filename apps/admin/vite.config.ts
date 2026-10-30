@@ -17,6 +17,10 @@ export default defineConfig(({ mode }) => {
     server: { port: 5174, strictPort: true },
     preview: { port: 4174, strictPort: true },
     // Internal tool: one larger bundle is fine.
-    build: { sourcemap: 'hidden', chunkSizeWarningLimit: 2000 },
+    build: {
+      // No source maps in the published files: they would expose the app's original code.
+      sourcemap: false,
+      chunkSizeWarningLimit: 2000,
+    },
   };
 });
