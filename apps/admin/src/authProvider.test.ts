@@ -1,6 +1,6 @@
 import { createFakeSupabase, type FakeState } from '@cs/core/testing';
 import { describe, expect, it } from 'vitest';
-import { createAuthProvider } from './authProvider';
+import { ADMIN_CHECK_TTL_MS, createAuthProvider } from './authProvider';
 
 const user = { id: 'm1', email: 'mod@clientshield.test' };
 const moderator: Partial<FakeState> = {
@@ -75,5 +75,44 @@ describe('admin roles', () => {
     const { auth } = setup({});
     await expect(auth.getPermissions!({})).resolves.toBeNull();
     await expect(auth.getIdentity!()).rejects.toThrow('Sign in to continue.');
+  });
+});
+
+describe('admin access check caching', () => {
+  const staff = {
+    session: { user, access_token: 'token-1' },
+    currentLevel: 'aal2',
+    nextLevel: 'aal2',
+    rpc: { my_platform_role: 'moderator' },
+  } as unknown as Partial<FakeState>;
+
+  it('asks the server once a minute, not on every page change', async () => {
+    let clock = 0;
+    const fake = createFakeSupabase(staff);
+    const auth = createAuthProvider(fake.client, () => clock);
+    await auth.checkAuth({});
+    await auth.checkAuth({});
+    await auth.getPermissions!({});
+    expect(fake.mocks.rpc).toHaveBeenCalledTimes(1);
+    clock = ADMIN_CHECK_TTL_MS + 1;
+    await auth.checkAuth({});
+    expect(fake.mocks.rpc).toHaveBeenCalledTimes(2);
+  });
+
+  it('checks again after an access error', async () => {
+    const fake = createFakeSupabase(staff);
+    const auth = createAuthProvider(fake.client, () => 0);
+    await auth.checkAuth({});
+    await expect(auth.checkError({ status: 403 })).rejects.toBeDefined();
+    await auth.checkAuth({});
+    expect(fake.mocks.rpc).toHaveBeenCalledTimes(2);
+  });
+
+  it('never reuses a failed check', async () => {
+    const fake = createFakeSupabase({ ...staff, rpc: { my_platform_role: null } });
+    const auth = createAuthProvider(fake.client, () => 0);
+    await expect(auth.checkAuth({})).rejects.toBeDefined();
+    await expect(auth.checkAuth({})).rejects.toBeDefined();
+    expect(fake.mocks.rpc).toHaveBeenCalledTimes(2);
   });
 });

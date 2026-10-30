@@ -67,28 +67,28 @@ interface EventRow {
 }
 
 async function fetchIncident(supabase: SupabaseClient, id: string) {
-  const { data: incident, error } = await supabase
-    .from('incidents')
-    .select('*')
-    .eq('id', id)
-    .single<IncidentRow>();
+  // Four independent reads, sent together: one round trip instead of four.
+  const [
+    { data: incident, error },
+    { data: customer },
+    { data: evidence, error: evidenceError },
+    { data: events, error: eventsError },
+  ] = await Promise.all([
+    supabase.from('incidents').select('*').eq('id', id).single<IncidentRow>(),
+    supabase.from('incident_customers').select('*').eq('incident_id', id).single(),
+    supabase
+      .from('incident_evidence')
+      .select('id, kind, file_name, storage_path')
+      .eq('incident_id', id)
+      .order('uploaded_at'),
+    supabase
+      .from('incident_events')
+      .select('id, action, note, created_at')
+      .eq('incident_id', id)
+      .order('id'),
+  ]);
   if (error) throw error;
-  const { data: customer } = await supabase
-    .from('incident_customers')
-    .select('*')
-    .eq('incident_id', id)
-    .single();
-  const { data: evidence, error: evidenceError } = await supabase
-    .from('incident_evidence')
-    .select('id, kind, file_name, storage_path')
-    .eq('incident_id', id)
-    .order('uploaded_at');
   if (evidenceError) throw evidenceError;
-  const { data: events, error: eventsError } = await supabase
-    .from('incident_events')
-    .select('id, action, note, created_at')
-    .eq('incident_id', id)
-    .order('id');
   if (eventsError) throw eventsError;
   return {
     incident: { ...incident, customer } as IncidentRow,

@@ -4,3 +4,4 @@ export { accentTextColor, appThemeOptions, createAppTheme, type ColorMode } from
 export { Logo, type LogoProps } from './Logo';
 export { CrashScreen } from './CrashScreen';
 export { MilesAvatar, MilesChat, type MilesChatProps, type MilesMessage } from './MilesChat';
+export { CrashBoundary } from './CrashBoundary';

@@ -298,6 +298,48 @@ The 300-a-day fair-use limit applies on every plan.
 - **Secrets:** `ANTHROPIC_API_KEY`, and optionally `SUPPORT_EMAIL`. Set a monthly spend limit in
   the Anthropic Console.
 
+## Performance (implemented)
+
+Measured with 2,000 businesses, 100,000 customers, 300,000 checks and 20,000 incidents
+(`docker exec ... psql` on the local stack).
+
+| What                                          | Before                       | After                      |
+| --------------------------------------------- | ---------------------------- | -------------------------- |
+| Security-rule-filtered read of 100k customers | 2,654 ms                     | 0.5 ms                     |
+| A business's own customers                    | 4.4 ms                       | 1.0 ms                     |
+| `my_subscription`                             | 10.4 ms                      | 3.9 ms                     |
+| `admin_insights(52)` / `(12)`                 | 792 / 298 ms                 | 217 / 99 ms                |
+| One customer check                            | 26 ms                        | 15 ms                      |
+| Web app first load                            | 1,080 KB (320 KB compressed) | 765 KB (229 KB compressed) |
+| Admin first load                              | 1,773 KB                     | 1,245 KB                   |
+
+- **Security rules** (`20261029000000_performance.sql`):
+  - Each person has one business, so the rules compare with `(SELECT private.my_business_id())`,
+    evaluated once per query, and the index is used.
+  - `is_aal2()`, `is_platform_staff()` and `auth.uid()` are wrapped in `SELECT` the same way.
+  - The `130_performance` tests fail if a rule goes back to a per-row function call.
+- **Indexes:** for foreign keys that deletes and the nightly cleanup follow, and for the
+  platform-wide date ranges insights reads.
+- **Insights:** one grouped pass per table over the chosen weeks, instead of one scan per week.
+  The plan mix is computed in one join, and a test checks it against `effective_tier()`.
+- **Checks:** the matching key is read from Vault once per check (it used to be up to 8 times), and
+  the details are fingerprinted once. A test checks the fingerprints are identical to the stored
+  ones.
+- **Web app:**
+  - Pages load on first visit (`lazyPage` in `App.tsx`).
+  - Sentry downloads in the background, and only when `VITE_SENTRY_DSN` is set
+    (`createErrorReporter` keeps early errors until it arrives).
+  - `zod` was replaced by plain validation (76 KB).
+- **Requests run in parallel:** app start (role and business), incident page (4 reads) and
+  verification page (3 reads).
+- **Admin:**
+  - Chart pages and the dashboard overview load on demand.
+  - The staff check is reused for 60 seconds per sign-in instead of running on every page
+    change. The database still checks every request.
+- **Security audit** (`npm run audit`, `scripts/audit.mjs`): fails on any high or critical
+  advisory, except entries in `scripts/audit-allowlist.json`. Each entry has a reason and an
+  expiry date, and the audit fails again after that date.
+
 ## Data model direction
 
 Two separate layers, joined only through the blind matching check:

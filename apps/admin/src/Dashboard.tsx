@@ -3,9 +3,14 @@ import FlagOutlined from '@mui/icons-material/FlagOutlined';
 import StorefrontOutlined from '@mui/icons-material/StorefrontOutlined';
 import { Card, CardActionArea, CardContent, Grid, Stack, Typography } from '@mui/material';
 import type { SvgIconComponent } from '@mui/icons-material';
+import { lazy, Suspense } from 'react';
 import { Title, useGetList } from 'react-admin';
 import { Link as RouterLink } from 'react-router-dom';
-import { DashboardOverview } from './DashboardOverview';
+
+// The overview's trend charts load separately, so the review queues appear first.
+const DashboardOverview = lazy(async () => ({
+  default: (await import('./DashboardOverview')).DashboardOverview,
+}));
 
 interface Queue {
   title: string;
@@ -97,7 +102,9 @@ export function Dashboard() {
       <Typography variant="h4" component="h1">
         Moderation
       </Typography>
-      <DashboardOverview />
+      <Suspense fallback={null}>
+        <DashboardOverview />
+      </Suspense>
       <Grid container spacing={2}>
         {queues.map((queue) => (
           <Grid key={queue.title} size={{ xs: 12, md: 4 }}>

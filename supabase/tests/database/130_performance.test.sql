@@ -1,7 +1,7 @@
 -- Guards for the performance work: fast security-rule patterns, indexes, and an
 -- admin_insights plan mix that matches private.effective_tier() exactly.
 begin;
-select plan(6);
+select plan(7);
 
 select is(
   (select count(*)::int from pg_policies
@@ -40,6 +40,18 @@ select is(
   (select jsonb_object_agg(t.tier, (select count(*) from public.businesses b where private.effective_tier(b.id) = t.tier))
    from unnest(enum_range(null::public.plan_tier)) t(tier)),
   'the fast plan mix matches effective_tier() for every business'
+);
+
+select is(
+  (select array_agg(hash order by kind) from private.customer_hashes(
+    '{"full_name":"Jordan Demo","phone":"(206) 555-0142","email":"J@Example.com","address_line1":"42 Sample Street","postal_code":"98101"}')),
+  array[
+    private.identifier_hash('name', private.normalize_identifier('name', 'Jordan Demo')),
+    private.identifier_hash('phone', private.normalize_identifier('phone', '(206) 555-0142')),
+    private.identifier_hash('email', private.normalize_identifier('email', 'J@Example.com')),
+    private.identifier_hash('address', private.normalize_identifier('address', '42 Sample Street 98101'))
+  ],
+  'the faster fingerprints are identical to the stored incident fingerprints'
 );
 
 select * from finish();

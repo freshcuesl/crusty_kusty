@@ -360,3 +360,111 @@ begin
   );
 end;
 $$;
+
+-- ---------------------------------------------------------------------------
+-- 4. Customer checks: unlock the matching key once and fingerprint once
+-- ---------------------------------------------------------------------------
+-- Before: each detail read the key from Vault, and run_check fingerprinted twice
+-- (up to 8 Vault reads per check). Now: one Vault read and one set of fingerprints.
+create or replace function private.customer_hashes(p_customer jsonb)
+returns table (kind public.identifier_kind, hash bytea)
+language plpgsql stable security definer
+set search_path = ''
+as $$
+declare
+  v_kind text;
+  v_value text;
+  -- Unlock the matching key once per customer, not once per detail.
+  v_pepper text := (select decrypted_secret from vault.decrypted_secrets where name = 'identifier_pepper');
+begin
+  foreach v_kind in array array['name', 'phone', 'email', 'address'] loop
+    v_value := private.normalize_identifier(
+      v_kind,
+      case v_kind
+        when 'name' then p_customer ->> 'full_name'
+        when 'phone' then p_customer ->> 'phone'
+        when 'email' then p_customer ->> 'email'
+        when 'address' then
+          case when nullif(btrim(coalesce(p_customer ->> 'address_line1', '')), '') is not null
+            then (p_customer ->> 'address_line1') || ' ' || left(coalesce(p_customer ->> 'postal_code', ''), 5)
+          end
+      end
+    );
+    if v_value is not null then
+      kind := v_kind::public.identifier_kind;
+      -- Same as private.identifier_hash() (a test keeps them equal), with the key read once.
+      hash := extensions.hmac(v_kind || ':' || v_value, v_pepper, 'sha256');
+      return next;
+    end if;
+  end loop;
+end;
+$$;
+
+create or replace function private.run_check(
+  p_business_id uuid,
+  p_customer jsonb,
+  p_customer_id uuid
+) returns jsonb
+language plpgsql security definer
+set search_path = ''
+as $$
+declare
+  v_provided public.identifier_kind[];
+  v_hashes bytea[];
+  v_matches uuid[];
+  v_check_id uuid;
+  v_alert_id uuid;
+begin
+  -- Fingerprint the details once and reuse them below.
+  select coalesce(array_agg(h.kind), '{}'), coalesce(array_agg(h.hash), '{}')
+  into v_provided, v_hashes
+  from private.customer_hashes(p_customer) h;
+  if not (v_provided && array['phone', 'email', 'address']::public.identifier_kind[]) then
+    raise exception 'Enter at least a phone, email or address' using errcode = '22023';
+  end if;
+
+  if (
+    select count(*) from public.customer_checks
+    where business_id = p_business_id and created_at > now() - interval '1 day'
+  ) >= 300 then
+    raise exception 'Daily check limit reached. Contact support if you need more.'
+      using errcode = '54000';
+  end if;
+
+  -- At least two details must agree; one detail alone never alerts.
+  select coalesce(array_agg(m.incident_id), '{}') into v_matches
+  from (
+    select ii.incident_id
+    from public.incident_identifiers ii
+    join unnest(v_provided, v_hashes) as h(kind, hash) on h.kind = ii.kind and h.hash = ii.hash
+    join public.incidents i on i.id = ii.incident_id
+    where i.status = 'evidence_verified' and i.expires_at > now()
+    group by ii.incident_id
+    having count(*) >= 2
+  ) m;
+
+  insert into public.customer_checks (business_id, user_id, customer_id, provided, incident_count)
+  values (p_business_id, auth.uid(), p_customer_id, v_provided, cardinality(v_matches))
+  returning id into v_check_id;
+
+  if cardinality(v_matches) > 0 then
+    insert into public.match_alerts (business_id, check_id, customer_id, customer_label, incident_count)
+    values (
+      p_business_id, v_check_id, p_customer_id,
+      coalesce(nullif(left(btrim(coalesce(p_customer ->> 'full_name', '')), 120), ''), 'Customer check'),
+      cardinality(v_matches)
+    )
+    returning id into v_alert_id;
+
+    insert into public.match_alert_incidents (alert_id, incident_id)
+    select v_alert_id, unnest(v_matches);
+  end if;
+
+  return jsonb_build_object(
+    'check_id', v_check_id,
+    'alert_id', v_alert_id,
+    'incident_count', cardinality(v_matches),
+    'incidents', private.incident_facts(v_matches)
+  );
+end;
+$$;
