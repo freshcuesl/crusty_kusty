@@ -2,14 +2,16 @@
 // Cloudflare builds it from GitHub: see docs/launch/06-deploy-the-apps.md.
 {
   "$schema": "../../node_modules/wrangler/config-schema.json",
-  "name": "clientshield-web",
+  // Must match the Worker's name in Cloudflare (Workers & Pages).
+  "name": "crusty-kusty",
   "compatibility_date": "2026-10-01",
   "assets": {
     "directory": "./dist",
     // Any address the app owns (like /customers/123) opens the app; it shows its own pages.
     "not_found_handling": "single-page-application",
   },
-  // Visitors use your own domain; the extra workers.dev address stays off.
-  "workers_dev": false,
+  // A free https://crusty-kusty.<account>.workers.dev address, so the site can be opened
+  // before your own domain is added (Launch 6). Your domain works alongside it.
+  "workers_dev": true,
   "preview_urls": false,
 }
