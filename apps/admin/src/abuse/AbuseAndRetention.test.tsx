@@ -72,7 +72,7 @@ describe('abuse flags', () => {
     expect(
       screen.getByText(/searching for people rather than checking bookings/),
     ).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /Alpha Plumbing/ })).toHaveAttribute(
+    expect(await screen.findByRole('link', { name: /Alpha Plumbing/ })).toHaveAttribute(
       'href',
       '#/businesses/b1/show',
     );

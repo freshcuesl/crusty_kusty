@@ -277,6 +277,27 @@ The 300-a-day fair-use limit applies on every plan.
   and only when `VITE_CF_ANALYTICS_TOKEN` is set. The CSP allows it only then. There's no Google
   Analytics and no ad networks: outside code would run next to customer details.
 
+## Miles, customer service AI (implemented)
+
+- **Scope:** customer service only. Miles answers questions about using ClientShield: sign-in,
+  verification, checks and alerts, incidents, plans and billing, team and privacy. He never
+  discusses specific customers or disputes, and he hands account problems to human support
+  (`SUPPORT_EMAIL`). He's open to every signed-in person on any plan, including people still
+  getting verified.
+- **The `miles` Edge Function** (logic in `supabase/functions/_shared/miles.ts`) calls
+  `miles_begin()` _as the caller_. It checks two-step login and a daily limit of 20 messages per
+  person, and records a `miles_usage` row. That table has no API access; the token counts are
+  added by the service role. Conversations are not stored.
+- **Context:** only the caller's plan and usage (`my_subscription`), read with their own
+  permissions, in `<account>` tags treated as data. Emails and phone numbers the person types are
+  masked before anything is sent.
+- **Model:** `claude-opus-5-5` through the Anthropic TypeScript SDK, effort `low`. Server-side
+  refusal fallback is on (`fallbacks: "default"`), and the system prompt is cached.
+- **UI:** an **Ask Miles** button on every app page opens `MilesChat` (`@cs/brand`). It shows
+  `MilesAvatar`: a service pro in a teal cap and headset.
+- **Secrets:** `ANTHROPIC_API_KEY`, and optionally `SUPPORT_EMAIL`. Set a monthly spend limit in
+  the Anthropic Console.
+
 ## Data model direction
 
 Two separate layers, joined only through the blind matching check:
@@ -318,4 +339,5 @@ Every change starts with a failing test. CI runs all layers on every push.
 10. `feature/passkeys-recovery-codes`: when Supabase marks them stable
 11. `feature/launch-prep`: hosting, deploys, headers, error tracking, launch guides (done)
 12. `feature/insights`: admin metrics, finances, landing page visitor stats (done)
-13. Later: sponsored offers (admin-managed partner cards; no ad networks)
+13. `feature/miles`: Miles, customer service AI (done)
+14. Later: sponsored offers (admin-managed partner cards; no ad networks)

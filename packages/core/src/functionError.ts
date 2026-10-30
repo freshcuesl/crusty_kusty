@@ -1,4 +1,4 @@
-import { friendlyError } from '@cs/core';
+import { friendlyError } from './friendlyError';
 
 /** Reads the {error} message our Edge Functions return, or a friendly fallback. */
 export async function functionErrorMessage(error: unknown): Promise<string> {

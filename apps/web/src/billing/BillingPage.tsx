@@ -1,10 +1,9 @@
 import { Alert, Box, Button, LinearProgress, Paper, Stack, Typography } from '@mui/material';
 import { useId, useState } from 'react';
 import { useSearchParams } from 'react-router';
-import { friendlyError } from '@cs/core';
+import { friendlyError, functionErrorMessage } from '@cs/core';
 import { useSupabase } from '../auth/SupabaseProvider';
 import { FormError, FullPageSpinner } from '../auth/ui';
-import { functionErrorMessage } from '../lib/functionError';
 import { redirectTo } from '../verification/redirect';
 import { IntervalToggle, PlanCard, PlanGrid } from './PlanCards';
 import { PLANS } from './plans';
