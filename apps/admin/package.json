@@ -22,7 +22,6 @@
     "@mui/x-charts": "9.16.0",
     "@sentry/react": "11.9.0",
     "react": "^19.3.1",
-    "react-admin": "^5.15.4",
     "react-admin": "^5.15.5",
     "react-dom": "^19.3.1",
     "react-router": "^7.18.4",
