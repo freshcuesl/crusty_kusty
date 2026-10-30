@@ -57,7 +57,7 @@ docs/         This file, setup guides, workflow
 4. **Evidence integrity.** Private storage buckets, short-lived signed URLs, a SHA-256 hash and
    metadata extraction per upload, append-only revisions and a hash-chained audit log.
 5. **Browser hardening.** Strict CSP and security headers (`apps/*/public/_headers`),
-   self-hosted fonts, hidden source maps, and the app refuses admin keys in its config.
+   self-hosted fonts, no published source maps, and the app refuses admin keys in its config.
 6. **Supply chain.** CI fails on high or critical `npm audit` findings, and Dependabot opens
    weekly update PRs.
 
@@ -240,10 +240,17 @@ The 300-a-day fair-use limit applies on every plan.
 
 ## Hosting and deploys (implemented)
 
-- **Apps:** Cloudflare Pages projects `clientshield-web` (the domain root) and
-  `clientshield-admin` (`admin.` subdomain, behind Cloudflare Access). The `Deploy apps` workflow
-  builds and publishes both after CI passes on `main`. It is off until the `DEPLOY_ENABLED`
-  variable is `true`, and it refuses a secret key in `VITE_SUPABASE_ANON_KEY`.
+- **Apps:** two Cloudflare Workers with static assets, `clientshield-web` (the domain root) and
+  `clientshield-admin` (the `admin.` subdomain, behind Cloudflare Access). Cloudflare builds both
+  from GitHub on every push to `main`:
+  - Build: `npm run build --workspace @cs/<app>`.
+  - Deploy: `npx wrangler deploy --config apps/<app>/wrangler.jsonc`.
+  - The `wrangler.jsonc` sets `not_found_handling: single-page-application`, so deep links open the
+    app.
+  - `VITE_*` values are Cloudflare build variables. Merge only when GitHub's checks are green.
+  - The **Deploy apps** GitHub workflow (Pages direct upload) is an alternative. It stays off unless
+    `DEPLOY_ENABLED` is `true`, so the site isn't published twice.
+- **No source maps** are built: they would publish the original code.
 - **Security headers:** `_headers` is generated per build by `scripts/security-headers.mjs`. The
   CSP `connect-src` names the real Supabase project and Sentry host, never a wildcard. The admin
   panel adds `X-Robots-Tag: noindex` and blocks the camera.

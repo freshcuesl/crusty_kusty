@@ -57,7 +57,9 @@ export default defineConfig(({ mode }) => {
     ],
     server: { port: 5173, strictPort: true },
     preview: { port: 4173, strictPort: true },
-    // Hidden maps: generated for error tracking uploads, never linked from public bundles.
-    build: { sourcemap: 'hidden' },
+    build: {
+      // No source maps in the published files: they would expose the app's original code.
+      sourcemap: false,
+    },
   };
 });

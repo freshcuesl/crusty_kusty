@@ -2,120 +2,118 @@
 
 **Time:** about 30 minutes.
 
-GitHub builds the contractor app and the admin panel and puts them on Cloudflare. After this,
-**every merge to `main` updates the live site by itself**, but only after all the checks pass.
+Cloudflare builds the contractor app and the admin panel straight from GitHub. After this,
+**every merge to `main` updates the live site by itself.** You make two Cloudflare **Workers**,
+one for each app, and both are connected to the same GitHub repository.
+
+> **Merge only when GitHub's checks are green.** Cloudflare publishes whatever is on `main`. It
+> doesn't wait for the tests.
 
 ---
 
-## Part A: Create the two Cloudflare projects
+## Part A: The contractor app
 
-**Step 1 of 17.** In a terminal in the `crusty_kusty` folder, log in to Cloudflare:
+**Step 1 of 14.** In Cloudflare, go to **Workers & Pages**, then **Create**, then **Import a
+repository** (or **Connect to Git**). Choose GitHub, allow access to **crusty_kusty**, and select
+it.
 
-```bash
-npx wrangler@4.151.1 login
-```
+**Step 2 of 14.** Fill in the build settings exactly like this:
 
-✅ **You should see:** your browser opens. Click **Allow**.
+| Setting                   | Value                                                  |
+| ------------------------- | ------------------------------------------------------ |
+| **Project / Worker name** | `clientshield-web`                                     |
+| **Production branch**     | `main`                                                 |
+| **Root directory** (Path) | leave empty (the top of the repository)                |
+| **Build command**         | `npm run build --workspace @cs/web`                    |
+| **Deploy command**        | `npx wrangler deploy --config apps/web/wrangler.jsonc` |
 
-**Step 2 of 17.** Create the project for the contractor app:
+The name must be exactly `clientshield-web`. It has to match the name in
+`apps/web/wrangler.jsonc`.
 
-```bash
-npx wrangler@4.151.1 pages project create clientshield-web --production-branch=main
-```
+**Step 3 of 14.** Open **Advanced settings** (or, after creating it, **Settings**, then **Build**,
+then **Variables and secrets**). Add these **build variables**:
 
-**Step 3 of 17.** Create the project for the admin panel:
+| Name                      | Value                                                                          |
+| ------------------------- | ------------------------------------------------------------------------------ |
+| `NODE_VERSION`            | `24`                                                                           |
+| `VITE_SUPABASE_URL`       | your project URL, like `https://abcdefghijklmnop.supabase.co`                  |
+| `VITE_SUPABASE_ANON_KEY`  | the **publishable** key (`sb_publishable_...`, Guide 2 Step 12)                |
+| `VITE_ADMIN_URL`          | `https://admin.clientshield.example`                                           |
+| `VITE_CONTACT_EMAIL`      | optional: the email for **Contact us** on the Business plan                    |
+| `VITE_SENTRY_DSN`         | optional, from Guide 7                                                         |
+| `VITE_CF_ANALYTICS_TOKEN` | optional, from Guide 7 Part B                                                  |
+| `VITE_SOCIAL_FACEBOOK`    | optional: your Facebook page (`https://...`). Until set, it opens facebook.com |
+| `VITE_SOCIAL_INSTAGRAM`   | optional: your Instagram page. Until set, it opens instagram.com               |
+| `VITE_SOCIAL_X`           | optional: your X page. Until set, it opens x.com                               |
 
-```bash
-npx wrangler@4.151.1 pages project create clientshield-admin --production-branch=main
-```
+> **Never** put the Supabase `sb_secret_` key here. These values are built into the app that
+> every visitor downloads. The app refuses to start with a secret key.
 
-✅ **You should see:** both say "Successfully created".
+**Step 4 of 14.** Click **Deploy** (or **Save and deploy**).
 
----
+✅ **You should see:** after a few minutes, **Success: Deploy command completed** at the end of the
+build log.
 
-## Part B: A Cloudflare token for GitHub
+**Step 5 of 14.** In the Worker, go to **Settings**, then **Domains & Routes**, then **Add**, then
+**Custom domain**. Type `clientshield.example` and add it.
 
-**Step 4 of 17.** In the Cloudflare dashboard, click your profile icon, then **My Profile**, then
-**API Tokens**, then **Create Token**. Next to **Create Custom Token**, click **Get started**.
-
-**Step 5 of 17.** Fill in:
-
-- **Token name:** `GitHub deploy`
-- **Permissions:** **Account**, then **Cloudflare Pages**, then **Edit**
-- **Account resources:** **Include**, then your account
-
-Click **Continue to summary**, then **Create Token**. Copy it **straight into your password
-manager** as "Cloudflare deploy token".
-
-**Step 6 of 17.** On the Cloudflare dashboard home page, find **Account ID** (on the right, or under
-**Account details**). Copy it. It isn't secret.
-
----
-
-## Part C: Tell GitHub the settings
-
-**Step 7 of 17.** On GitHub, go to **Settings**, then **Environments**, then **production**. Under
-**Environment secrets**, add:
-
-| Name                   | Value                 |
-| ---------------------- | --------------------- |
-| `CLOUDFLARE_API_TOKEN` | the token from Step 5 |
-
-**Step 8 of 17.** Under **Environment variables** (still in **production**), add each of these:
-
-| Name                       | Value                                                                                         |
-| -------------------------- | --------------------------------------------------------------------------------------------- |
-| `VITE_SUPABASE_URL`        | your project URL, like `https://abcdefghijklmnop.supabase.co`                                 |
-| `VITE_SUPABASE_ANON_KEY`   | the **publishable** key (`sb_publishable_...`, Guide 2 Step 12)                               |
-| `VITE_ADMIN_URL`           | `https://admin.clientshield.example`                                                          |
-| `VITE_APP_URL`             | `https://clientshield.example`                                                                |
-| `CLOUDFLARE_ACCOUNT_ID`    | the account ID from Step 6                                                                    |
-| `CLOUDFLARE_WEB_PROJECT`   | `clientshield-web`                                                                            |
-| `CLOUDFLARE_ADMIN_PROJECT` | `clientshield-admin`                                                                          |
-| `VITE_CONTACT_EMAIL`       | optional: the email for **Contact us** on the Business plan                                   |
-| `VITE_SOCIAL_FACEBOOK`     | optional: your Facebook page (starts with `https://`). Until set, the icon opens facebook.com |
-| `VITE_SOCIAL_INSTAGRAM`    | optional: your Instagram page. Until set, it opens instagram.com                              |
-| `VITE_SOCIAL_X`            | optional: your X page. Until set, it opens x.com                                              |
-
-**Step 9 of 17.** Go to **Settings**, then **Secrets and variables**, then **Actions**, then the
-**Variables** tab. Add a **repository variable**:
-
-| Name             | Value  |
-| ---------------- | ------ |
-| `DEPLOY_ENABLED` | `true` |
-
-This switches on automatic deploys.
+✅ **You should see:** the domain marked **Active** after a few minutes. Open it, and the landing page
+shows.
 
 ---
 
-## Part D: First deploy
+## Part B: The admin panel
 
-**Step 10 of 17.** Click **Actions**, then **Deploy apps**, then **Run workflow** (branch **main**).
-Approve it like in Guide 4.
+**Step 6 of 14.** Repeat Step 1, choosing the same repository again.
 
-✅ **You should see:** green ticks after a few minutes. The build stops with a clear message if a
-setting is missing, or if a secret key was put where the publishable key goes.
+**Step 7 of 14.** Use these build settings:
 
-**Step 11 of 17.** In Cloudflare, go to **Workers & Pages**, then **clientshield-web**, then
-**Custom domains**, then **Set up a custom domain**. Type `clientshield.example` and confirm.
+| Setting                   | Value                                                    |
+| ------------------------- | -------------------------------------------------------- |
+| **Project / Worker name** | `clientshield-admin`                                     |
+| **Production branch**     | `main`                                                   |
+| **Root directory** (Path) | leave empty                                              |
+| **Build command**         | `npm run build --workspace @cs/admin`                    |
+| **Deploy command**        | `npx wrangler deploy --config apps/admin/wrangler.jsonc` |
 
-**Step 12 of 17.** Do the same for **clientshield-admin** with `admin.clientshield.example`.
+**Step 8 of 14.** Add these build variables:
 
-✅ **You should see:** both domains **Active** after a few minutes.
+| Name                     | Value                              |
+| ------------------------ | ---------------------------------- |
+| `NODE_VERSION`           | `24`                               |
+| `VITE_SUPABASE_URL`      | the same as Step 3                 |
+| `VITE_SUPABASE_ANON_KEY` | the same publishable key as Step 3 |
+| `VITE_APP_URL`           | `https://clientshield.example`     |
+| `VITE_SENTRY_DSN`        | optional, the same as Step 3       |
+
+**Step 9 of 14.** Click **Deploy**. Then add the custom domain `admin.clientshield.example` the
+same way as Step 5.
 
 ---
 
-## Part E: Lock the admin panel behind Cloudflare Access (recommended)
+## Part C: If you already made a Worker with another name
+
+Did you connect the repository before this guide, for example as `crusty-kusty`? Then delete that
+Worker (**Settings**, then **Delete**) and follow Parts A and B. Its build fails with "detection logic
+has been run in the root of a workspace", because it doesn't know which of the two apps to publish.
+
+> The **Deploy apps** workflow in GitHub's Actions tab is a second way to publish (Pages plus a
+> GitHub token). Leave it switched off (`DEPLOY_ENABLED` not set) when Cloudflare builds from
+> GitHub, so the site isn't published twice.
+
+---
+
+## Part D: Lock the admin panel behind Cloudflare Access (recommended)
 
 This adds a second door: only email addresses you list can even load the admin page.
 
-**Step 13 of 17.** In Cloudflare, open **Zero Trust**. If asked, pick a team name and the **Free**
+**Step 10 of 14.** In Cloudflare, open **Zero Trust**. If asked, pick a team name and the **Free**
 plan.
 
-**Step 14 of 17.** Go to **Access**, then **Applications**, then **Add an application**, then
+**Step 11 of 14.** Go to **Access**, then **Applications**, then **Add an application**, then
 **Self-hosted**. Set **Application domain** to `admin.clientshield.example`.
 
-**Step 15 of 17.** Add a policy named `Staff`. Set **Action** to **Allow**, and **Include** to
+**Step 12 of 14.** Add a policy named `Staff`. Set **Action** to **Allow**, and **Include** to
 **Emails**. Add your own email and each moderator's email. Save.
 
 ✅ **You should see:** opening `https://admin.clientshield.example` first asks for an emailed
@@ -123,12 +121,12 @@ code, then shows the ClientShield admin sign-in.
 
 ---
 
-## Part F: Make yourself the admin
+## Part E: Make yourself the admin
 
-**Step 16 of 17.** Open `https://clientshield.example`. Sign up, confirm your email, and set up
+**Step 13 of 14.** Open `https://clientshield.example`. Sign up, confirm your email, and set up
 two-step login. This checks that the Resend email from Guide 3 works.
 
-**Step 17 of 17.** In Supabase, go to **SQL Editor**. Run this with **your** email:
+**Step 14 of 14.** In Supabase, go to **SQL Editor**. Run this with **your** email:
 
 ```sql
 insert into public.platform_roles (user_id, role)
