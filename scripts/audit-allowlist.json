@@ -1,0 +1,16 @@
+{
+  "advisories": [
+    {
+      "id": "GHSA-vcc3-ghjq-m6fr",
+      "package": "decode-uri-component",
+      "reason": "Only via react-admin 5.15.5 (ra-core -> query-string 7 -> decode-uri-component 0.2). No compatible fix: 0.5.x is ESM-only and breaks query-string 7. Impact: a crafted URL can hang the tab of a staff member in the admin panel, which is staff-only and behind Cloudflare Access. Remove when react-admin updates query-string.",
+      "expires": "2026-11-30"
+    },
+    {
+      "id": "GHSA-qr28-fpjm-wq7f",
+      "package": "decode-uri-component",
+      "reason": "Same dependency path and impact as GHSA-vcc3-ghjq-m6fr.",
+      "expires": "2026-11-30"
+    }
+  ]
+}
