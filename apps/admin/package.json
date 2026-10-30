@@ -19,11 +19,11 @@
     "@fontsource/plus-jakarta-sans": "^5.3.0",
     "@mui/icons-material": "^9.5.0",
     "@mui/material": "^9.5.0",
-    "@mui/x-charts": "9.15.0",
-    "@sentry/react": "11.8.0",
-    "react": "^19.3.0",
+    "@mui/x-charts": "9.16.0",
+    "@sentry/react": "11.9.0",
+    "react": "^19.3.1",
     "react-admin": "^5.15.4",
-    "react-dom": "^19.3.0",
+    "react-dom": "^19.3.1",
     "react-router": "^7.18.4",
     "react-router-dom": "^7.18.4"
   },
@@ -33,6 +33,6 @@
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.1.2",
-    "vite": "^8.3.4"
+    "vite": "^8.3.5"
   }
 }
