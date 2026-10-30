@@ -67,25 +67,32 @@ const BUCKET = 'business-documents';
 const EDITABLE: Status[] = ['unverified', 'needs_info', 'rejected'];
 
 async function fetchVerification(supabase: SupabaseClient, businessId: string) {
-  const { data: business, error } = await supabase
-    .from('businesses')
-    .select(
-      'verification_status, phone, address_line1, address_line2, city, state, postal_code, review_note',
-    )
-    .eq('id', businessId)
-    .single<BusinessRow>();
+  // Three independent reads, sent together: one round trip instead of three.
+  const [
+    { data: business, error },
+    { data: documents, error: docsError },
+    { data: checks, error: checksError },
+  ] = await Promise.all([
+    supabase
+      .from('businesses')
+      .select(
+        'verification_status, phone, address_line1, address_line2, city, state, postal_code, review_note',
+      )
+      .eq('id', businessId)
+      .single<BusinessRow>(),
+    supabase
+      .from('business_documents')
+      .select('id, kind, file_name, storage_path, uploaded_at')
+      .eq('business_id', businessId)
+      .order('uploaded_at'),
+    supabase
+      .from('owner_identity_checks')
+      .select('status, last_error_code, updated_at')
+      .eq('business_id', businessId)
+      .order('updated_at', { ascending: false }),
+  ]);
   if (error) throw error;
-  const { data: documents, error: docsError } = await supabase
-    .from('business_documents')
-    .select('id, kind, file_name, storage_path, uploaded_at')
-    .eq('business_id', businessId)
-    .order('uploaded_at');
   if (docsError) throw docsError;
-  const { data: checks, error: checksError } = await supabase
-    .from('owner_identity_checks')
-    .select('status, last_error_code, updated_at')
-    .eq('business_id', businessId)
-    .order('updated_at', { ascending: false });
   if (checksError) throw checksError;
   return {
     business,

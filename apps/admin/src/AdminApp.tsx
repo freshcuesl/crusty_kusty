@@ -1,5 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { useMemo } from 'react';
+import { lazy, useMemo } from 'react';
 import { Admin, CustomRoutes, Resource } from 'react-admin';
 import { Route } from 'react-router-dom';
 import { AbuseFlagList } from './abuse/AbuseFlagList';
@@ -15,9 +15,15 @@ import { BusinessList } from './businesses/BusinessList';
 import { BusinessShow } from './businesses/BusinessShow';
 import { createDataProvider } from './dataProvider';
 import { createLoginPage } from './LoginPage';
-import { InsightsPage } from './insights/InsightsPage';
-import { RetentionPage } from './retention/RetentionPage';
-import { StaffPage } from './staff/StaffPage';
+
+// Pages with charts and tools only some staff use load when first opened.
+const InsightsPage = lazy(async () => ({
+  default: (await import('./insights/InsightsPage')).InsightsPage,
+}));
+const RetentionPage = lazy(async () => ({
+  default: (await import('./retention/RetentionPage')).RetentionPage,
+}));
+const StaffPage = lazy(async () => ({ default: (await import('./staff/StaffPage')).StaffPage }));
 
 export function AdminApp({ supabase }: { supabase: SupabaseClient }) {
   const authProvider = useMemo(() => createAuthProvider(supabase), [supabase]);

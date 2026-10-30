@@ -26,7 +26,7 @@ describe('sign up', () => {
       },
     });
     await waitFor(() => expect(path()).toBe('/check-email'));
-    expect(screen.getByText('owner@alpha.test')).toBeInTheDocument();
+    expect(await screen.findByText('owner@alpha.test')).toBeInTheDocument();
   });
 
   it('shows which password rules are still missing as the user types', async () => {

@@ -13,6 +13,7 @@ import { Box, Button, Container, Grid, Stack, Typography } from '@mui/material';
 import type { SvgIconComponent } from '@mui/icons-material';
 import { Pricing } from './Pricing';
 import { SectionTitle } from './SectionTitle';
+import { SocialLinks } from './SocialLinks';
 import { loadWebAnalytics } from './webAnalytics';
 import { Link as RouterLink } from 'react-router';
 import { brand, fonts, Logo } from '@cs/brand';
@@ -37,6 +38,9 @@ function SiteHeader() {
           <Logo size={34} withWordmark onDark decorative />
         </RouterLink>
         <Box sx={{ flex: 1 }} />
+        <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
+          <SocialLinks color={brand.mist} />
+        </Box>
         <Button href="#pricing" sx={{ color: brand.mist }}>
           Pricing
         </Button>
@@ -478,6 +482,7 @@ function SiteFooter() {
         }}
       >
         <Logo size={28} withWordmark onDark />
+        <SocialLinks color={brand.mist} />
         <Typography variant="body2" sx={{ color: brand.haze }}>
           Not a blacklist. A truth engine for the service industry. © {new Date().getFullYear()}{' '}
           ClientShield

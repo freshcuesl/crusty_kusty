@@ -63,16 +63,19 @@ manager** as "Cloudflare deploy token".
 
 **Step 8 of 17.** Under **Environment variables** (still in **production**), add each of these:
 
-| Name                       | Value                                                           |
-| -------------------------- | --------------------------------------------------------------- |
-| `VITE_SUPABASE_URL`        | your project URL, like `https://abcdefghijklmnop.supabase.co`   |
-| `VITE_SUPABASE_ANON_KEY`   | the **publishable** key (`sb_publishable_...`, Guide 2 Step 12) |
-| `VITE_ADMIN_URL`           | `https://admin.clientshield.example`                            |
-| `VITE_APP_URL`             | `https://clientshield.example`                                  |
-| `CLOUDFLARE_ACCOUNT_ID`    | the account ID from Step 6                                      |
-| `CLOUDFLARE_WEB_PROJECT`   | `clientshield-web`                                              |
-| `CLOUDFLARE_ADMIN_PROJECT` | `clientshield-admin`                                            |
-| `VITE_CONTACT_EMAIL`       | optional: the email for **Contact us** on the Business plan     |
+| Name                       | Value                                                                                         |
+| -------------------------- | --------------------------------------------------------------------------------------------- |
+| `VITE_SUPABASE_URL`        | your project URL, like `https://abcdefghijklmnop.supabase.co`                                 |
+| `VITE_SUPABASE_ANON_KEY`   | the **publishable** key (`sb_publishable_...`, Guide 2 Step 12)                               |
+| `VITE_ADMIN_URL`           | `https://admin.clientshield.example`                                                          |
+| `VITE_APP_URL`             | `https://clientshield.example`                                                                |
+| `CLOUDFLARE_ACCOUNT_ID`    | the account ID from Step 6                                                                    |
+| `CLOUDFLARE_WEB_PROJECT`   | `clientshield-web`                                                                            |
+| `CLOUDFLARE_ADMIN_PROJECT` | `clientshield-admin`                                                                          |
+| `VITE_CONTACT_EMAIL`       | optional: the email for **Contact us** on the Business plan                                   |
+| `VITE_SOCIAL_FACEBOOK`     | optional: your Facebook page (starts with `https://`). Until set, the icon opens facebook.com |
+| `VITE_SOCIAL_INSTAGRAM`    | optional: your Instagram page. Until set, it opens instagram.com                              |
+| `VITE_SOCIAL_X`            | optional: your X page. Until set, it opens x.com                                              |
 
 **Step 9 of 17.** Go to **Settings**, then **Secrets and variables**, then **Actions**, then the
 **Variables** tab. Add a **repository variable**:
